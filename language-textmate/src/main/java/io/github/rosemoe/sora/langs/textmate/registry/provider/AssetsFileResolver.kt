@@ -1,7 +1,7 @@
 /*
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
- *    Copyright (C) 2020-2024  Rosemoe
+ *    Copyright (C) 2020-2026  Rosemoe
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,20 +21,24 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.langs.textmate.folding;
+package io.github.rosemoe.sora.langs.textmate.registry.provider
 
-public class PreviousRegion {
-    // indent or -2 if a marker
-    public int indent;
-    // end line number for the region above
-    public int endAbove;
-    // start line of the region. Only used for marker regions.
-    public int line;
+import android.content.res.AssetManager
+import java.io.IOException
+import java.io.InputStream
 
-    public PreviousRegion(int indent, int endAbove, int line) {
-        this.indent = indent;
-        this.endAbove = endAbove;
-        this.line = line;
+class AssetsFileResolver(private var assetManager: AssetManager?) : FileResolver {
+
+    override fun resolveStreamByPath(path: String): InputStream? {
+        val manager = assetManager ?: return null
+        return try {
+            manager.open(path)
+        } catch (e: IOException) {
+            null
+        }
     }
 
+    override fun dispose() {
+        assetManager = null
+    }
 }

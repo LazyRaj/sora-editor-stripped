@@ -1,7 +1,7 @@
 /*
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
- *    Copyright (C) 2020-2024  Rosemoe
+ *    Copyright (C) 2020-2026  Rosemoe
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,14 +21,14 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.langs.textmate.folding;
+package io.github.rosemoe.sora.langs.textmate
 
-import org.eclipse.tm4e.core.internal.oniguruma.OnigResult;
+import org.eclipse.tm4e.core.grammar.IStateStack
+import org.eclipse.tm4e.core.internal.oniguruma.OnigResult
 
-public interface FoldingHelper {
-
-    OnigResult getResultFor(int line);
-
-    int getIndentFor(int line);
-
-}
+data class MyState(
+    @JvmField var tokenizeState: IStateStack?,
+    @JvmField var foldingCache: OnigResult?,
+    @JvmField var indent: Int,
+    @JvmField var identifiers: List<String>?
+)

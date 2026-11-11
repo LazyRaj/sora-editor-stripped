@@ -11,6 +11,7 @@ maintained as a submodule for my personal project.
     `language-textmate`.
 > - **Purpose:** Dedicated to experimental features, custom optimizations, and breaking API changes
     tailored for my personal project.
+> - WILL NEVER MERGE TO UPSTREAM.
 
 ----
 [![CI](https://github.com/Rosemoe/sora-editor/actions/workflows/gradle.yml/badge.svg?event=push)](https://github.com/Rosemoe/sora-editor/actions/workflows/gradle.yml)

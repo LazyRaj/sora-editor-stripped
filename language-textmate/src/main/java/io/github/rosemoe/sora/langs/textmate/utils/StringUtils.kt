@@ -1,7 +1,7 @@
 /*
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
- *    Copyright (C) 2020-2024  Rosemoe
+ *    Copyright (C) 2020-2026  Rosemoe
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,43 +21,46 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.langs.textmate.utils;
+package io.github.rosemoe.sora.langs.textmate.utils
 
-import java.util.regex.Pattern;
+import java.util.regex.Pattern
 
-public class StringUtils {
+object StringUtils {
 
-    public static boolean checkSurrogate(String text) {
-        for (int i = 0; i < text.length(); i++) {
-            if (Character.isSurrogate(text.charAt(i))) {
-                return true;
+    @JvmStatic
+    fun checkSurrogate(text: String): Boolean {
+        for (i in 0 until text.length) {
+            if (Character.isSurrogate(text[i])) {
+                return true
             }
         }
-        return false;
+        return false
     }
 
-    public static int convertUnicodeOffsetToUtf16(String text, int offset, boolean hasSurrogate) {
+    @JvmStatic
+    fun convertUnicodeOffsetToUtf16(text: String, offset: Int, hasSurrogate: Boolean): Int {
         if (hasSurrogate) {
-            var j = 0;
-            for (int i = 0; i < text.length(); i++) {
+            var j = 0
+            var i = 0
+            while (i < text.length) {
                 if (j == offset) {
-                    return i;
+                    return i
                 }
-                var ch = text.charAt(i);
-                if (Character.isHighSurrogate(ch) && i + 1 < text.length() && Character.isLowSurrogate(text.charAt(i + 1))) {
-                    i++;
+                val ch = text[i]
+                if (Character.isHighSurrogate(ch) && i + 1 < text.length && Character.isLowSurrogate(text[i + 1])) {
+                    i++
                 }
-                j++;
+                j++
+                i++
             }
         }
-        return offset;
+        return offset
     }
 
+    private val MATCH_PATTERN: Pattern = Pattern.compile(".*/|\\..*")
 
-    private static final Pattern MATCH_PATTERN = Pattern.compile(".*/|\\..*");
-
-    public static String getFileNameWithoutExtension(String filePath) {
-        return MATCH_PATTERN.matcher(filePath).replaceAll("");
-
+    @JvmStatic
+    fun getFileNameWithoutExtension(filePath: String): String {
+        return MATCH_PATTERN.matcher(filePath).replaceAll("")
     }
 }

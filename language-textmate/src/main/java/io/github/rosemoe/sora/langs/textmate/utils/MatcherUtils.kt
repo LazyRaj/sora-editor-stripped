@@ -1,7 +1,7 @@
 /*
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
- *    Copyright (C) 2020-2024  Rosemoe
+ *    Copyright (C) 2020-2026  Rosemoe
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,35 +21,34 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.langs.textmate.registry.provider;
+package io.github.rosemoe.sora.langs.textmate.utils
 
-import androidx.annotation.Nullable;
+import java.util.function.Function
+import java.util.regex.MatchResult
+import java.util.regex.Matcher
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+object MatcherUtils {
 
-@FunctionalInterface
-public interface FileResolver {
-    @Nullable
-    InputStream resolveStreamByPath(String path);
-
-    default void dispose() {
-
-    }
-
-    FileResolver DEFAULT = path -> {
-        var file = new File(path);
-        if (file.isFile()) {
-            try {
-                return new FileInputStream(file);
-            } catch (FileNotFoundException e) {
-                return null;
-            }
-        } else {
-            return null;
+    @JvmStatic
+    fun replaceAll(
+        source: CharSequence,
+        matcher: Matcher,
+        replacer: Function<MatchResult, String>
+    ): String {
+        matcher.reset()
+        val sb = StringBuilder()
+        var appendPos = 0
+        while (matcher.find()) {
+            val result = matcher.toMatchResult()
+            val replacement = replacer.apply(result)
+            sb.append(source, appendPos, result.start())
+            sb.append(replacement)
+            appendPos = result.end()
         }
-
-    };
+        if (sb.isEmpty()) {
+            return source.toString()
+        }
+        sb.append(source, appendPos, source.length)
+        return sb.toString()
+    }
 }

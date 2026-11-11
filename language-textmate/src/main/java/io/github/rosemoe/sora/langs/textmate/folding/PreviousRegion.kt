@@ -1,7 +1,7 @@
 /*
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
- *    Copyright (C) 2020-2024  Rosemoe
+ *    Copyright (C) 2020-2026  Rosemoe
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,25 +21,10 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.langs.textmate;
+package io.github.rosemoe.sora.langs.textmate.folding
 
-import org.eclipse.tm4e.core.grammar.IStateStack;
-import org.eclipse.tm4e.core.internal.oniguruma.OnigResult;
-
-import java.util.List;
-
-public class MyState {
-
-    public MyState(IStateStack tokenizeState, OnigResult foldingCache, int indent, List<String> identifiers) {
-        this.tokenizeState = tokenizeState;
-        this.foldingCache = foldingCache;
-        this.indent = indent;
-        this.identifiers = identifiers;
-    }
-
-    public IStateStack tokenizeState;
-    public OnigResult foldingCache;
-    public List<String> identifiers;
-    public int indent;
-
-}
+class PreviousRegion(
+    @JvmField var indent: Int,
+    @JvmField var endAbove: Int,
+    @JvmField var line: Int
+)

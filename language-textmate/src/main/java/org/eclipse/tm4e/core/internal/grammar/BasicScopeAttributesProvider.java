@@ -17,8 +17,6 @@ package org.eclipse.tm4e.core.internal.grammar;
 
 import static org.eclipse.tm4e.core.internal.utils.NullSafetyHelper.defaultIfNull;
 
-import android.os.Build;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,22 +54,11 @@ final class BasicScopeAttributesProvider {
 			return BasicScopeAttributesProvider._NULL_SCOPE_METADATA;
 		}
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            return cache.computeIfAbsent(scopeName, scopeName2 -> {
-                final var languageId = this._scopeToLanguage(scopeName);
-                final var standardTokenType = _toStandardTokenType(scopeName);
-                return new BasicScopeAttributes(languageId, standardTokenType);
-            });
-        } else {
-            var basicScopeAttributes = cache.get(scopeName);
-            if (basicScopeAttributes == null) {
-                final var languageId = this._scopeToLanguage(scopeName);
-                final var standardTokenType = _toStandardTokenType(scopeName);
-                basicScopeAttributes = new BasicScopeAttributes(languageId, standardTokenType);
-                cache.put(scopeName, basicScopeAttributes);
-            }
-            return basicScopeAttributes;
-        }
+		return cache.computeIfAbsent(scopeName, scopeName2 -> {
+			final var languageId = this._scopeToLanguage(scopeName);
+			final var standardTokenType = _toStandardTokenType(scopeName);
+			return new BasicScopeAttributes(languageId, standardTokenType);
+		});
 	}
 
 	private static final BasicScopeAttributes _NULL_SCOPE_METADATA = new BasicScopeAttributes(0, 0);

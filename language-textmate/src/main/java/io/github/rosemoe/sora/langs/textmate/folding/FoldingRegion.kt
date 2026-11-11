@@ -1,7 +1,7 @@
 /*
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
- *    Copyright (C) 2020-2024  Rosemoe
+ *    Copyright (C) 2020-2026  Rosemoe
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,30 +21,20 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.langs.textmate.registry.model;
+package io.github.rosemoe.sora.langs.textmate.folding
 
+class FoldingRegion(
+    private val ranges: FoldingRegions,
+    val regionIndex: Int
+) {
+    val startLineNumber: Int
+        get() = ranges.getStartLineNumber(regionIndex)
 
-import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tm4e.core.registry.IGrammarSource;
+    val endLineNumber: Int
+        get() = ranges.getEndLineNumber(regionIndex)
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-public interface GrammarDefinition {
-
-    String getName();
-
-    @Nullable
-    String getLanguageConfiguration();
-
-    @Nullable
-    String getScopeName();
-
-    default Map<String,String> getEmbeddedLanguages() {
-        return Collections.emptyMap();
+    @Throws(Exception::class)
+    fun getParentIndex(): Int {
+        return ranges.getParentIndex(regionIndex)
     }
-
-    IGrammarSource getGrammar();
-
 }

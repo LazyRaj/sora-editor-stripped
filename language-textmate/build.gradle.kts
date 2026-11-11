@@ -34,6 +34,10 @@ android {
         consumerProguardFiles("consumer-rules.pro")
     }
 
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
+
     buildFeatures {
         buildConfig = true
     }
@@ -52,6 +56,8 @@ android {
 dependencies {
     compileOnly(project(":editor:editor"))
     compileOnly(project(":editor:oniguruma-native"))
+    testImplementation(project(":editor:editor"))
+    testImplementation(project(":editor:oniguruma-native"))
 
     implementation(libs.gson)
     implementation(libs.jcodings)

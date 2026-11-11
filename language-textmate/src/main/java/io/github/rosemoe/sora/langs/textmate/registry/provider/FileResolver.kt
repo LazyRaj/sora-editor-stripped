@@ -1,7 +1,7 @@
 /*
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
- *    Copyright (C) 2020-2024  Rosemoe
+ *    Copyright (C) 2020-2026  Rosemoe
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,30 +21,31 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.langs.textmate.folding;
+package io.github.rosemoe.sora.langs.textmate.registry.provider
 
-public class FoldingRegion {
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileNotFoundException
+import java.io.InputStream
 
-    private final FoldingRegions ranges;
-    private final int index;
+fun interface FileResolver {
+    fun resolveStreamByPath(path: String): InputStream?
 
-    public FoldingRegion(FoldingRegions ranges, int index) {
-        this.ranges = ranges;
-        this.index = index;
-    }
+    fun dispose() {}
 
-    public int getStartLineNumber() {
-        return this.ranges.getStartLineNumber(this.index);
-    }
-
-    public int getEndLineNumber() {
-        return this.ranges.getEndLineNumber(this.index);
-    }
-
-    public int getRegionIndex() {
-        return this.index;
-    }
-    public int getParentIndex() throws Exception {
-        return this.ranges.getParentIndex(this.index);
+    companion object {
+        @JvmField
+        val DEFAULT: FileResolver = FileResolver { path ->
+            val file = File(path)
+            if (file.isFile) {
+                try {
+                    FileInputStream(file)
+                } catch (e: FileNotFoundException) {
+                    null
+                }
+            } else {
+                null
+            }
+        }
     }
 }
