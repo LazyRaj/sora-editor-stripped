@@ -1,6 +1,17 @@
 <div align="center">
 
-![Banner](/images/editor_banner.jpg)
+
+> [!IMPORTANT]
+> **Open Source Submodule Fork Information**
+>
+> This repository is an open-source fork of [sora-editor](https://github.com/Rosemoe/sora-editor)
+maintained as a submodule for my personal project.
+>
+> - **Target Platform:** Android API 30+ (Android 11 and above) for `editor`, `editor-lsp`, and
+    `language-textmate`.
+> - **Purpose:** Dedicated to experimental features, custom optimizations, and breaking API changes
+    tailored for my personal project.
+
 ----
 [![CI](https://github.com/Rosemoe/sora-editor/actions/workflows/gradle.yml/badge.svg?event=push)](https://github.com/Rosemoe/sora-editor/actions/workflows/gradle.yml)
 ![GitHub License](https://img.shields.io/github/license/Rosemoe/sora-editor?link=https%3A%2F%2Fgithub.com%2FRosemoe%2Fsora-editor%2Fblob%2Fmain%2FLICENSE&link=https%3A%2F%2Fgithub.com%2FRosemoe%2Fsora-editor%2Fblob%2Fmain%2FLICENSE)
@@ -12,11 +23,12 @@ sora-editor is a cool and optimized code editor on Android platform
 
 </div>
 
-Read this in other languages: [English](README.md), [简体中文](README.zh-cn.md), [Español](README.es.md), [日本語](README.jp.md).
+Read this in other
+languages: [English](README.md), [简体中文](README.zh-cn.md), [Español](README.es.md), [日本語](README.jp.md).
 
 Note that statements in other languages may not be up-to-date.
 
-***Work In Progress*** This project is still developing slowly.   
+***Work In Progress*** This project is still developing slowly.
 
 **Issues and pull requests are welcome.**
 

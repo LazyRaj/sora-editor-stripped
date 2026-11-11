@@ -24,7 +24,6 @@
 
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.publish)
 }
 
 android {
@@ -46,7 +45,10 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 }
@@ -54,10 +56,9 @@ android {
 dependencies {
     api(libs.androidx.annotation)
     implementation(libs.androidx.collection)
-    implementation(libs.kotlin.stdlib)
     testImplementation(libs.junit)
-    testImplementation(libs.tests.google.truth)
-    testImplementation(libs.tests.robolectric)
-    androidTestImplementation(libs.androidx.test.junit)
-    androidTestImplementation(libs.androidx.test.espresso)
+    testImplementation(libs.truth)
+    testImplementation(libs.robolectric)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }

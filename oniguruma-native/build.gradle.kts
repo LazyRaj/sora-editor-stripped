@@ -24,7 +24,6 @@
 
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.publish)
 }
 
 android {
@@ -45,7 +44,7 @@ android {
         }
     }
 
-    ndkVersion = "29.0.14206865"
+    ndkVersion = "30.0.16248370"
 
     externalNativeBuild {
         cmake {
@@ -57,6 +56,6 @@ android {
 
 dependencies {
     testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.test.junit)
-    androidTestImplementation(libs.androidx.test.espresso)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }

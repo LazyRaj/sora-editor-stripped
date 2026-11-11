@@ -1,7 +1,7 @@
 [versions]
-agp = "9.4.1"
+agp = "9.5.1"
 kotlin = "2.4.21"
-tsBinding = "4.3.2"
+tsBinding = "4.3.3"
 lsp4j = "1.0.0"
 androidxAnnotation = "1.11.0"
 
@@ -23,9 +23,9 @@ tree-sitter = { module = "com.itsaky.androidide.treesitter:android-tree-sitter",
 lsp4j = { module = "org.eclipse.lsp4j:org.eclipse.lsp4j", version.ref = "lsp4j" }
 leakcanary = { module = "com.squareup.leakcanary:leakcanary-android", version = "2.14" }
 junit = { module = "junit:junit", version = "4.13.2" }
-gson = { module = "com.google.code.gson:gson", version = "2.14.0" }
+gson = { module = "com.google.code.gson:gson", version = "2.15.0" }
 jcodings = { module = "org.jruby.jcodings:jcodings", version = "1.0.64" }
-joni = { module = "org.jruby.joni:joni", version = "2.2.7" }
+joni = { module = "org.jruby.joni:joni", version = "2.2.9" }
 snakeyaml-engine = { module = "org.snakeyaml:snakeyaml-engine", version = "3.2" }
 moshi = { module = "com.squareup.moshi:moshi", version = "1.15.2" }
 jdt-annotation = { module = "org.eclipse.jdt:org.eclipse.jdt.annotation", version = "2.4.100" }
@@ -43,4 +43,3 @@ kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
-publish = { id = "com.vanniktech.maven.publish.base", version = "0.37.0" }

@@ -24,7 +24,6 @@
 
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.publish)
 }
 
 android {
@@ -42,19 +41,17 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
-    }
-    compileOptions {
-        // Flag to enable support for the new language APIs
-        // It's only needed if your app targets old Android APIs.
-        //isCoreLibraryDesugaringEnabled = true
     }
 }
 
 dependencies {
-    compileOnly(projects.editor)
-    compileOnly(projects.onigurumaNative)
+    compileOnly(project(":editor:editor"))
+    compileOnly(project(":editor:oniguruma-native"))
 
     implementation(libs.gson)
     implementation(libs.jcodings)
@@ -64,6 +61,6 @@ dependencies {
     implementation(libs.jdt.annotation)
 
     testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.test.junit)
-    androidTestImplementation(libs.androidx.test.espresso)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }

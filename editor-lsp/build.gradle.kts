@@ -1,4 +1,4 @@
-  /*******************************************************************************
+/*******************************************************************************
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2024  Rosemoe
@@ -23,7 +23,6 @@
  ******************************************************************************/
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.publish)
 }
 
 android {
@@ -36,18 +35,21 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 }
 
 dependencies {
-    compileOnly(projects.editor)
+    compileOnly(project(":editor:editor"))
     implementation(libs.lsp4j)
-    implementation(libs.kotlinx.coroutines)
+    implementation(libs.kotlinx.coroutines.android)
     testImplementation(libs.junit)
-    testImplementation(libs.tests.google.truth)
-    testImplementation(libs.tests.robolectric)
-    androidTestImplementation(libs.androidx.test.junit)
-    androidTestImplementation(libs.androidx.test.espresso)
+    testImplementation(libs.truth)
+    testImplementation(libs.robolectric)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }

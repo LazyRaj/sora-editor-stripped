@@ -24,27 +24,23 @@
 
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.CommonExtension
-import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
-import com.vanniktech.maven.publish.JavadocJar
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
-import com.vanniktech.maven.publish.SourcesJar
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidExtension
 
 plugins {
-    id("build-logic.root-project")
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.android.library) apply false
-    alias(libs.plugins.publish) apply false
 }
 
-buildscript {
-    dependencies {
-        classpath(libs.kotlin.plugin)
-    }
+object Versions {
+    const val buildToolsVersion = "37.0.0"
+    const val compileSdkVersion = 37
+    const val minSdkVersion = 30
+    const val targetSdkVersion = 37
+    const val versionCode = 96
+    const val appVersionName = "0.24.7"
+    const val artifactVersion = "0.24.7"
 }
-
-val highApiProjects = arrayOf("editor-lsp")
 
 fun Project.configureAndroidAndKotlin() {
     extensions.findByType<CommonExtension>()?.apply {
@@ -52,16 +48,12 @@ fun Project.configureAndroidAndKotlin() {
         buildToolsVersion = Versions.buildToolsVersion
 
         defaultConfig.apply {
-            minSdk = if (highApiProjects.contains(this@configureAndroidAndKotlin.name)) {
-                Versions.minSdkVersionHighApi
-            } else {
-                Versions.minSdkVersion
-            }
+            minSdk = Versions.minSdkVersion
         }
 
         compileOptions.apply {
-            sourceCompatibility = JavaVersion.VERSION_17
-            targetCompatibility = JavaVersion.VERSION_17
+            sourceCompatibility = JavaVersion.VERSION_25
+            targetCompatibility = JavaVersion.VERSION_25
         }
     }
 
@@ -76,7 +68,7 @@ fun Project.configureAndroidAndKotlin() {
     extensions.findByType<KotlinAndroidExtension>()?.apply {
         compilerOptions {
             languageVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_4
-            jvmTarget = JvmTarget.JVM_17
+            jvmTarget = JvmTarget.JVM_25
         }
     }
 }
@@ -90,23 +82,6 @@ subprojects {
     }
     plugins.withId("com.android.library") {
         configureAndroidAndKotlin()
-    }
-
-    plugins.withId("com.vanniktech.maven.publish.base") {
-        configure<MavenPublishBaseExtension> {
-            pomFromGradleProperties()
-            publishToMavenCentral()
-            signAllPublications()
-            if ("editor-bom" != this@subprojects.name) {
-                configure(
-                    AndroidSingleVariantLibrary(
-                        variant = "release",
-                        sourcesJar = SourcesJar.Sources(),
-                        javadocJar = JavadocJar.None()
-                    )
-                )
-            }
-        }
     }
 }
 

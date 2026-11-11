@@ -26,7 +26,6 @@
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
-    includeBuild("build-logic")
     repositories {
         gradlePluginPortal()
         google()
@@ -42,17 +41,18 @@ dependencyResolutionManagement {
         maven("https://repo.eclipse.org/content/groups/releases/")
         maven("https://maven.aliyun.com/nexus/content/groups/public/")
     }
+    versionCatalogs {
+        create("libs") {
+            from(files("gradle/libs.versions.toml"))
+        }
+    }
 }
 
-rootProject.name="sora-editor"
+rootProject.name = "sora-editor"
 include(
     ":editor-bom",
     ":editor",
-    ":app",
-    ":language-monarch",
-    ":language-java",
     ":language-textmate",
     ":editor-lsp",
-    ":language-treesitter",
     ":oniguruma-native"
 )
