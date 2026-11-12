@@ -50,11 +50,10 @@ import org.eclipse.lsp4j.TextDocumentContentChangeEvent
 import org.eclipse.lsp4j.TextDocumentIdentifier
 import org.eclipse.lsp4j.TextDocumentItem
 import org.eclipse.lsp4j.VersionedTextDocumentIdentifier
-import java.util.concurrent.locks.ReentrantReadWriteLock
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
-private val versionMap = HashMap<FileUri, Int>()
-
-private var lock: ReentrantReadWriteLock? = null
+private val versionMap = ConcurrentHashMap<FileUri, AtomicInteger>()
 
 fun FileUri.createDidCloseTextDocumentParams(): DidCloseTextDocumentParams {
     val params = DidCloseTextDocumentParams()
@@ -189,26 +188,11 @@ fun DiagnosticSeverity.toEditorLevel(): Short {
 }
 
 private fun getVersion(fileUri: FileUri): Int {
-    val notNullLock = lock ?: ReentrantReadWriteLock()
-    if (lock == null) {
-        lock = notNullLock
-    }
-
-    val readLock = notNullLock.readLock()
-    readLock.lock()
-    var version = versionMap.getOrDefault(fileUri, 0)
-    version++
-    readLock.unlock()
-    val writeLock = notNullLock.writeLock()
-    writeLock.lock()
-    versionMap[fileUri] = version
-    writeLock.unlock()
-    return version
+    return versionMap.computeIfAbsent(fileUri) { AtomicInteger(0) }.incrementAndGet()
 }
 
 fun clearVersions(func: (FileUri) -> Boolean) {
-    val keysToDelete = versionMap.keys.filter(func)
-    keysToDelete.forEach { versionMap.remove(it) }
+    versionMap.keys.removeIf(func)
 }
 
 fun blendARGB(

@@ -70,7 +70,6 @@ import org.eclipse.lsp4j.ShowMessageRequestParams
 import org.eclipse.lsp4j.SignatureHelp
 import org.eclipse.lsp4j.SignatureHelpParams
 import org.eclipse.lsp4j.SymbolInformation
-import org.eclipse.lsp4j.TextDocumentPositionParams
 import org.eclipse.lsp4j.TextEdit
 import org.eclipse.lsp4j.TypeDefinitionParams
 import org.eclipse.lsp4j.UnregistrationParams
@@ -388,26 +387,12 @@ class AggregatedRequestManager(
         return firstFuture { hover(params) }
     }
 
-    override fun hover(params: TextDocumentPositionParams): CompletableFuture<Hover>? {
-        return firstFuture { hover(params) }
-    }
-
-    override fun signatureHelp(params: TextDocumentPositionParams): CompletableFuture<SignatureHelp>? {
-        return firstFuture { signatureHelp(params) }
-    }
-
     override fun signatureHelp(params: SignatureHelpParams): CompletableFuture<SignatureHelp>? {
         return firstFuture { signatureHelp(params) }
     }
 
     override fun references(params: ReferenceParams): CompletableFuture<List<Location?>>? {
         val futures = activeManagers.mapNotNull { it.references(params) }
-        return aggregateLists(futures)
-    }
-
-    @Deprecated("")
-    override fun documentHighlight(params: TextDocumentPositionParams): CompletableFuture<List<DocumentHighlight>>? {
-        val futures = activeManagers.mapNotNull { it.documentHighlight(params) }
         return aggregateLists(futures)
     }
 
@@ -436,12 +421,6 @@ class AggregatedRequestManager(
     override fun diagnostic(params: DocumentDiagnosticParams?): CompletableFuture<DocumentDiagnosticReport>? {
         val futures = activeManagers.mapNotNull { it.diagnostic(params) }
         return aggregateDocumentDiagnostics(futures)
-    }
-
-    @Deprecated("")
-    override fun definition(params: TextDocumentPositionParams): CompletableFuture<Either<List<Location>, List<LocationLink>>>? {
-        val futures = activeManagers.mapNotNull { it.definition(params) }
-        return aggregateDefinitions(futures)
     }
 
     override fun definition(params: DefinitionParams): CompletableFuture<Either<List<Location>, List<LocationLink>>>? {

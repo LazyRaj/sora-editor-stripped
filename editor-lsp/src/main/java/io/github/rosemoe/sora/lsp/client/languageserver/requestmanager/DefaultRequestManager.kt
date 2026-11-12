@@ -91,7 +91,6 @@ import org.eclipse.lsp4j.ShowMessageRequestParams
 import org.eclipse.lsp4j.SignatureHelp
 import org.eclipse.lsp4j.SignatureHelpParams
 import org.eclipse.lsp4j.SymbolInformation
-import org.eclipse.lsp4j.TextDocumentPositionParams
 import org.eclipse.lsp4j.TextDocumentSyncOptions
 import org.eclipse.lsp4j.TextEdit
 import org.eclipse.lsp4j.TypeDefinitionParams
@@ -461,11 +460,6 @@ class DefaultRequestManager(
         } else null
     }
 
-    @Deprecated("")
-    override fun hover(params: TextDocumentPositionParams): CompletableFuture<Hover>? {
-        return hover(HoverParams(params.textDocument, params.position))
-    }
-
     override fun hover(params: HoverParams): CompletableFuture<Hover>? {
         if (LspFeature.Hover in disabledFeatures) return null
         return if (checkStatus()) {
@@ -478,11 +472,6 @@ class DefaultRequestManager(
                 null
             }
         } else null
-    }
-
-    @Deprecated("")
-    override fun signatureHelp(params: TextDocumentPositionParams): CompletableFuture<SignatureHelp>? {
-        return signatureHelp(SignatureHelpParams(params.textDocument, params.position))
     }
 
     override fun signatureHelp(params: SignatureHelpParams): CompletableFuture<SignatureHelp>? {
@@ -527,11 +516,6 @@ class DefaultRequestManager(
                 null
             }
         } else null
-    }
-
-    @Deprecated("")
-    override fun documentHighlight(params: TextDocumentPositionParams): CompletableFuture<List<DocumentHighlight>>? {
-        return documentHighlight(DocumentHighlightParams(params.textDocument, params.position))
     }
 
     override fun documentHighlight(params: DocumentHighlightParams): CompletableFuture<List<DocumentHighlight>>? {
@@ -620,11 +604,6 @@ class DefaultRequestManager(
                 null
             }
         } else null
-    }
-
-    @Deprecated("")
-    override fun definition(params: TextDocumentPositionParams): CompletableFuture<Either<List<Location>, List<LocationLink>>>? {
-        return definition(DefinitionParams(params.textDocument, params.position))
     }
 
     override fun definition(params: DefinitionParams): CompletableFuture<Either<List<Location>, List<LocationLink>>>? {

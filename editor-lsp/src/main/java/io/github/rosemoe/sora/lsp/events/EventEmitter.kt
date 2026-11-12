@@ -195,16 +195,19 @@ abstract class AsyncEventListener : EventListener {
 class EventContext {
     private val data = HashMap<String, Any>()
 
+    @Suppress("UNCHECKED_CAST")
     fun <T : Any> get(key: String): T {
         return data[key] as T
     }
 
+    @Suppress("UNCHECKED_CAST")
     fun <T : Any> getOrDefault(key: String, default: T): T {
         return data.getOrDefault(key, default) as T
     }
 
+    @Suppress("UNCHECKED_CAST")
     fun <T : Any> getOrNull(key: String): T? {
-        return data[key] as? T?
+        return data[key] as? T
     }
 
     fun put(key: String, value: Any?) {
@@ -216,8 +219,9 @@ class EventContext {
         data[value::class.java.name] = value
     }
 
+    @Suppress("UNCHECKED_CAST")
     fun <T : Any> remove(key: String): T? {
-        return data.remove(key) as? T?
+        return data.remove(key) as? T
     }
 
     fun <T : Any> getByClass(clazz: Class<T>): T? {

@@ -87,7 +87,6 @@ import org.eclipse.lsp4j.ShowMessageRequestParams
 import org.eclipse.lsp4j.SignatureHelp
 import org.eclipse.lsp4j.SignatureHelpParams
 import org.eclipse.lsp4j.SymbolInformation
-import org.eclipse.lsp4j.TextDocumentPositionParams
 import org.eclipse.lsp4j.TextEdit
 import org.eclipse.lsp4j.TypeDefinitionParams
 import org.eclipse.lsp4j.UnregistrationParams
@@ -153,25 +152,15 @@ abstract class RequestManager : LanguageClient, TextDocumentService, WorkspaceSe
     abstract override fun completion(params: CompletionParams): CompletableFuture<Either<List<CompletionItem>, CompletionList>>?
     abstract override fun resolveCompletionItem(unresolved: CompletionItem): CompletableFuture<CompletionItem>?
     abstract override fun hover(params: HoverParams): CompletableFuture<Hover>?
-
-    @Deprecated("")
-    abstract fun hover(params: TextDocumentPositionParams): CompletableFuture<Hover>?
-
-    @Deprecated("")
-    abstract fun signatureHelp(params: TextDocumentPositionParams): CompletableFuture<SignatureHelp>?
     abstract override fun signatureHelp(params: SignatureHelpParams): CompletableFuture<SignatureHelp>?
     abstract override fun references(params: ReferenceParams): CompletableFuture<List<Location?>>?
 
-    @Deprecated("")
-    abstract fun documentHighlight(params: TextDocumentPositionParams): CompletableFuture<List<DocumentHighlight>>?
     abstract override fun documentHighlight(params: DocumentHighlightParams): CompletableFuture<List<DocumentHighlight>>?
     abstract override fun documentSymbol(params: DocumentSymbolParams): CompletableFuture<List<Either<SymbolInformation, DocumentSymbol>>>?
     abstract override fun formatting(params: DocumentFormattingParams): CompletableFuture<List<TextEdit>>?
     abstract override fun rangeFormatting(params: DocumentRangeFormattingParams): CompletableFuture<List<TextEdit>>?
     abstract override fun onTypeFormatting(params: DocumentOnTypeFormattingParams): CompletableFuture<List<TextEdit>>?
 
-    @Deprecated("")
-    abstract fun definition(params: TextDocumentPositionParams): CompletableFuture<Either<List<Location>, List<LocationLink>>>?
     abstract override fun definition(params: DefinitionParams): CompletableFuture<Either<List<Location>, List<LocationLink>>>?
     abstract override fun codeAction(params: CodeActionParams): CompletableFuture<List<Either<Command, CodeAction>>>?
     abstract override fun codeLens(params: CodeLensParams): CompletableFuture<List<CodeLens>>?

@@ -1,25 +1,23 @@
 package io.github.rosemoe.sora.lsp.editor.text
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Typeface
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.text.SpannableStringBuilder
 import android.text.Spanned
-import android.text.TextPaint
 import android.text.style.ForegroundColorSpan
 import android.text.style.ImageSpan
 import android.text.style.LeadingMarginSpan
-import android.text.style.MetricAffectingSpan
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
+import android.text.style.TypefaceSpan
 import android.text.style.URLSpan
-import android.util.Base64
 import androidx.annotation.VisibleForTesting
 import java.util.Locale
 
 object SimpleMarkdownRenderer {
+    typealias ImageProvider = io.github.rosemoe.sora.lsp.editor.text.ImageProvider
+    typealias DefaultImageProvider = io.github.rosemoe.sora.lsp.editor.text.DefaultImageProvider
+
     var globalImageProvider: ImageProvider = DefaultImageProvider(maxImageWidth)
 
     fun render(
@@ -123,7 +121,7 @@ object SimpleMarkdownRenderer {
                     builder.append(result.content)
                     val end = builder.length
                     if (end > start) {
-                        builder.setSpan(TypefaceSpanCompat(codeTypeface), start, end, SPAN_MODE)
+                        builder.setSpan(TypefaceSpan(codeTypeface), start, end, SPAN_MODE)
                     }
                 }
 
@@ -261,7 +259,7 @@ object SimpleMarkdownRenderer {
                     builder.append(highlighted)
                     val end = builder.length
                     if (end > start) {
-                        builder.setSpan(TypefaceSpanCompat(codeTypeface), start, end, SPAN_MODE)
+                        builder.setSpan(TypefaceSpan(codeTypeface), start, end, SPAN_MODE)
                     }
                 }
 
@@ -383,7 +381,7 @@ object SimpleMarkdownRenderer {
                     val start = builder.length
                     builder.append(inline.value)
                     val end = builder.length
-                    builder.setSpan(TypefaceSpanCompat(codeTypeface), start, end, SPAN_MODE)
+                    builder.setSpan(TypefaceSpan(codeTypeface), start, end, SPAN_MODE)
                     builder.setSpan(ForegroundColorSpan(inlineCodeColor), start, end, SPAN_MODE)
                 }
 
@@ -820,124 +818,7 @@ object SimpleMarkdownRenderer {
         return match.range.last + 1
     }
 
-    private fun normalize(input: String): String {
-        var text = input.replace("\r\n", "\n")
-        text = text.replace("\r", "\n")
-        text = text.replace(brRegex, "\n")
-        text = headingRegex.replace(text) { matchResult ->
-            val level = matchResult.groupValues[1].toInt()
-            val body = matchResult.groupValues[2].trim()
-            "${"#".repeat(level)} $body"
-        }
-        text = blockquoteRegex.replace(text) { matchResult ->
-            val body = matchResult.groupValues[1].trim()
-            "> $body"
-        }
-        text = strongRegex.replace(text, "**$1**")
-        text = emRegex.replace(text, "*$1*")
-        text = codeRegex.replace(text, "`$1`")
-        text = preRegex.replace(text) { matchResult ->
-            val body = matchResult.groupValues[1]
-            "```\n$body\n```"
-        }
-        text = liRegex.replace(text) { matchResult ->
-            val body = matchResult.groupValues[1].trim()
-            "- $body"
-        }
-        text = linkRegex.replace(text) { matchResult ->
-            val href = matchResult.groupValues[1]
-            val label = matchResult.groupValues[2]
-            "[$label]($href)"
-        }
-        text = autoLinkRegex.replace(text) { matchResult ->
-            val url = matchResult.groupValues[1]
-            if (url.matches(urlRegex)) "[$url]($url)" else matchResult.value
-        }
-        text = normalizePlainUrl(text)
-        text = text.replace(ulRegex, "")
-        text = text.replace(olRegex, "")
-        text = text.replace(pCloseRegex, "\n\n")
-        text = pOpenRegex.replace(text, "")
-        text = text.replace("&nbsp;", " ")
-        text = text.replace("&lt;", "<")
-        text = text.replace("&gt;", ">")
-        text = text.replace("&amp;", "&")
-        text = text.replace(multiNewlineRegex, "\n\n")
-        return text.trim()
-    }
-
-    /**
-     * Converts plain URLs in the input text into Markdown links, ignoring URLs
-     * that are already part of existing Markdown links.
-     *
-     * @param text Input string that may contain plain URLs.
-     * @return Text with plain URLs wrapped as Markdown links `[url](url)`.
-     */
-    private fun normalizePlainUrl(text: String): String {
-        val markdownLinks = markdownLinkRegex.findAll(text).map { it.range }.toList()
-        var lastIndex = 0
-
-        return buildString {
-            urlRegex.findAll(text).forEach { match ->
-                val range = match.range
-                append(text.substring(lastIndex, range.first))
-                if (markdownLinks.none { range.first >= it.first && range.last <= it.last }) {
-                    append("[${match.value}](${match.value})")
-                } else {
-                    append(text.substring(range))
-                }
-                lastIndex = range.last + 1
-            }
-            append(text.substring(lastIndex))
-        }
-    }
-
-    /**
-     * Default implementation of [ImageProvider] that decodes Base64 raster images from data URIs.
-     *
-     * @param maxWidth Maximum width for returned Bitmaps. Images wider than this will be scaled down preserving aspect ratio.
-     */
-    open class DefaultImageProvider(
-        private val maxWidth: Int = 800
-    ): ImageProvider {
-        override fun load(src: String): Drawable? {
-            if (!src.startsWith("data:")) return null
-
-            val payload = src.substringAfter("base64,", "")
-            if (payload.isEmpty()) return null
-
-            val imageByteArray = try {
-                Base64.decode(payload, Base64.DEFAULT)
-            } catch (_: Exception) {
-                return null
-            }
-            val bitmap = BitmapFactory.decodeByteArray(imageByteArray, 0, imageByteArray.size) ?: return null
-            val scaledBitmap = scaleIfNeeded(bitmap, maxWidth)
-            return BitmapDrawable(scaledBitmap)
-        }
-
-        /**
-         * Scale down a bitmap to maxWidth preserving aspect ratio. If bitmap width
-         * is already <= maxWidth, the original bitmap is returned.
-         */
-        private fun scaleIfNeeded(bmp: Bitmap, maxWidth: Int): Bitmap {
-            val currentWidth = bmp.width
-            if (currentWidth <= maxWidth) return bmp
-            val ratio = maxWidth.toFloat() / currentWidth.toFloat()
-
-            val newHeight = (bmp.height * ratio).toInt()
-            return Bitmap.createScaledBitmap(bmp, maxWidth, newHeight, true)
-        }
-    }
-
-    interface ImageProvider {
-        /**
-         * Attempts to load an image from the given source string.
-         * @param src Source string (e.g., data URI, file path, URL)
-         * @return A [Drawable] if successful, or null if the image cannot be loaded.
-         */
-        fun load(src: String): Drawable?
-    }
+    private fun normalize(input: String): String = normalizeMarkdownHtml(input)
 
     @VisibleForTesting
     internal interface Block {
@@ -965,41 +846,10 @@ object SimpleMarkdownRenderer {
     private val unorderedPattern = Regex("^\\s*[\\*\\-+]\\s+.+")
     private val orderedPattern = Regex("^\\s*(\\d+)\\.\\s+.+")
     private val markerPattern = Regex("^(?:\\d+\\.|[\\*\\-+])\\s+")
-    private val brRegex = Regex("(?i)<br\\s*/?>")
-    private val headingRegex = Regex("(?is)<h([1-6])[^>]*>(.*?)</h\\1>")
-    private val blockquoteRegex = Regex("(?is)<blockquote[^>]*>(.*?)</blockquote>")
-    private val strongRegex = Regex("(?is)<strong[^>]*>(.*?)</strong>")
-    private val emRegex = Regex("(?is)<em[^>]*>(.*?)</em>")
-    private val codeRegex = Regex("(?is)<code[^>]*>(.*?)</code>")
-    private val preRegex = Regex("(?is)<pre[^>]*>(.*?)</pre>")
-    private val liRegex = Regex("(?is)<li[^>]*>(.*?)</li>")
-    private val linkRegex = Regex("(?is)<a[^>]+href\\s*=\\s*['\"]([^'\"]+)['\"][^>]*>(.*?)</a>")
-    private val markdownLinkRegex = Regex("(?i)\\[([^\\]]*)\\]\\(([^\\)]*)\\)")
-    private val autoLinkRegex = Regex("(?i)<([^>]+)>")
-    private val urlRegex = Regex("(?i)https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&/=]*)")
-    private val ulRegex = Regex("(?is)</?ul[^>]*>")
-    private val olRegex = Regex("(?is)</?ol[^>]*>")
-    private val pOpenRegex = Regex("(?is)<p[^>]*>")
-    private val pCloseRegex = Regex("(?is)</p>")
-    private val multiNewlineRegex = Regex("\n{3,}")
     private const val maxImageWidth = 800
     private const val leadingMargin = 24
     private const val indentMargin = 24
     private const val lineSeparator = "──────────"
     private val escapeCharacters = "\\`*_{}[]()#+-.!<>|:".toSet()
     private val DEFAULT_HEADING_SCALE = floatArrayOf(1.6f, 1.4f, 1.25f, 1.1f, 1.05f, 1.0f)
-}
-
-class TypefaceSpanCompat(private val typeface: Typeface) : MetricAffectingSpan() {
-    override fun updateDrawState(tp: TextPaint) {
-        apply(tp)
-    }
-
-    override fun updateMeasureState(tp: TextPaint) {
-        apply(tp)
-    }
-
-    private fun apply(paint: TextPaint) {
-        paint.typeface = typeface
-    }
 }

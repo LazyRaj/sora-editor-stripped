@@ -24,7 +24,6 @@
 
 package io.github.rosemoe.sora.lsp.utils
 
-import android.annotation.SuppressLint
 import android.graphics.Color
 
 /**
@@ -163,7 +162,6 @@ object ColorUtils {
      * @param hex Hexadecimal color string
      * @return Android color integer, or null if input is invalid
      */
-    @SuppressLint("UseKtx")
     fun parseHex(hex: String): Int? {
         val normalizedHex = normalizeHex(hex)
         return runCatching { Color.parseColor(normalizedHex) }.getOrNull()
