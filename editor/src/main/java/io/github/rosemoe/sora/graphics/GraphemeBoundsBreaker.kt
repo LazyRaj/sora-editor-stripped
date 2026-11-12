@@ -1,7 +1,8 @@
 /*
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
- *    Copyright (C) 2020-2024  Rosemoe
+ *    Copyright (C) 2020-2025  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,18 +22,35 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.graphics;
 
-import android.graphics.RectF;
+package io.github.rosemoe.sora.graphics
 
-public class RectUtils {
+/**
+ * Utility for breaking text by grapheme bounds
+ *
+ * @author Rosemoe
+ */
+object GraphemeBoundsBreaker {
 
-    public static boolean contains(RectF rect, float x, float y, float extraXSpace) {
-        return (x >= rect.left - extraXSpace && x <= rect.right + extraXSpace && y >= rect.top && y <= rect.bottom);
+    /**
+     * Find next grapheme break point before the given width
+     */
+    @JvmStatic
+    fun findGraphemeBreakPoint(advances: FloatArray, length: Int, width: Int, start: Int): Int {
+        var currentWidth = 0f
+        var next = start
+        while (next < length) {
+            if (advances[next] == 0f) {
+                // Not grapheme bound
+                next++
+                continue
+            }
+            if (currentWidth + advances[next] > width) {
+                break
+            }
+            currentWidth += advances[next]
+            next++
+        }
+        return next
     }
-
-    public static boolean almostContains(RectF rect, float x, float y, float extraSpace) {
-        return (x >= rect.left - extraSpace && x <= rect.right + extraSpace && y >= rect.top - extraSpace && y <= rect.bottom + extraSpace);
-    }
-
 }

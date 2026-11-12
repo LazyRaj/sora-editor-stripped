@@ -1,7 +1,8 @@
 /*
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
- *    Copyright (C) 2020-2024  Rosemoe
+ *    Copyright (C) 2020-2025  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,45 +22,40 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.graphics;
 
+package io.github.rosemoe.sora.graphics
 
-import android.graphics.Canvas;
-import android.graphics.Paint;
+import android.graphics.Canvas
+import android.graphics.Paint
 
-public class BufferedDrawPoints {
+class BufferedDrawPoints {
 
-    private int pointCount;
-    private float[] points;
-    private float offsetX, offsetY;
+    private var pointCount = 0
+    private var points = FloatArray(128)
+    private var offsetX = 0f
+    private var offsetY = 0f
 
-    public BufferedDrawPoints() {
-        points = new float[128];
-    }
-
-    public void drawPoint(float cx, float cy) {
-        // Check buffer size and grow
-        if (points.length < (pointCount + 1) * 2) {
-            float[] newBuffer = new float[points.length << 1];
-            System.arraycopy(points, 0, newBuffer, 0, pointCount * 2);
-            points = newBuffer;
+    fun drawPoint(cx: Float, cy: Float) {
+        if (points.size < (pointCount + 1) * 2) {
+            val newBuffer = FloatArray(points.size shl 1)
+            System.arraycopy(points, 0, newBuffer, 0, pointCount * 2)
+            points = newBuffer
         }
-        points[pointCount * 2] = cx + offsetX;
-        points[pointCount * 2 + 1] = cy + offsetY;
-        pointCount++;
+        points[pointCount * 2] = cx + offsetX
+        points[pointCount * 2 + 1] = cy + offsetY
+        pointCount++
     }
 
-    public void setOffsets(float x, float y) {
-        this.offsetX = x;
-        this.offsetY = y;
+    fun setOffsets(x: Float, y: Float) {
+        this.offsetX = x
+        this.offsetY = y
     }
 
-    public void commitPoints(Canvas canvas, Paint paint) {
+    fun commitPoints(canvas: Canvas, paint: Paint) {
         if (pointCount == 0) {
-            return;
+            return
         }
-        canvas.drawPoints(points, 0, pointCount * 2, paint);
-        pointCount = 0;
+        canvas.drawPoints(points, 0, pointCount * 2, paint)
+        pointCount = 0
     }
-
 }
