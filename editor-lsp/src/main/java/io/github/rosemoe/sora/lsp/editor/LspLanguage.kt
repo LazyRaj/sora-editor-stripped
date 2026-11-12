@@ -72,13 +72,11 @@ class LspLanguage(var editor: LspEditor) : Language {
             }
     }
 
-    override fun getAnalyzeManager(): AnalyzeManager {
-        return wrapperLanguage?.analyzeManager ?: EmptyLanguage.EmptyAnalyzeManager.INSTANCE
-    }
+    override val analyzeManager: AnalyzeManager
+        get() = wrapperLanguage?.analyzeManager ?: EmptyLanguage.EmptyAnalyzeManager.INSTANCE
 
-    override fun getInterruptionLevel(): Int {
-        return wrapperLanguage?.interruptionLevel ?: 0
-    }
+    override val interruptionLevel: Int
+        get() = wrapperLanguage?.interruptionLevel ?: 0
 
     @Throws(CompletionCancelledException::class)
     override fun requireAutoComplete(
@@ -185,21 +183,17 @@ class LspLanguage(var editor: LspEditor) : Language {
         return wrapperLanguage?.useTab() == true
     }
 
-    override fun getFormatter(): Formatter {
-        return _formatter ?: wrapperLanguage?.formatter ?: EmptyLanguage.EmptyFormatter.INSTANCE
-    }
+    override var formatter: Formatter
+        get() = _formatter ?: wrapperLanguage?.formatter ?: EmptyLanguage.EmptyFormatter.INSTANCE
+        set(value) {
+            this._formatter = value
+        }
 
-    fun setFormatter(formatter: Formatter) {
-        this._formatter = formatter
-    }
+    override val symbolPairs: SymbolPairMatch
+        get() = wrapperLanguage?.symbolPairs ?: EmptyLanguage.EMPTY_SYMBOL_PAIRS
 
-    override fun getSymbolPairs(): SymbolPairMatch {
-        return wrapperLanguage?.symbolPairs ?: EmptyLanguage.EMPTY_SYMBOL_PAIRS
-    }
-
-    override fun getNewlineHandlers(): Array<NewlineHandler?> {
-        return wrapperLanguage?.newlineHandlers ?: emptyArray()
-    }
+    override val newlineHandlers: Array<NewlineHandler>?
+        get() = wrapperLanguage?.newlineHandlers ?: emptyArray()
 
     override fun destroy() {
         formatter.destroy()

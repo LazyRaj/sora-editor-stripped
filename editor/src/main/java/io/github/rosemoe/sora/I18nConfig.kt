@@ -1,7 +1,8 @@
 /*
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
- *    Copyright (C) 2020-2024  Rosemoe
+ *    Copyright (C) 2020-2025  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,48 +22,46 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora;
 
-import android.content.Context;
-import android.util.SparseIntArray;
+package io.github.rosemoe.sora
 
-import androidx.annotation.NonNull;
+import android.content.Context
+import android.util.SparseIntArray
 
 /**
  * Map editor built-in string resources to your given string resource. Editor string resource has
  * limited i18n function, as it only contains English and Chinese.
- * <p>
+ *
  * Note that you should configure this before creating editor instances
  *
  * @author Rosemoe
  */
-public class I18nConfig {
+object I18nConfig {
 
-    private static final SparseIntArray mapping = new SparseIntArray();
+    private val mapping = SparseIntArray()
 
     /**
      * Map the given editor resId to new one
      */
-    public static void mapTo(int originalResId, int newResId) {
-        mapping.put(originalResId, newResId);
+    @JvmStatic
+    fun mapTo(originalResId: Int, newResId: Int) {
+        mapping.put(originalResId, newResId)
     }
 
     /**
      * Get mapped resource id or itself
      */
-    public static int getResourceId(int resId) {
-        int newResource = mapping.get(resId);
-        if (newResource == 0) {
-            return resId;
-        }
-        return newResource;
+    @JvmStatic
+    fun getResourceId(resId: Int): Int {
+        val newResource = mapping.get(resId)
+        return if (newResource == 0) resId else newResource
     }
 
     /**
      * Get mapped resource string
      */
-    public static String getString(@NonNull Context context, int resId) {
-        return context.getString(getResourceId(resId));
+    @JvmStatic
+    fun getString(context: Context, resId: Int): String {
+        return context.getString(getResourceId(resId))
     }
-
 }

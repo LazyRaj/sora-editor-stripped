@@ -60,7 +60,7 @@ open class TextMateLanguage protected constructor(
     var languageConfiguration: LanguageConfiguration? = languageConfiguration
         private set
 
-    private var newlineHandlers: Array<NewlineHandler>? = null
+    private var _newlineHandlers: Array<NewlineHandler>? = null
     var newlineHandler: TextMateNewlineHandler? = null
         private set
 
@@ -180,7 +180,7 @@ open class TextMateLanguage protected constructor(
         this.languageConfiguration = languageConfiguration
         val handler = TextMateNewlineHandler(this)
         this.newlineHandler = handler
-        this.newlineHandlers = arrayOf(handler)
+        this._newlineHandlers = arrayOf(handler)
         if (languageConfiguration != null) {
             symbolPairMatch.updatePair()
         }
@@ -213,9 +213,8 @@ open class TextMateLanguage protected constructor(
         createAnalyzerAndNewlineHandler(grammar, config)
     }
 
-    override fun getAnalyzeManager(): AnalyzeManager {
-        return textMateAnalyzer ?: EmptyLanguage.EmptyAnalyzeManager.INSTANCE
-    }
+    override val analyzeManager: AnalyzeManager
+        get() = textMateAnalyzer ?: EmptyLanguage.EmptyAnalyzeManager.INSTANCE
 
     override fun useTab(): Boolean = isUseTab
 
@@ -223,9 +222,11 @@ open class TextMateLanguage protected constructor(
         this.isUseTab = useTab
     }
 
-    override fun getSymbolPairs(): TextMateSymbolPairMatch = symbolPairMatch
+    override val symbolPairs: TextMateSymbolPairMatch
+        get() = symbolPairMatch
 
-    override fun getNewlineHandlers(): Array<NewlineHandler>? = newlineHandlers
+    override val newlineHandlers: Array<NewlineHandler>?
+        get() = _newlineHandlers
 
     override fun requireAutoComplete(
         content: ContentReference,
