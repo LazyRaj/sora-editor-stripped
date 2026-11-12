@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2024  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,42 +22,37 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.event;
+package io.github.rosemoe.sora.event
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import io.github.rosemoe.sora.widget.CodeEditor;
+import java.lang.ref.WeakReference
+import kotlin.concurrent.withLock
 
 /**
- * Event with a result
+ * Receipt of [EventManager.subscribeEvent]. You can unsubscribe the event outside
+ * the dispatch process from any thread by calling [SubscriptionReceipt.unsubscribe]
  *
- * @param <T> Result type
+ * @author Rosemoe
  */
-public abstract class ResultedEvent<T> extends Event {
+class SubscriptionReceipt<R : Event> internal constructor(
+    private val manager: EventManager,
+    private val clazz: Class<R>,
+    receiver: EventReceiver<R>
+) {
 
-    private T result;
+    private val receiver: WeakReference<EventReceiver<R>> = WeakReference(receiver)
 
-    public ResultedEvent(@NonNull CodeEditor editor) {
-        super(editor);
+    /**
+     * Unsubscribe the event receiver.
+     *
+     * Does nothing if the listener is already recycled or unsubscribed.
+     */
+    fun unsubscribe() {
+        val receivers = manager.getReceivers(clazz)
+        receivers.lock.writeLock().withLock {
+            val target = receiver.get()
+            if (target != null) {
+                receivers.receivers.remove(target)
+            }
+        }
     }
-
-    @Nullable
-    public T getResult() {
-        return result;
-    }
-
-    public void setResult(@Nullable T result) {
-        this.result = result;
-    }
-
-    public void interceptAndSetResult(@Nullable T result) {
-        setResult(result);
-        intercept();
-    }
-
-    public boolean isResultSet() {
-        return result != null;
-    }
-
 }

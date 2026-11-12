@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2024  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,13 +22,9 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.event;
+package io.github.rosemoe.sora.event
 
-import androidx.annotation.NonNull;
-
-import java.util.Objects;
-
-import io.github.rosemoe.sora.widget.CodeEditor;
+import io.github.rosemoe.sora.widget.CodeEditor
 
 /**
  * An Event object describes an event of editor.
@@ -36,64 +33,36 @@ import io.github.rosemoe.sora.widget.CodeEditor;
  *
  * @author Rosemoe
  */
-public abstract class Event {
-
-    private final long eventTime;
-    private final CodeEditor editor;
-    private int interceptTargets;
-
-    public Event(@NonNull CodeEditor editor) {
-        this(editor, System.currentTimeMillis());
-    }
-
-    public Event(@NonNull CodeEditor editor, long eventTime) {
-        this.editor = Objects.requireNonNull(editor);
-        this.eventTime = eventTime;
-        interceptTargets = 0;
-    }
+abstract class Event @JvmOverloads constructor(
+    val editor: CodeEditor,
+    open val eventTime: Long = System.currentTimeMillis()
+) {
 
     /**
-     * Get event time
+     * Get intercepted dispatch targets
      */
-    public long getEventTime() {
-        return eventTime;
-    }
-
-    /**
-     * Get the editor
-     */
-    @NonNull
-    public CodeEditor getEditor() {
-        return editor;
-    }
+    var interceptTargets: Int = 0
+        private set
 
     /**
      * Check whether this event can be intercepted (so that the event is not sent to other
      * receivers after being intercepted)
-     * Intercept-able events:
-     *
-     * @see LongPressEvent
-     * @see ClickEvent
-     * @see DoubleClickEvent
-     * @see EditorKeyEvent
      */
-    public boolean canIntercept() {
-        return false;
-    }
+    open fun canIntercept(): Boolean = false
 
     /**
      * Intercept the event for all targets.
-     * <p>
-     * Make sure {@link #canIntercept()} returns true. Otherwise, an {@link UnsupportedOperationException}
+     *
+     * Make sure [canIntercept] returns true. Otherwise, an [UnsupportedOperationException]
      * will be thrown.
      *
      * @see InterceptTarget
      */
-    public void intercept() {
+    fun intercept() {
         if (!canIntercept()) {
-            throw new UnsupportedOperationException("intercept() not supported");
+            throw UnsupportedOperationException("intercept() not supported")
         }
-        interceptTargets = InterceptTarget.TARGET_EDITOR | InterceptTarget.TARGET_RECEIVERS;
+        interceptTargets = InterceptTarget.TARGET_EDITOR or InterceptTarget.TARGET_RECEIVERS
     }
 
     /**
@@ -102,30 +71,16 @@ public abstract class Event {
      * @param targets Masks for target types
      * @see InterceptTarget
      */
-    public void intercept(int targets) {
+    fun intercept(targets: Int) {
         if (!canIntercept()) {
-            throw new UnsupportedOperationException("intercept() not supported");
+            throw UnsupportedOperationException("intercept() not supported")
         }
-        interceptTargets = targets;
-    }
-
-    /**
-     * Get intercepted dispatch targets
-     *
-     * @see #intercept(int)
-     * @see InterceptTarget
-     */
-    public int getInterceptTargets() {
-        return interceptTargets;
+        interceptTargets = targets
     }
 
     /**
      * Check whether this event is intercepted for some types of targets
-     *
-     * @see #getInterceptTargets()
      */
-    public boolean isIntercepted() {
-        return interceptTargets != 0;
-    }
-
+    val isIntercepted: Boolean
+        get() = interceptTargets != 0
 }

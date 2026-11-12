@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2024  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,39 +22,10 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.event;
+package io.github.rosemoe.sora.event
 
-/**
- * Instance for unsubscribing for a receiver.
- * <p>
- * Note that this instance can be reused during an event dispatch, so
- * it is not a valid behavior to save the instance in event receivers.
- * Always use the one given by {@link EventReceiver#onReceive(Event, Unsubscribe)}.
- */
-public class Unsubscribe {
+fun interface EventReceiver<T : Event> {
 
-    private boolean unsubscribeFlag = false;
-
-    /**
-     * Unsubscribe the event. And current receiver will not get event again.
-     * References to the receiver are also removed.
-     */
-    public void unsubscribe() {
-        unsubscribeFlag = true;
-    }
-
-    /**
-     * Checks whether unsubscribe flag is set
-     */
-    public boolean isUnsubscribed() {
-        return unsubscribeFlag;
-    }
-
-    /**
-     * Reset the flag
-     */
-    public void reset() {
-        unsubscribeFlag = false;
-    }
+    fun onReceive(event: T, unsubscribe: Unsubscribe)
 
 }

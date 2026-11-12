@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2024  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,12 +22,24 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.event;
+package io.github.rosemoe.sora.event
 
-import androidx.annotation.NonNull;
+/**
+ * Define available intercept targets. You may intercept one or more targets of the given event.
+ *
+ * @author Rosemoe
+ */
+interface InterceptTarget {
 
-public interface EventReceiver<T extends Event> {
+    companion object {
+        /**
+         * Registered receivers in the event dispatching graph
+         */
+        const val TARGET_RECEIVERS: Int = 1
 
-    void onReceive(@NonNull T event, @NonNull Unsubscribe unsubscribe);
-
+        /**
+         * Editor built-in behavior
+         */
+        const val TARGET_EDITOR: Int = 1 shl 1
+    }
 }

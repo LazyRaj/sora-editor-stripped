@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2024  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,23 +22,26 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.event;
+package io.github.rosemoe.sora.event
+
+import io.github.rosemoe.sora.widget.CodeEditor
 
 /**
- * Define available intercept targets. You may intercept one or more targets of the given event.
+ * Event with a result
  *
- * @author Rosemoe
+ * @param T Result type
  */
-public interface InterceptTarget {
+abstract class ResultedEvent<T : Any>(
+    editor: CodeEditor
+) : Event(editor) {
 
-    /**
-     * Registered receivers in the event dispatching graph
-     */
-    int TARGET_RECEIVERS = 1;
+    var result: T? = null
 
-    /**
-     * Editor built-in behavior
-     */
-    int TARGET_EDITOR = 1 << 1;
+    fun interceptAndSetResult(result: T?) {
+        this.result = result
+        intercept()
+    }
 
+    val isResultSet: Boolean
+        get() = result != null
 }
