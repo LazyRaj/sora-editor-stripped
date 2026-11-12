@@ -29,6 +29,11 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Path
 import android.graphics.RectF
+import io.github.rosemoe.sora.text.ContentLine
+import io.github.rosemoe.sora.text.bidi.Directions
+import io.github.rosemoe.sora.util.IntPair
+import io.github.rosemoe.sora.widget.rendering.TextAdvancesCache
+import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -156,5 +161,65 @@ class GraphicsTest {
 
         paint.setTextSizeWrapped(30f)
         assertTrue(paint.textSize == 30f)
+    }
+
+    @Test
+    fun testTextRow() {
+        val line = ContentLine()
+        line.insert(0, "Hello World")
+        val directions = Directions(longArrayOf(IntPair.pack(0, 0)), line.length)
+        val paint = Paint().apply { textSize = 20f }
+        val fontMetrics = paint.fontMetricsInt
+        val params = TextRowParams(
+            tabWidth = 4,
+            textMetrics = fontMetrics,
+            textTop = 0,
+            textBottom = 30,
+            textHeight = 30,
+            textBaseline = 25,
+            rowTop = 0,
+            rowBottom = 35,
+            rowHeight = 35,
+            roundTextBackgroundFactor = 0.1f,
+            inlayHintRendererProvider = { null },
+            colorScheme = EditorColorScheme(),
+            miscPaint = Paint(),
+            graphPaint = Paint(),
+            graphMetrics = fontMetrics
+        )
+        val cache = TextAdvancesCache(line.length + 1)
+        for (i in 0 until line.length) {
+            cache.setAdvanceAt(i, 10f)
+        }
+        cache.finishBuilding()
+
+        val textRow = TextRow()
+        textRow.set(
+            line,
+            0,
+            line.length,
+            null,
+            null,
+            directions,
+            paint,
+            cache,
+            params
+        )
+        assertEquals(0, textRow.textStart)
+        assertEquals(line.length, textRow.textEnd)
+        val rowWidth = textRow.computeRowWidth()
+        assertTrue(rowWidth > 0f)
+        assertEquals(110f, rowWidth, 0.01f)
+
+        val cursorOffset = textRow.getCursorOffsetForIndex(5)
+        assertEquals(50f, cursorOffset, 0.01f)
+
+        val pos = textRow.getElementPositionForCursorOffset(cursorOffset)
+        assertEquals(5, pos.textOffset)
+
+        val bitmap = Bitmap.createBitmap(200, 50, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        val drawResult = textRow.draw(canvas, 0f, 500f)
+        assertTrue(IntPair.getSecond(drawResult) > 0f)
     }
 }
