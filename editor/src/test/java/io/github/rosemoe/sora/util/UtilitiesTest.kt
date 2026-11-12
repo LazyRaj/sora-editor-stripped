@@ -110,4 +110,104 @@ class UtilitiesTest {
         val uriClip = ClipData.newRawUri("uri", Uri.parse("https://example.com"))
         assertEquals("https://example.com", ClipDataUtils.clipDataToString(uriClip))
     }
+
+    @Test
+    fun testLongArrayList() {
+        val list = LongArrayList()
+        assertEquals(0, list.size())
+        list.add(10L)
+        list.add(20L)
+        list.add(30L)
+        assertEquals(3, list.size())
+        assertEquals(20L, list[1])
+        list[1] = 25L
+        assertEquals(25L, list[1])
+        assertEquals(1, list.lowerBound(25L))
+        assertEquals(2, list.lowerBound(26L))
+        list.clear()
+        assertEquals(0, list.size())
+    }
+
+    @Test
+    fun testMyCharacter() {
+        assertTrue(MyCharacter.isJavaIdentifierStart('a'))
+        assertTrue(MyCharacter.isJavaIdentifierStart('_'))
+        assertFalse(MyCharacter.isJavaIdentifierStart('1'))
+        assertTrue(MyCharacter.isJavaIdentifierPart('1'))
+        assertTrue(MyCharacter.isAlpha('Z'))
+        assertFalse(MyCharacter.isAlpha('9'))
+        assertTrue(MyCharacter.couldBeEmoji(0x1F600))
+        assertFalse(MyCharacter.couldBeEmoji(0x0041))
+    }
+
+    @Test
+    fun testRegexBackref() {
+        val pattern = java.util.regex.Pattern.compile("([a-z]+)-(\\d+)")
+        val matcher = pattern.matcher("hello-123")
+        assertTrue(matcher.find())
+        val replacement = io.github.rosemoe.sora.util.regex.RegexBackrefHelper.computeReplacement(
+            matcher,
+            io.github.rosemoe.sora.util.regex.RegexBackrefGrammar.DEFAULT,
+            "word: $1, num: $2"
+        )
+        assertEquals("word: hello, num: 123", replacement)
+    }
+
+    @Test
+    fun testTrieTree() {
+        val trie = TrieTree<Int>()
+        trie.put("apple", 1)
+        trie.put("app", 2)
+        assertEquals(1, trie.get("apple", 0, 5))
+        assertEquals(2, trie.get("app", 0, 3))
+        assertEquals(null, trie.get("appl", 0, 4))
+    }
+
+    @Test
+    fun testBinaryHeap() {
+        val heap = BinaryHeap()
+        val id1 = heap.push(10)
+        val id2 = heap.push(30)
+        val id3 = heap.push(20)
+        assertEquals(30, heap.top())
+        heap.update(id1, 40)
+        assertEquals(40, heap.top())
+        heap.remove(id1)
+        assertEquals(30, heap.top())
+    }
+
+    @Test
+    fun testBlockIntList() {
+        val list = BlockIntList(16)
+        for (i in 0 until 50) {
+            list.add(i)
+        }
+        assertEquals(50, list.size())
+        assertEquals(49, list.getMax())
+        assertEquals(25, list[25])
+        list[25] = 100
+        assertEquals(100, list.getMax())
+        list.remove(25)
+        assertEquals(49, list.size())
+        assertEquals(49, list.getMax())
+        list.removeRange(10, 20)
+        assertEquals(39, list.size())
+    }
+
+    @Test
+    fun testObjectPool() {
+        var count = 0
+        val pool = object : ObjectPool<StringBuilder>(4) {
+            override fun allocateNew(): StringBuilder {
+                count++
+                return StringBuilder()
+            }
+        }
+        val sb1 = pool.obtain()
+        assertEquals(1, count)
+        pool.recycle(sb1)
+        val sb2 = pool.obtain()
+        assertTrue(sb1 === sb2)
+        assertEquals(1, count)
+    }
 }
