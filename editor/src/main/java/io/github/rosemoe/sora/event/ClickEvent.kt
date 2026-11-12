@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2024  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,29 +22,25 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.event;
+package io.github.rosemoe.sora.event
 
-import android.view.MotionEvent;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import io.github.rosemoe.sora.lang.styling.Span;
-import io.github.rosemoe.sora.text.CharPosition;
-import io.github.rosemoe.sora.text.TextRange;
-import io.github.rosemoe.sora.widget.CodeEditor;
+import android.view.MotionEvent
+import io.github.rosemoe.sora.lang.styling.Span
+import io.github.rosemoe.sora.text.CharPosition
+import io.github.rosemoe.sora.text.TextRange
+import io.github.rosemoe.sora.widget.CodeEditor
 
 /**
- * Report double click in editor.
- * This event can be intercepted.
+ * Report a single click
  *
  * @author Rosemoe
  */
-public class DoubleClickEvent extends EditorMotionEvent {
-
-    public DoubleClickEvent(@NonNull CodeEditor editor, @NonNull CharPosition position, @NonNull MotionEvent event,
-                            @Nullable Span span, @Nullable TextRange spanRange, int motionRegion, int motionBound) {
-        super(editor, position, event, span, spanRange, motionRegion, motionBound);
-    }
-
-}
+class ClickEvent(
+    editor: CodeEditor,
+    position: CharPosition,
+    event: MotionEvent,
+    span: Span?,
+    spanRange: TextRange?,
+    motionRegion: Int,
+    motionBound: Int
+) : EditorMotionEvent(editor, position, event, span, spanRange, motionRegion, motionBound)

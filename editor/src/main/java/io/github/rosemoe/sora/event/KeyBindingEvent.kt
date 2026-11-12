@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2024  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,46 +22,37 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.event;
+package io.github.rosemoe.sora.event
 
-import androidx.annotation.NonNull;
-
-import io.github.rosemoe.sora.widget.CodeEditor;
+import android.view.KeyEvent
+import io.github.rosemoe.sora.widget.CodeEditor
 
 /**
- * Notifies a selection handle's touch state has changed
+ * Keybinding event in editor.
  *
- * @author Rosemoe
+ * This is different from [EditorKeyEvent].
+ * An `EditorKeyEvent` is dispatched by the editor whenever there is a key event.
+ * However, a `KeyBindingEvent` is dispatched only for keybindings i.e.
+ * when multiple keys are pressed at once.
+ * For example, Ctrl + X, Ctrl + D, Ctrl + Alt + O, etc.
+ *
+ * This event is dispatched after the [EditorKeyEvent].
+ * So, if any `EditorKeyEvent` consumes the event (sets the [InterceptTarget.TARGET_EDITOR] flag),
+ * `KeyBindingEvent` will not be called.
+ *
+ * @author Akash Yadav
  */
-public class HandleStateChangeEvent extends Event {
-
-    public final static int HANDLE_TYPE_INSERT = 0;
-    public final static int HANDLE_TYPE_LEFT = 1;
-    public final static int HANDLE_TYPE_RIGHT = 2;
-    private final int which;
-    private final boolean isHeld;
-
-    public HandleStateChangeEvent(@NonNull CodeEditor editor, int which, boolean heldState) {
-        super(editor);
-        this.which = which;
-        isHeld = heldState;
-    }
+class KeyBindingEvent(
+    editor: CodeEditor,
+    src: KeyEvent,
+    type: Type,
+    private val editorAbleToHandle: Boolean
+) : EditorKeyEvent(editor, src, type) {
 
     /**
-     * Get handle type of this event
-     * @see #HANDLE_TYPE_LEFT
-     * @see #HANDLE_TYPE_RIGHT
-     * @see #HANDLE_TYPE_INSERT
+     * Is the editor capable of handling this key binding event?
+     *
+     * @return `true` if the editor can handle this event, `false` otherwise.
      */
-    public int getHandleType() {
-        return which;
-    }
-
-    /**
-     * Is the handle held now
-     */
-    public boolean isHeld() {
-        return isHeld;
-    }
-
+    fun canEditorHandle(): Boolean = editorAbleToHandle
 }
