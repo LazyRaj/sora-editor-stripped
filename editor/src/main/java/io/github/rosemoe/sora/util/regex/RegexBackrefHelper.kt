@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2025  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,32 +22,37 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.util.regex;
+package io.github.rosemoe.sora.util.regex
 
-import androidx.annotation.NonNull;
+import java.util.regex.Matcher
 
-import java.util.List;
-import java.util.regex.Matcher;
+object RegexBackrefHelper {
 
-public class RegexBackrefHelper {
-
-    public static String computeReplacement(@NonNull Matcher matcher, @NonNull RegexBackrefGrammar grammar, @NonNull String replacementPattern) {
-        var parser = new RegexBackrefParser(grammar);
-        var tokens = parser.parse(replacementPattern, matcher.groupCount());
-        return computeReplacement(matcher, tokens);
+    @JvmStatic
+    fun computeReplacement(
+        matcher: Matcher,
+        grammar: RegexBackrefGrammar,
+        replacementPattern: String
+    ): String {
+        val parser = RegexBackrefParser(grammar)
+        val tokens = parser.parse(replacementPattern, matcher.groupCount())
+        return computeReplacement(matcher, tokens)
     }
 
-    public static String computeReplacement(@NonNull Matcher matcher, @NonNull List<RegexBackrefToken> tokens) {
-        var sb = new StringBuilder();
-        for (var token : tokens) {
-            if (token.isReference()) {
-                String text = matcher.group(token.getGroup());
-                sb.append(text == null ? "" : text);
+    @JvmStatic
+    fun computeReplacement(
+        matcher: Matcher,
+        tokens: List<RegexBackrefToken>
+    ): String {
+        val sb = StringBuilder()
+        for (token in tokens) {
+            if (token.isReference) {
+                val text = matcher.group(token.group)
+                sb.append(text ?: "")
             } else {
-                sb.append(token.getText());
+                sb.append(token.text ?: "")
             }
         }
-        return sb.toString();
+        return sb.toString()
     }
-
 }

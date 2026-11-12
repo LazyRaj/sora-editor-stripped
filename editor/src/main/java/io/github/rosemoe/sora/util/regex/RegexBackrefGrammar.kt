@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2025  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,44 +22,14 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.util.regex;
+package io.github.rosemoe.sora.util.regex
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import java.util.regex.Matcher;
-
-public class RegexBackrefToken {
-
-    private final boolean isRef;
-
-    private final String text;
-
-    private final int group;
-
-    public RegexBackrefToken(boolean isRef, String text, int group) {
-        this.isRef = isRef;
-        this.text = text;
-        this.group = group;
+class RegexBackrefGrammar(
+    @JvmField val backrefStartChar: Char,
+    @JvmField val escapeChar: Char
+) {
+    companion object {
+        @JvmField
+        val DEFAULT = RegexBackrefGrammar('$', '\\')
     }
-
-    public String getReplacementText(@NonNull Matcher matcher) {
-        if (isReference()) {
-            return matcher.group(getGroup());
-        }
-        return text;
-    }
-
-    public boolean isReference() {
-        return isRef;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public int getGroup() {
-        return group;
-    }
-
 }

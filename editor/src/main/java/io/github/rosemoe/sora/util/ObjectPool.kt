@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2024  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,56 +22,44 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.util;
+package io.github.rosemoe.sora.util
 
-public abstract class ObjectPool<T> {
+abstract class ObjectPool<T : Any> @JvmOverloads constructor(size: Int = 16) {
 
-    private final Object[] pool;
+    private val pool: Array<Any?> = arrayOfNulls(size)
 
-    public ObjectPool() {
-        this(16);
-    }
-
-    public ObjectPool(int size) {
-        pool = new Object[size];
-    }
-
-    public void recycle(T obj) {
-        if (obj == null)
-            return;
-        onRecycleObject(obj);
-        synchronized (this) {
-            for (int i = 0; i < pool.length; i++) {
+    open fun recycle(obj: T?) {
+        if (obj == null) {
+            return
+        }
+        onRecycleObject(obj)
+        synchronized(this) {
+            for (i in pool.indices) {
                 if (pool[i] == null) {
-                    pool[i] = obj;
-                    break;
+                    pool[i] = obj
+                    break
                 }
             }
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public T obtain() {
-        T result = null;
-        synchronized (this) {
-            for (int i = pool.length - 1; i >= 0; i--) {
+    @Suppress("UNCHECKED_CAST")
+    open fun obtain(): T {
+        var result: T? = null
+        synchronized(this) {
+            for (i in pool.size - 1 downTo 0) {
                 if (pool[i] != null) {
-                    result = (T) pool[i];
-                    pool[i] = null;
-                    break;
+                    result = pool[i] as T?
+                    pool[i] = null
+                    break
                 }
             }
         }
-        if (result == null) {
-            result = allocateNew();
-        }
-        return result;
+        return result ?: allocateNew()
     }
 
-    protected void onRecycleObject(T recycledObj) {
-
+    protected open fun onRecycleObject(recycledObj: T) {
     }
 
-    protected abstract T allocateNew();
-
+    protected abstract fun allocateNew(): T
 }
