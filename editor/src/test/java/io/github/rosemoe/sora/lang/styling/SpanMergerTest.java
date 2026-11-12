@@ -44,7 +44,7 @@ import io.github.rosemoe.sora.util.RendererUtils;
 import io.github.rosemoe.sora.widget.schemes.EditorColorScheme;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 28)
+@Config(sdk = 30)
 public class SpanMergerTest {
     @Test
     public void mergesColorsAndFlagsWithoutChangingInputs() {

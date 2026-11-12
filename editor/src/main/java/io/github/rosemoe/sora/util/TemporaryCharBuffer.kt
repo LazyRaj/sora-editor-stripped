@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2024  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,12 +22,32 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.util;
+package io.github.rosemoe.sora.util
 
-public class Floats {
+object TemporaryCharBuffer {
 
-    public static boolean withinDelta(float a, float b, float delta) {
-        return Math.abs(a - b) < Math.abs(delta);
+    @Volatile
+    private var sTemp: CharArray? = null
+
+    @JvmStatic
+    fun obtain(len: Int): CharArray {
+        val buf: CharArray?
+        synchronized(this) {
+            buf = sTemp
+            sTemp = null
+        }
+        return if (buf == null || buf.size < len) {
+            CharArray(len)
+        } else {
+            buf
+        }
     }
 
+    @JvmStatic
+    fun recycle(temp: CharArray) {
+        if (temp.size > 1000) return
+        synchronized(this) {
+            sTemp = temp
+        }
+    }
 }

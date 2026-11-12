@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2024  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,34 +22,15 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.util;
+package io.github.rosemoe.sora.util
 
-import android.content.ClipData;
-import android.content.Intent;
+class MutableInt(@JvmField var value: Int) {
 
-import androidx.annotation.Nullable;
-
-public class ClipDataUtils {
-
-    public static String clipDataToString(@Nullable ClipData clipData) {
-        if (clipData == null) {
-            return "";
-        }
-        var sb = new StringBuilder();
-        for (int i = 0; i < clipData.getItemCount(); i++) {
-            if (i > 0) {
-                sb.append('\n');
-            }
-            var item = clipData.getItemAt(i);
-            if (item.getText() != null) {
-                sb.append(item.getText());
-            } else if (item.getUri() != null) {
-                sb.append(item.getUri().toString());
-            } else if (item.getIntent() != null) {
-                sb.append(item.getIntent().toUri(Intent.URI_INTENT_SCHEME));
-            }
-        }
-        return sb.toString();
+    fun decreaseAndGet(): Int {
+        return --value
     }
 
+    fun increase() {
+        value++
+    }
 }

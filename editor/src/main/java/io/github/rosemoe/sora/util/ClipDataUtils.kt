@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2024  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,32 +22,39 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.util;
+package io.github.rosemoe.sora.util
 
-public class TemporaryCharBuffer {
+import android.content.ClipData
+import android.content.Intent
 
-    private static char[] sTemp = null;
+object ClipDataUtils {
 
-    public static char[] obtain(int len) {
-        char[] buf;
-
-        synchronized (TemporaryCharBuffer.class) {
-            buf = sTemp;
-            sTemp = null;
+    @JvmStatic
+    fun clipDataToString(clipData: ClipData?): String {
+        if (clipData == null || clipData.itemCount == 0) {
+            return ""
         }
-
-        if (buf == null || buf.length < len) {
-            buf = new char[len];
+        val sb = StringBuilder()
+        for (i in 0 until clipData.itemCount) {
+            if (i > 0) {
+                sb.append('\n')
+            }
+            val item = clipData.getItemAt(i)
+            val text = item.text
+            if (text != null) {
+                sb.append(text)
+            } else {
+                val uri = item.uri
+                if (uri != null) {
+                    sb.append(uri.toString())
+                } else {
+                    val intent = item.intent
+                    if (intent != null) {
+                        sb.append(intent.toUri(Intent.URI_INTENT_SCHEME))
+                    }
+                }
+            }
         }
-
-        return buf;
-    }
-
-    public static void recycle(char[] temp) {
-        if (temp.length > 1000) return;
-
-        synchronized (TemporaryCharBuffer.class) {
-            sTemp = temp;
-        }
+        return sb.toString()
     }
 }

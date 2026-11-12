@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2024  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,47 +22,21 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.util;
+package io.github.rosemoe.sora.util
 
-public class TemporaryFloatBuffer {
+import android.content.Context
+import android.view.ViewConfiguration
 
-    private static final FloatArrayCache sCache = new FloatArrayCache();
+object ViewUtils {
 
-    public static float[] obtain(int len) {
-        return sCache.obtain(len);
+    const val DEFAULT_SCROLL_FACTOR: Float = 32f
+
+    const val HOVER_TOOLTIP_SHOW_TIMEOUT: Long = 1000L
+
+    const val HOVER_TAP_SLOP: Int = 20
+
+    @JvmStatic
+    fun getVerticalScrollFactor(context: Context): Float {
+        return ViewConfiguration.get(context).scaledVerticalScrollFactor
     }
-
-    public static void recycle(float[] temp) {
-        sCache.recycle(temp);
-    }
-
-    public static class FloatArrayCache {
-
-        private float[] temp = null;
-
-        public float[] obtain(int len) {
-            float[] buf;
-
-            synchronized (this) {
-                buf = temp;
-                temp = null;
-            }
-
-            if (buf == null || buf.length < len) {
-                buf = new float[len];
-            }
-
-            return buf;
-        }
-
-        public void recycle(float[] temp) {
-            if (temp.length > 1000) return;
-
-            synchronized (this) {
-                this.temp = temp;
-            }
-        }
-
-    }
-
 }

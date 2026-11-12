@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2024  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,17 +22,45 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.util;
+package io.github.rosemoe.sora.util
 
-import android.util.TypedValue;
-import android.view.ContextThemeWrapper;
+object TemporaryFloatBuffer {
 
-public class ThemeUtils {
+    @JvmField
+    val sCache: FloatArrayCache = FloatArrayCache()
 
-    public static int getColorPrimary(ContextThemeWrapper context) {
-        TypedValue typedValue = new TypedValue();
-        context.getTheme().resolveAttribute(android.R.attr.colorPrimary, typedValue, true);
-        return typedValue.data;
+    @JvmStatic
+    fun obtain(len: Int): FloatArray {
+        return sCache.obtain(len)
     }
 
+    @JvmStatic
+    fun recycle(temp: FloatArray) {
+        sCache.recycle(temp)
+    }
+
+    class FloatArrayCache {
+
+        private var temp: FloatArray? = null
+
+        fun obtain(len: Int): FloatArray {
+            val buf: FloatArray?
+            synchronized(this) {
+                buf = temp
+                temp = null
+            }
+            return if (buf == null || buf.size < len) {
+                FloatArray(len)
+            } else {
+                buf
+            }
+        }
+
+        fun recycle(temp: FloatArray) {
+            if (temp.size > 1000) return
+            synchronized(this) {
+                this.temp = temp
+            }
+        }
+    }
 }

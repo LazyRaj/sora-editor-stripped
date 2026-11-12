@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2024  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,33 +22,28 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.util;
+package io.github.rosemoe.sora.util
 
 /**
- * Pack two int numbers into a long number, and unpack it.
- * <p>
+ * Pack two 32-bit integers (or an int and float) into a 64-bit long, and unpack it.
+ *
  * This is effective for passing two primitive 32-bit numbers without creating a new object.
  *
  * @author Rosemoe
+ * Modified by Raj Dave (aka LazyRaj)
  */
-public class IntPair {
+object IntPair {
 
     /**
-     * Convert an integer to a long whose binary bits are equal to the given integer
-     */
-    private static long toUnsignedLong(int x) {
-        return ((long) x) & 0xffffffffL;
-    }
-
-    /**
-     * Pack two int number into a long number
+     * Pack two int numbers into a long number
      *
      * @param first  First of pair
      * @param second Second of pair
      * @return Packed value
      */
-    public static long pack(int first, int second) {
-        return (toUnsignedLong(first) << 32L) | toUnsignedLong(second);
+    @JvmStatic
+    fun pack(first: Int, second: Int): Long {
+        return (first.toLong() and 0xFFFFFFFFL shl 32) or (second.toLong() and 0xFFFFFFFFL)
     }
 
     /**
@@ -56,8 +52,9 @@ public class IntPair {
      * @param packedValue Packed value
      * @return Second of pair
      */
-    public static int getSecond(long packedValue) {
-        return (int) (packedValue & 0xFFFFFFFFL);
+    @JvmStatic
+    fun getSecond(packedValue: Long): Int {
+        return packedValue.toInt()
     }
 
     /**
@@ -66,8 +63,9 @@ public class IntPair {
      * @param packedValue Packed value
      * @return First of pair
      */
-    public static int getFirst(long packedValue) {
-        return (int) (packedValue >> 32L);
+    @JvmStatic
+    fun getFirst(packedValue: Long): Int {
+        return (packedValue ushr 32).toInt()
     }
 
     /**
@@ -77,8 +75,9 @@ public class IntPair {
      * @param second Second of pair (float)
      * @return Packed value
      */
-    public static long packIntFloat(int first, float second) {
-        return pack(first, Float.floatToRawIntBits(second));
+    @JvmStatic
+    fun packIntFloat(first: Int, second: Float): Long {
+        return pack(first, second.toRawBits())
     }
 
     /**
@@ -86,10 +85,10 @@ public class IntPair {
      *
      * @param packedValue Packed value
      * @return Second of pair
-     * @see #packIntFloat(int, float)
+     * @see packIntFloat
      */
-    public static float getSecondAsFloat(long packedValue) {
-        return Float.intBitsToFloat(getSecond(packedValue));
+    @JvmStatic
+    fun getSecondAsFloat(packedValue: Long): Float {
+        return Float.fromBits(getSecond(packedValue))
     }
-
 }
