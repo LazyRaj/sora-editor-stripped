@@ -38,7 +38,7 @@ public class NativeOnigRegExp implements OnigRegExp {
      */
     public NativeOnigRegExp(final String pattern, final boolean ignoreCase) {
         this.pattern = pattern;
-        nativePtr = OnigNative.newRegex(pattern, ignoreCase);
+        nativePtr = OnigNative.INSTANCE.newRegex(pattern, ignoreCase);
         if (nativePtr == 0L) {
             throw new TMException("Parsing regex pattern \"" + pattern + "\" failed");
         }
@@ -49,7 +49,7 @@ public class NativeOnigRegExp implements OnigRegExp {
      */
     @Override
     public @Nullable NativeOnigResult search(final OnigString str, final int startPosition) {
-        var result = OnigNative.regexSearch(nativePtr, str.getCacheKey(), str.getUtf8Bytes(), startPosition, str.bytesCount);
+        var result = OnigNative.INSTANCE.regexSearch(nativePtr, str.getCacheKey(), str.getUtf8Bytes(), startPosition, str.bytesCount);
         if (result != null) {
             return new NativeOnigResult(result);
         }

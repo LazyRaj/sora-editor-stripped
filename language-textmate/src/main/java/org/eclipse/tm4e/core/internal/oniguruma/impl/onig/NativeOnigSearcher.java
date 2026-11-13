@@ -52,7 +52,7 @@ class NativeOnigSearcher {
         final int byteOffset = source.getByteIndexOfChar(charOffset);
 
         if (NativeOnigConfig.isSearchInBatch()) {
-            var result = OnigNative.regexSearchBatch(pointers, source.getCacheKey(), source.getUtf8Bytes(), byteOffset, source.bytesCount);
+            var result = OnigNative.INSTANCE.regexSearchBatch(pointers, source.getCacheKey(), source.getUtf8Bytes(), byteOffset, source.bytesCount);
             return result == null ? null : new NativeOnigResult(result, true);
         }
 

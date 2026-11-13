@@ -21,6 +21,7 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
+/* Modified by Raj Dave (aka LazyRaj) */
 package io.github.rosemoe.oniguruma
 
 /**
@@ -42,8 +43,7 @@ object OnigNative {
      * @param ignoreCase Ignore case when matching
      * @return The pointer of newly created regex, or 0L if it fails
      */
-    @JvmStatic
-    fun newRegex(pattern: String, ignoreCase: Boolean): Long {
+    fun newRegex(pattern: String, ignoreCase: Boolean = false): Long {
         return newRegex(pattern.toByteArray(Charsets.UTF_8), ignoreCase)
     }
 
@@ -54,8 +54,7 @@ object OnigNative {
      * @param ignoreCase Ignore case when matching
      * @return The pointer of newly created regex, or 0L if it fails
      */
-    @JvmStatic
-    fun newRegex(pattern: ByteArray, ignoreCase: Boolean): Long {
+    fun newRegex(pattern: ByteArray, ignoreCase: Boolean = false): Long {
         return nCreateRegex(pattern, ignoreCase)
     }
 
@@ -78,7 +77,6 @@ object OnigNative {
      * @return Ranges if the match is successful. Each range is represented as two integers start and end.
      * Null if the match failed.
      */
-    @JvmStatic
     fun regexSearch(nativePointer: Long, cacheKey: Long, str: ByteArray, start: Int, end: Int): IntArray? {
         if (start > end || start < 0 || end > str.size) {
             throw IndexOutOfBoundsException("start:$start end:$end str.length:${str.size}")
@@ -97,7 +95,6 @@ object OnigNative {
      * @return Ranges if the match is successful. Each range is represented as two integers start and end.
      * Null if the match failed.
      */
-    @JvmStatic
     fun regexSearchBatch(nativePointers: LongArray, cacheKey: Long, str: ByteArray, start: Int, end: Int): IntArray? {
         if (start > end || start < 0 || end > str.size) {
             throw IndexOutOfBoundsException("start:$start end:$end str.length:${str.size}")
