@@ -21,46 +21,63 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.widget.layout;
+/*
+ * Modified by Raj Dave (aka LazyRaj)
+ */
+package io.github.rosemoe.sora.widget.layout
 
-import androidx.annotation.NonNull;
-
-import java.util.NoSuchElementException;
+import io.github.rosemoe.sora.lang.styling.inlayHint.InlayHint
 
 /**
- * Row iterator.
- * This iterator is able to return a series of Row objects linearly
- * Editor uses this to get information of rows and paint them accordingly
+ * This class represents a 'row' in editor.
+ * Editor uses this to draw rows
  *
- * @author Rose
+ * @author Rosemoe
  */
-public interface RowIterator {
+class Row {
 
     /**
-     * Return next Row object
-     * <p>
-     * The result should not be stored, because implementing classes will always return the same
-     * object due to performance
-     *
-     * @return Row object contains the information about a row
-     * @throws NoSuchElementException If no more row available
+     * The index in lines
+     * But not row index
      */
-    @NonNull
-    Row next();
+    @JvmField
+    var lineIndex: Int = 0
 
     /**
-     * Whether there is more Row object
-     *
-     * @return Whether more row available
+     * Whether this row is the first one of a line.
+     * Editor will draw line number to left of this row to indicate this
      */
-    boolean hasNext();
+    @JvmField
+    var isLeadingRow: Boolean = false
 
     /**
-     * Reset the position to its original position.
-     * <p>
-     * This can be useful when the elements should be iterated for
-     * several times.
+     * Whether this row is the last one of a line.
+     * Editor will draw soft-wrap or line-break indicator according to this
      */
-    void reset();
+    @JvmField
+    var isTrailingRow: Boolean = false
 
+    /**
+     * Start index in target line
+     */
+    @JvmField
+    var startColumn: Int = 0
+
+    /**
+     * End index in target line
+     */
+    @JvmField
+    var endColumn: Int = 0
+
+    /**
+     * Inlay hints on the row
+     */
+    @JvmField
+    var inlayHints: (@JvmSuppressWildcards List<InlayHint>)? = null
+
+    /**
+     * Extra translation when rendering
+     */
+    @JvmField
+    var renderTranslateX: Float = 0f
 }

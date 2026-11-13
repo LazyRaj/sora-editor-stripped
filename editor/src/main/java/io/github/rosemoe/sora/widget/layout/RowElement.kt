@@ -1,7 +1,7 @@
 /*
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
- *    Copyright (C) 2020-2024  Rosemoe
+ *    Copyright (C) 2020-2025  Rosemoe
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,56 +21,59 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.widget.layout;
+/*
+ * Modified by Raj Dave (aka LazyRaj)
+ */
+package io.github.rosemoe.sora.widget.layout
 
-import java.util.List;
-
-import io.github.rosemoe.sora.lang.styling.inlayHint.InlayHint;
+import io.github.rosemoe.sora.lang.styling.inlayHint.InlayHint
 
 /**
- * This class represents a 'row' in editor.
- * Editor uses this to draw rows
+ * Element on a row
  *
  * @author Rosemoe
  */
-public class Row {
+class RowElement {
 
     /**
-     * The index in lines
-     * But not row index
+     * Type of element.
+     *
+     * @see RowElementTypes
      */
-    public int lineIndex;
+    @JvmField
+    var type: Int = 0
+
+    /* Fields for type TEXT */
 
     /**
-     * Whether this row is the first one of a line.
-     * Editor will draw line number to left of this row to indicate this
+     * Start column of text
      */
-    public boolean isLeadingRow;
+    @JvmField
+    var startColumn: Int = 0
 
     /**
-     * Whether this row is the last one of a line.
-     * Editor will draw soft-wrap or line-break indicator according to this
+     * End column of text
      */
-    public boolean isTrailingRow;
+    @JvmField
+    var endColumn: Int = 0
 
     /**
-     * Start index in target line
+     * Direction of the text run
      */
-    public int startColumn;
+    @JvmField
+    var isRtlText: Boolean = false
+
+    /* Fields for type INLAY_HINT */
 
     /**
-     * End index in target line
+     * The inlay hint
      */
-    public int endColumn;
+    @JvmField
+    var inlayHint: InlayHint? = null
 
     /**
-     * Inlay hints on the row
+     * The expected column position to display after
      */
-    public List<InlayHint> inlayHints;
-
-    /**
-     * Extra translation when rendering
-     */
-    public float renderTranslateX;
-
+    @JvmField
+    var displayColumnPosition: Int = 0
 }

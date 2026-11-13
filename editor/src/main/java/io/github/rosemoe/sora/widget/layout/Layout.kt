@@ -21,18 +21,17 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.widget.layout;
+/*
+ * Modified by Raj Dave (aka LazyRaj)
+ */
+package io.github.rosemoe.sora.widget.layout
 
-import android.util.SparseArray;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.Size;
-
-import io.github.rosemoe.sora.lang.analysis.StyleUpdateRange;
-import io.github.rosemoe.sora.text.ContentLine;
-import io.github.rosemoe.sora.text.ContentListener;
-import io.github.rosemoe.sora.util.IntPair;
+import android.util.SparseArray
+import androidx.annotation.Size
+import io.github.rosemoe.sora.lang.analysis.StyleUpdateRange
+import io.github.rosemoe.sora.text.ContentLine
+import io.github.rosemoe.sora.text.ContentListener
+import io.github.rosemoe.sora.util.IntPair
 
 /**
  * Layout is a manager class for editor to display text
@@ -41,13 +40,13 @@ import io.github.rosemoe.sora.util.IntPair;
  *
  * @author Rose
  */
-public interface Layout extends ContentListener {
+interface Layout : ContentListener {
 
     /**
      * Called by editor to destroy this layout
      * This means the layout will never be used again
      */
-    void destroyLayout();
+    fun destroyLayout()
 
     /**
      * Get line index of a row in layout
@@ -55,34 +54,31 @@ public interface Layout extends ContentListener {
      * @param row The row index in layout
      * @return Line index in text
      */
-    int getLineNumberForRow(int row);
+    fun getLineNumberForRow(row: Int): Int
 
     /**
-     * Return a {@link RowIterator} object for editor to draw text rows
+     * Return a [RowIterator] object for editor to draw text rows
      *
      * @param initialRow The first row in result iterator
      * @return Iterator contains rows
      */
-    @NonNull
-    default RowIterator obtainRowIterator(int initialRow) {
-        return obtainRowIterator(initialRow, null);
+    fun obtainRowIterator(initialRow: Int): RowIterator {
+        return obtainRowIterator(initialRow, null)
     }
 
     /**
-     * Return a {@link RowIterator} object for editor to draw text rows
+     * Return a [RowIterator] object for editor to draw text rows
      *
      * @param initialRow The first row in result iterator
      * @param preloadedLines Lines that are already loaded in editor
      * @return Iterator contains rows
      */
-    @NonNull
-    RowIterator obtainRowIterator(int initialRow, @Nullable SparseArray<ContentLine> preloadedLines);
+    fun obtainRowIterator(initialRow: Int, preloadedLines: SparseArray<ContentLine>?): RowIterator
 
     /**
      * Get the specific Row
      */
-    @NonNull
-    Row getRowAt(int rowIndex);
+    fun getRowAt(rowIndex: Int): Row
 
     /**
      * Get the width of this layout
@@ -90,7 +86,7 @@ public interface Layout extends ContentListener {
      *
      * @return Width of layout
      */
-    int getLayoutWidth();
+    val layoutWidth: Int
 
     /**
      * Get the height of this layout
@@ -98,12 +94,12 @@ public interface Layout extends ContentListener {
      *
      * @return Height of layout
      */
-    int getLayoutHeight();
+    val layoutHeight: Int
 
     /**
      * Get the total row count
      */
-    int getRowCount();
+    val rowCount: Int
 
     /**
      * Get character line and column for offsets in layout
@@ -113,84 +109,68 @@ public interface Layout extends ContentListener {
      * @return Packed IntPair, first is line and second is column
      * @see io.github.rosemoe.sora.util.IntPair
      */
-    default long getCharPositionForLayoutOffset(float offsetX, float offsetY) {
-        var pos = getVisualPositionForLayoutOffset(offsetX, offsetY);
-        return IntPair.pack(pos.line, pos.column);
+    fun getCharPositionForLayoutOffset(offsetX: Float, offsetY: Float): Long {
+        val pos = getVisualPositionForLayoutOffset(offsetX, offsetY)
+        return IntPair.pack(pos.line, pos.column)
     }
 
-    @NonNull
-    VisualLocation getVisualPositionForLayoutOffset(float offsetX, float offsetY);
+    fun getVisualPositionForLayoutOffset(offsetX: Float, offsetY: Float): VisualLocation
 
     /**
      * Get layout offset of a position in text
      *
-     * @param line   The line index
+     * @param line The line index
      * @param column Column on line
      * @return An array containing layout offset, first element is the bottom of character and second element is the left of character
      */
-    @NonNull
     @Size(2)
-    default float[] getCharLayoutOffset(int line, int column) {
-        return getCharLayoutOffset(line, column, new float[2]);
+    fun getCharLayoutOffset(line: Int, column: Int): FloatArray {
+        return getCharLayoutOffset(line, column, FloatArray(2))
     }
 
     /**
      * Get layout offset of a position in text
      *
-     * @param line   The line index
+     * @param line The line index
      * @param column Column on line
-     * @param array  If the array is given, it will try to save the two elements in this array. Otherwise, a new array is created
+     * @param array If the array is given, it will try to save the two elements in this array. Otherwise, a new array is created
      * @return An array containing layout offset, first element is the bottom of character and second element is the left of character
      */
-    @NonNull
-    float[] getCharLayoutOffset(int line, int column, @Nullable float[] array);
+    fun getCharLayoutOffset(line: Int, column: Int, array: FloatArray?): FloatArray
 
     /**
      * Get how many rows are in the given line
      */
-    int getRowCountForLine(int line);
+    fun getRowCountForLine(line: Int): Int
 
     /**
      * Get position after moving up once
      *
      * @return A packed pair (line, column) describing the result position
      */
-    long getUpPosition(int line, int column);
+    fun getUpPosition(line: Int, column: Int): Long
 
     /**
      * Get position after moving down once
      *
      * @return A packed pair (line, column) describing the result position
      */
-    long getDownPosition(int line, int column);
+    fun getDownPosition(line: Int, column: Int): Long
 
     /**
      * Get row index for text index
      */
-    int getRowIndexForPosition(int index);
+    fun getRowIndexForPosition(index: Int): Int
 
     /**
      * Notify the layout that the given lines have external changes and their layout should be re-calculated.
      */
-    void invalidateLines(StyleUpdateRange range);
+    fun invalidateLines(range: StyleUpdateRange)
 
-    class VisualLocation {
-
-        public final int line;
-
-        public final int column;
-
-        @Nullable
-        public final RowElement element;
-
-        public boolean isInElementBounds;
-
-        public VisualLocation(int line, int column, @Nullable RowElement element, boolean isInElementBounds) {
-            this.line = line;
-            this.column = column;
-            this.element = element;
-            this.isInElementBounds = isInElementBounds;
-        }
-    }
-
+    class VisualLocation @JvmOverloads constructor(
+        @JvmField val line: Int,
+        @JvmField val column: Int,
+        @JvmField val element: RowElement? = null,
+        @JvmField var isInElementBounds: Boolean = false
+    )
 }

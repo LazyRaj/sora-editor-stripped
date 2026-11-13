@@ -21,49 +21,26 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.widget.layout;
-
-import io.github.rosemoe.sora.lang.styling.inlayHint.InlayHint;
+/*
+ * Modified by Raj Dave (aka LazyRaj)
+ */
+package io.github.rosemoe.sora.widget.layout
 
 /**
- * Element on a row
+ * Type constants for [RowElement]
  *
  * @author Rosemoe
  */
-public class RowElement {
+interface RowElementTypes {
+    companion object {
+        /**
+         * Unidirectional text segment
+         */
+        const val TEXT = 0
 
-    /**
-     * Type of element.
-     *
-     * @see RowElementTypes
-     */
-    public int type;
-
-    /* Fields for type TEXT */
-
-    /**
-     * Start column of text
-     */
-    public int startColumn;
-    /**
-     * End column of text
-     */
-    public int endColumn;
-    /**
-     * Direction of the text run
-     */
-    public boolean isRtlText;
-
-    /* Fields for type INLAY_HINT */
-
-    /**
-     * The inlay hint
-     */
-    public InlayHint inlayHint;
-
-    /**
-     * The expected column position to display after
-     */
-    public int displayColumnPosition;
-
+        /**
+         * Inlay hint
+         */
+        const val INLAY_HINT = 1
+    }
 }

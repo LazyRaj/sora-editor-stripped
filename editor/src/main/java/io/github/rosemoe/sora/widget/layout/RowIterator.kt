@@ -1,7 +1,7 @@
 /*
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
- *    Copyright (C) 2020-2025  Rosemoe
+ *    Copyright (C) 2020-2024  Rosemoe
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,20 +21,45 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.widget.layout;
+/*
+ * Modified by Raj Dave (aka LazyRaj)
+ */
+package io.github.rosemoe.sora.widget.layout
+
+import java.util.NoSuchElementException
 
 /**
- * Type constants for {@link RowElement}
+ * Row iterator.
+ * This iterator is able to return a series of Row objects linearly
+ * Editor uses this to get information of rows and paint them accordingly
  *
- * @author Rosemoe
+ * @author Rose
  */
-public interface RowElementTypes {
+interface RowIterator {
+
     /**
-     * Unidirectional text segment
+     * Return next Row object
+     *
+     * The result should not be stored, because implementing classes will always return the same
+     * object due to performance
+     *
+     * @return Row object contains the information about a row
+     * @throws NoSuchElementException If no more row available
      */
-    int TEXT = 0;
+    fun next(): Row
+
     /**
-     * Inlay hint
+     * Whether there is more Row object
+     *
+     * @return Whether more row available
      */
-    int INLAY_HINT = 1;
+    fun hasNext(): Boolean
+
+    /**
+     * Reset the position to its original position.
+     *
+     * This can be useful when the elements should be iterated for
+     * several times.
+     */
+    fun reset()
 }
