@@ -21,18 +21,16 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.widget.snippet.variable;
+/*
+ * Modified by Raj Dave (aka LazyRaj)
+ */
+package io.github.rosemoe.sora.widget.snippet.variable
 
-import androidx.annotation.NonNull;
+abstract class WorkspaceBasedSnippetVariableResolver : ISnippetVariableResolver {
 
-public abstract class FileBasedSnippetVariableResolver implements ISnippetVariableResolver {
-
-    @NonNull
-    @Override
-    public String[] getResolvableNames() {
-        return new String[]{
-                "TM_FILENAME", "TM_FILENAME_BASE", "TM_DIRECTORY", "TM_FILEPATH", "RELATIVE_PATH"
-        };
+    override fun getResolvableNames(): Array<String> {
+        return arrayOf(
+            "WORKSPACE_NAME", "WORKSPACE_FOLDER"
+        )
     }
-
 }

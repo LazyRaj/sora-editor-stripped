@@ -21,34 +21,16 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.widget.snippet.variable;
+/*
+ * Modified by Raj Dave (aka LazyRaj)
+ */
+package io.github.rosemoe.sora.widget.snippet.variable
 
-import androidx.annotation.NonNull;
+abstract class FileBasedSnippetVariableResolver : ISnippetVariableResolver {
 
-import java.util.Random;
-import java.util.UUID;
-
-public class RandomBasedSnippetVariableResolver implements ISnippetVariableResolver {
-
-    @NonNull
-    @Override
-    public String[] getResolvableNames() {
-        return new String[]{
-                "RANDOM", "RANDOM_HEX", "UUID"
-        };
-    }
-
-    @NonNull
-    @Override
-    public String resolve(@NonNull String name) {
-        switch (name) {
-            case "RANDOM":
-                return Integer.toString(new Random().nextInt());
-            case "RANDOM_HEX":
-                return Integer.toString(new Random().nextInt(), 16);
-            case "UUID":
-                return UUID.randomUUID().toString();
-        }
-        throw new IllegalArgumentException("Unsupported variable name:" + name);
+    override fun getResolvableNames(): Array<String> {
+        return arrayOf(
+            "TM_FILENAME", "TM_FILENAME_BASE", "TM_DIRECTORY", "TM_FILEPATH", "RELATIVE_PATH"
+        )
     }
 }

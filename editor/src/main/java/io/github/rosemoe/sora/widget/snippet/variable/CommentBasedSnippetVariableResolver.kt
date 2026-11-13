@@ -21,28 +21,32 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.widget.snippet.variable;
-
-import androidx.annotation.NonNull;
-
-/**
- * Interface for resolving code snippet variables
+/*
+ * Modified by Raj Dave (aka LazyRaj)
  */
-public interface ISnippetVariableResolver {
+package io.github.rosemoe.sora.widget.snippet.variable
 
+open class CommentBasedSnippetVariableResolver @JvmOverloads constructor(
     /**
-     * Resolve the given variable name. Caller should ensure that the given variable name is
-     * supported by this resolver.
-     *
-     * @return A non-empty string
+     * For example, Java language comment tokens: `arrayOf("//", "/*", "*/")`
      */
-    @NonNull
-    String resolve(@NonNull String name);
+    var commentTokens: Array<String>? = null
+) : ISnippetVariableResolver {
 
-    /**
-     * Get variable names supported by this resolver
-     */
-    @NonNull
-    String[] getResolvableNames();
+    override fun getResolvableNames(): Array<String> {
+        return arrayOf("LINE_COMMENT", "BLOCK_COMMENT_START", "BLOCK_COMMENT_END")
+    }
 
+    override fun resolve(name: String): String {
+        val tokens = commentTokens
+        if (tokens == null || tokens.size != 3) {
+            throw IllegalStateException("language comment style is not configured properly")
+        }
+        return when (name) {
+            "LINE_COMMENT" -> tokens[0]
+            "BLOCK_COMMENT_START" -> tokens[1]
+            "BLOCK_COMMENT_END" -> tokens[2]
+            else -> throw IllegalArgumentException("Unsupported variable name:$name")
+        }
+    }
 }

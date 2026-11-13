@@ -21,40 +21,34 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.widget.snippet.variable;
+/*
+ * Modified by Raj Dave (aka LazyRaj)
+ */
+package io.github.rosemoe.sora.widget.snippet.variable
 
-import android.content.ClipboardManager;
+import android.content.ClipboardManager
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+open class ClipboardBasedSnippetVariableResolver(
+    private val clipboardManager: ClipboardManager?
+) : ISnippetVariableResolver {
 
-public class ClipboardBasedSnippetVariableResolver implements ISnippetVariableResolver {
-
-    private final ClipboardManager clipboardManager;
-
-    public ClipboardBasedSnippetVariableResolver(@Nullable ClipboardManager clipboardManager) {
-        this.clipboardManager = clipboardManager;
+    override fun getResolvableNames(): Array<String> {
+        return arrayOf("CLIPBOARD")
     }
 
-    @NonNull
-    @Override
-    public String[] getResolvableNames() {
-        return new String[]{"CLIPBOARD"};
-    }
-
-    @NonNull
-    @Override
-    public String resolve(@NonNull String name) {
-        if ("CLIPBOARD".equals(name)) {
-            if (clipboardManager != null && clipboardManager.hasPrimaryClip()) {
-                var clip = clipboardManager.getPrimaryClip();
-                if (clip == null || clip.getItemCount() == 0) {
-                    return "";
+    override fun resolve(name: String): String {
+        if ("CLIPBOARD" == name) {
+            val cm = clipboardManager
+            if (cm != null && cm.hasPrimaryClip()) {
+                val clip = cm.primaryClip
+                if (clip == null || clip.itemCount == 0) {
+                    return ""
                 }
-                return clip.getItemAt(0).getText().toString();
+                val text = clip.getItemAt(0).text
+                return text?.toString() ?: ""
             }
-            return "";
+            return ""
         }
-        throw new IllegalArgumentException("Unsupported variable name:" + name);
+        throw IllegalArgumentException("Unsupported variable name:$name")
     }
 }

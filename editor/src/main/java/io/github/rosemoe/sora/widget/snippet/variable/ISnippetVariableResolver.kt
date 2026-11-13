@@ -21,18 +21,28 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.widget.snippet.variable;
+/*
+ * Modified by Raj Dave (aka LazyRaj)
+ */
+package io.github.rosemoe.sora.widget.snippet.variable
 
-import androidx.annotation.NonNull;
+/**
+ * Interface for resolving code snippet variables
+ *
+ * @author Rosemoe
+ */
+interface ISnippetVariableResolver {
 
-public abstract class WorkspaceBasedSnippetVariableResolver implements ISnippetVariableResolver {
+    /**
+     * Resolve the given variable name. Caller should ensure that the given variable name is
+     * supported by this resolver.
+     *
+     * @return A non-empty string
+     */
+    fun resolve(name: String): String
 
-    @NonNull
-    @Override
-    public String[] getResolvableNames() {
-        return new String[]{
-                "WORKSPACE_NAME", "WORKSPACE_FOLDER"
-        };
-    }
-
+    /**
+     * Get variable names supported by this resolver
+     */
+    fun getResolvableNames(): Array<String>
 }
