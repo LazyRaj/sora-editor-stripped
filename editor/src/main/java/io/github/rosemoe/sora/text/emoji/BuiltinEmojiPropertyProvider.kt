@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2026  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,30 +22,29 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.text.emoji;
 
-class BuiltinEmojiPropertyProvider implements EmojiPropertyProvider {
+package io.github.rosemoe.sora.text.emoji
 
-    public final static BuiltinEmojiPropertyProvider INSTANCE = new BuiltinEmojiPropertyProvider();
+internal class BuiltinEmojiPropertyProvider private constructor() : EmojiPropertyProvider {
 
-    @Override
-    public boolean isVariationSelector(int codePoint) {
-        return UnicodeEmojiData.isVariationSelector(codePoint);
+    override fun isVariationSelector(codePoint: Int): Boolean {
+        return UnicodeEmojiData.isVariationSelector(codePoint)
     }
 
-    @Override
-    public boolean isEmoji(int codePoint) {
-        return UnicodeEmojiData.isEmoji(codePoint);
+    override fun isEmoji(codePoint: Int): Boolean {
+        return UnicodeEmojiData.isEmoji(codePoint)
     }
 
-    @Override
-    public boolean isEmojiModifier(int codePoint) {
-        return UnicodeEmojiData.isEmojiModifier(codePoint);
+    override fun isEmojiModifier(codePoint: Int): Boolean {
+        return UnicodeEmojiData.isEmojiModifier(codePoint)
     }
 
-    @Override
-    public boolean isEmojiModifierBase(int codePoint) {
-        return UnicodeEmojiData.isEmojiModifierBase(codePoint);
+    override fun isEmojiModifierBase(codePoint: Int): Boolean {
+        return UnicodeEmojiData.isEmojiModifierBase(codePoint)
     }
 
+    companion object {
+        @JvmField
+        val INSTANCE: BuiltinEmojiPropertyProvider = BuiltinEmojiPropertyProvider()
+    }
 }

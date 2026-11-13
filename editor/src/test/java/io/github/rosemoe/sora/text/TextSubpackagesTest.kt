@@ -33,6 +33,10 @@ import io.github.rosemoe.sora.text.bidi.VisualDirections
 import io.github.rosemoe.sora.text.breaker.WordBreaker
 import io.github.rosemoe.sora.text.breaker.WordBreakerEmpty
 import io.github.rosemoe.sora.text.breaker.WordBreakerProgram
+import io.github.rosemoe.sora.text.emoji.BuiltinEmojiPropertyProvider
+import io.github.rosemoe.sora.text.emoji.EmojiPropertyProvider
+import io.github.rosemoe.sora.text.emoji.PlatformEmojiPropertyProvider
+import io.github.rosemoe.sora.text.emoji.UnicodeEmojiData
 import io.github.rosemoe.sora.text.method.KeyMetaStates
 import io.github.rosemoe.sora.text.string.StringLatin1
 import io.github.rosemoe.sora.text.string.StringUTF16
@@ -41,6 +45,7 @@ import io.github.rosemoe.sora.widget.CodeEditor
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -222,5 +227,152 @@ class TextSubpackagesTest {
         val ctrlUp = KeyEvent(0, 0, KeyEvent.ACTION_UP, KeyEvent.KEYCODE_CTRL_LEFT, 0, 0)
         keyMetaStates.onKeyUp(ctrlUp)
         assertFalse(keyMetaStates.isCtrlPressed)
+    }
+
+    @Test
+    fun testEmojiProvidersAndAndroidEmoji() {
+        val provider = EmojiPropertyProvider.get()
+        assertNotNull(provider)
+        assertTrue(provider is PlatformEmojiPropertyProvider)
+
+        val fireEmoji = 0x1F525
+        assertTrue(provider.isEmoji(fireEmoji))
+        assertTrue(AndroidEmoji.isEmoji(fireEmoji))
+
+        val regInd = 0x1F1E6
+        assertTrue(AndroidEmoji.isRegionalIndicatorSymbol(regInd))
+        assertFalse(AndroidEmoji.isRegionalIndicatorSymbol('A'.code))
+
+        // Keycap base
+        assertTrue(AndroidEmoji.isKeycapBase('5'.code))
+        assertTrue(AndroidEmoji.isKeycapBase('#'.code))
+        assertTrue(AndroidEmoji.isKeycapBase('*'.code))
+        assertFalse(AndroidEmoji.isKeycapBase('A'.code))
+
+        // Tag spec
+        assertTrue(AndroidEmoji.isTagSpecChar(0xE0021))
+        assertFalse(AndroidEmoji.isTagSpecChar(AndroidEmoji.CANCEL_TAG))
+
+        // Emoji modifier base exceptions
+        assertTrue(AndroidEmoji.isEmojiModifierBase(0x1F91D))
+        assertTrue(AndroidEmoji.isEmojiModifierBase(0x1F93C))
+
+        // Builtin and UnicodeEmojiData fallback validation
+        val builtin = BuiltinEmojiPropertyProvider.INSTANCE
+        assertTrue(builtin.isEmoji(fireEmoji))
+        assertTrue(builtin.isVariationSelector(0xFE0F))
+        assertTrue(UnicodeEmojiData.isEmoji(fireEmoji))
+        assertTrue(UnicodeEmojiData.isVariationSelector(0xFE0F))
+        assertTrue(UnicodeEmojiData.isEmojiModifier(0x1F3FB))
+        assertTrue(UnicodeEmojiData.isEmojiModifierBase(0x1F442))
+    }
+
+    @Test
+    fun testFunctionCharacters() {
+        assertTrue(FunctionCharacters.isFunctionCharacter('\u0000'))
+        assertTrue(FunctionCharacters.isFunctionCharacter('\n'))
+        assertTrue(FunctionCharacters.isFunctionCharacter('\r'))
+        assertTrue(FunctionCharacters.isFunctionCharacter('\t'))
+        assertTrue(FunctionCharacters.isFunctionCharacter(127.toChar()))
+        assertFalse(FunctionCharacters.isFunctionCharacter('A'))
+
+        // isEditorFunctionChar excludes '\t'
+        assertFalse(FunctionCharacters.isEditorFunctionChar('\t'))
+        assertTrue(FunctionCharacters.isEditorFunctionChar('\n'))
+        assertTrue(FunctionCharacters.isEditorFunctionChar('\u0000'))
+
+        assertEquals("NUL", FunctionCharacters.getNameForFunctionCharacter('\u0000'))
+        assertEquals("LF", FunctionCharacters.getNameForFunctionCharacter('\n'))
+        assertEquals("CR", FunctionCharacters.getNameForFunctionCharacter('\r'))
+        assertEquals("DEL", FunctionCharacters.getNameForFunctionCharacter(127.toChar()))
+        assertEquals("UNK", FunctionCharacters.getNameForFunctionCharacter('Z'))
+    }
+
+    @Test
+    fun testPreserveCaseReplace() {
+        assertEquals("World", PreserveCaseReplace.getReplacementSimple("", "World"))
+        assertEquals("", PreserveCaseReplace.getReplacementSimple("Hello", ""))
+        assertEquals("123", PreserveCaseReplace.getReplacementSimple("456", "123"))
+
+        // Uppercase
+        assertEquals("WORLD", PreserveCaseReplace.getReplacementSimple("HELLO", "world"))
+
+        // Lowercase
+        assertEquals("world", PreserveCaseReplace.getReplacementSimple("hello", "WORLD"))
+
+        // Capitalized
+        assertEquals("World", PreserveCaseReplace.getReplacementSimple("Hello", "world"))
+        assertEquals("World", PreserveCaseReplace.getReplacementSimple("Hello", "WORLD"))
+
+        // Mixed case matching
+        assertEquals("wOrLd", PreserveCaseReplace.getReplacementSimple("hElLo", "world"))
+    }
+
+    @Test
+    fun testCharArrayWrapper() {
+        val chars = "Hello World".toCharArray()
+        val wrapper = CharArrayWrapper(chars, 11)
+
+        assertEquals(11, wrapper.length)
+        assertEquals('H', wrapper[0])
+        assertEquals('o', wrapper[4])
+        assertEquals("Hello", wrapper.subSequence(0, 5).toString())
+
+        val dest = CharArray(5)
+        android.text.TextUtils.getChars(wrapper, 6, 11, dest, 0)
+        assertEquals("World", String(dest))
+
+        wrapper.setDataCount(5)
+        assertEquals(5, wrapper.length)
+
+        assertThrows(StringIndexOutOfBoundsException::class.java) {
+            android.text.TextUtils.getChars(wrapper, 0, 6, dest, 0)
+        }
+    }
+
+    @Test
+    fun testContentListener() {
+        var beforeReplaceCalled = false
+        var insertCalled = false
+        var deleteCalled = false
+
+        val listener = object : ContentListener {
+            override fun beforeReplace(content: Content) {
+                beforeReplaceCalled = true
+            }
+
+            override fun afterInsert(
+                content: Content,
+                startLine: Int,
+                startColumn: Int,
+                endLine: Int,
+                endColumn: Int,
+                insertedContent: CharSequence
+            ) {
+                insertCalled = true
+            }
+
+            override fun afterDelete(
+                content: Content,
+                startLine: Int,
+                startColumn: Int,
+                endLine: Int,
+                endColumn: Int,
+                deletedContent: CharSequence
+            ) {
+                deleteCalled = true
+            }
+        }
+
+        val content = Content()
+        content.addContentListener(listener)
+
+        content.insert(0, 0, "Hello")
+        assertTrue(insertCalled)
+
+        content.delete(0, 0, 0, 2)
+        assertTrue(deleteCalled)
+
+        content.removeContentListener(listener)
     }
 }

@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2026  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,34 +22,32 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.text.emoji;
 
-import android.os.Build;
+package io.github.rosemoe.sora.text.emoji
 
-import androidx.annotation.NonNull;
+import android.icu.lang.UCharacter
+import android.icu.lang.UProperty
 
-/**
- * Provides emoji character data
- */
-public interface EmojiPropertyProvider {
+internal class PlatformEmojiPropertyProvider private constructor() : EmojiPropertyProvider {
 
-    boolean isVariationSelector(int codePoint);
-
-    boolean isEmoji(int codePoint);
-
-    boolean isEmojiModifier(int codePoint);
-
-    boolean isEmojiModifierBase(int codePoint);
-
-    /**
-     * Get instance for current platform
-     */
-    @NonNull
-    static EmojiPropertyProvider get() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            return PlatformEmojiPropertyProvider.INSTANCE;
-        }
-        return BuiltinEmojiPropertyProvider.INSTANCE;
+    override fun isVariationSelector(codePoint: Int): Boolean {
+        return UCharacter.hasBinaryProperty(codePoint, UProperty.VARIATION_SELECTOR)
     }
 
+    override fun isEmoji(codePoint: Int): Boolean {
+        return UCharacter.hasBinaryProperty(codePoint, UProperty.EMOJI)
+    }
+
+    override fun isEmojiModifier(codePoint: Int): Boolean {
+        return UCharacter.hasBinaryProperty(codePoint, UProperty.EMOJI_MODIFIER)
+    }
+
+    override fun isEmojiModifierBase(codePoint: Int): Boolean {
+        return UCharacter.hasBinaryProperty(codePoint, UProperty.EMOJI_MODIFIER_BASE)
+    }
+
+    companion object {
+        @JvmField
+        val INSTANCE: PlatformEmojiPropertyProvider = PlatformEmojiPropertyProvider()
+    }
 }

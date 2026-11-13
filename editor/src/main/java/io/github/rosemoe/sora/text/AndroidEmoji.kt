@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2006 The Android Open Source Project
+ * Modified by Raj Dave (aka LazyRaj)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,37 +14,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.rosemoe.sora.text;
 
-import io.github.rosemoe.sora.text.emoji.EmojiPropertyProvider;
+package io.github.rosemoe.sora.text
+
+import io.github.rosemoe.sora.text.emoji.EmojiPropertyProvider
 
 /**
- * Taken from {@link android.text.Emoji}
+ * Taken from [android.text.Emoji]
  */
-public class AndroidEmoji {
+object AndroidEmoji {
 
-    public static int COMBINING_ENCLOSING_KEYCAP = 0x20E3;
+    const val COMBINING_ENCLOSING_KEYCAP: Int = 0x20E3
 
-    public static int ZERO_WIDTH_JOINER = 0x200D;
+    const val ZERO_WIDTH_JOINER: Int = 0x200D
 
-    public static int VARIATION_SELECTOR_16 = 0xFE0F;
+    const val VARIATION_SELECTOR_16: Int = 0xFE0F
 
-    public static int CANCEL_TAG = 0xE007F;
+    const val CANCEL_TAG: Int = 0xE007F
 
     /**
      * Returns true if the given code point is regional indicator symbol.
      */
-    public static boolean isRegionalIndicatorSymbol(int codePoint) {
-        return 0x1F1E6 <= codePoint && codePoint <= 0x1F1FF;
+    @JvmStatic
+    fun isRegionalIndicatorSymbol(codePoint: Int): Boolean {
+        return codePoint in 0x1F1E6..0x1F1FF
     }
 
     /**
      * Returns true if the given code point is emoji modifier.
      */
-    public static boolean isEmojiModifier(int codePoint) {
-        return EmojiPropertyProvider.get().isEmojiModifier(codePoint);
+    @JvmStatic
+    fun isEmojiModifier(codePoint: Int): Boolean {
+        return EmojiPropertyProvider.get().isEmojiModifier(codePoint)
     }
-
 
     /**
      * Returns true if the given code point is emoji modifier base.
@@ -51,42 +54,46 @@ public class AndroidEmoji {
      * @param c codepoint to check
      * @return true if is emoji modifier base
      */
-    public static boolean isEmojiModifierBase(int c) {
+    @JvmStatic
+    fun isEmojiModifierBase(c: Int): Boolean {
         // These two characters were removed from Emoji_Modifier_Base in Emoji 4.0, but we need to
         // keep them as emoji modifier bases since there are fonts and user-generated text out there
         // that treats these as potential emoji bases.
         if (c == 0x1F91D || c == 0x1F93C) {
-            return true;
+            return true
         }
         // If Android's copy of ICU is behind, check for new codepoints here.
         // Consult log for implementation pattern.
-        return EmojiPropertyProvider.get().isEmojiModifierBase(c);
+        return EmojiPropertyProvider.get().isEmojiModifierBase(c)
     }
 
     /**
      * Returns true if the character has Emoji property.
      */
-    public static boolean isEmoji(int codePoint) {
-        return EmojiPropertyProvider.get().isEmoji(codePoint);
+    @JvmStatic
+    fun isEmoji(codePoint: Int): Boolean {
+        return EmojiPropertyProvider.get().isEmoji(codePoint)
     }
 
     // Returns true if the character can be a base character of COMBINING ENCLOSING KEYCAP.
-    public static boolean isKeycapBase(int codePoint) {
-        return ('0' <= codePoint && codePoint <= '9') || codePoint == '#' || codePoint == '*';
+    @JvmStatic
+    fun isKeycapBase(codePoint: Int): Boolean {
+        return (codePoint in '0'.code..'9'.code) || codePoint == '#'.code || codePoint == '*'.code
     }
 
     /**
      * Returns true if the character can be a part of tag_spec in emoji tag sequence.
-     * <p>
+     *
      * Note that 0xE007F (CANCEL TAG) is not included.
      */
-    public static boolean isTagSpecChar(int codePoint) {
-        return 0xE0020 <= codePoint && codePoint <= 0xE007E;
+    @JvmStatic
+    fun isTagSpecChar(codePoint: Int): Boolean {
+        return codePoint in 0xE0020..0xE007E
     }
 
     // Returns true if the given code point is a variation selector.
-    public static boolean isVariationSelector(int codepoint) {
-        return EmojiPropertyProvider.get().isVariationSelector(codepoint);
+    @JvmStatic
+    fun isVariationSelector(codepoint: Int): Boolean {
+        return EmojiPropertyProvider.get().isVariationSelector(codepoint)
     }
-
 }

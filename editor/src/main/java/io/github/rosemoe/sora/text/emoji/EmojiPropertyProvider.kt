@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2026  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,36 +22,27 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.text.emoji;
 
-import android.icu.lang.UCharacter;
-import android.icu.lang.UProperty;
-import android.os.Build;
+package io.github.rosemoe.sora.text.emoji
 
-import androidx.annotation.RequiresApi;
+/**
+ * Provides emoji character data
+ */
+interface EmojiPropertyProvider {
 
-@RequiresApi(api = Build.VERSION_CODES.P)
-class PlatformEmojiPropertyProvider implements EmojiPropertyProvider {
+    fun isVariationSelector(codePoint: Int): Boolean
 
-    public final static PlatformEmojiPropertyProvider INSTANCE = new PlatformEmojiPropertyProvider();
+    fun isEmoji(codePoint: Int): Boolean
 
-    @Override
-    public boolean isVariationSelector(int codePoint) {
-        return UCharacter.hasBinaryProperty(codePoint, UProperty.VARIATION_SELECTOR);
-    }
+    fun isEmojiModifier(codePoint: Int): Boolean
 
-    @Override
-    public boolean isEmoji(int codePoint) {
-        return UCharacter.hasBinaryProperty(codePoint, UProperty.EMOJI);
-    }
+    fun isEmojiModifierBase(codePoint: Int): Boolean
 
-    @Override
-    public boolean isEmojiModifier(int codePoint) {
-        return UCharacter.hasBinaryProperty(codePoint, UProperty.EMOJI_MODIFIER);
-    }
-
-    @Override
-    public boolean isEmojiModifierBase(int codePoint) {
-        return UCharacter.hasBinaryProperty(codePoint, UProperty.EMOJI_MODIFIER_BASE);
+    companion object {
+        /**
+         * Get instance for current platform (API 30+ baseline)
+         */
+        @JvmStatic
+        fun get(): EmojiPropertyProvider = PlatformEmojiPropertyProvider.INSTANCE
     }
 }

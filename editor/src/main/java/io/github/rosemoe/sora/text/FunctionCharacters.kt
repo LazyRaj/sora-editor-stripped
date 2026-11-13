@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2024  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,50 +22,51 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.text;
 
-import androidx.annotation.NonNull;
+package io.github.rosemoe.sora.text
 
 /**
  * Utility for ASCII function characters
  *
  * @author Rosemoe
  */
-public class FunctionCharacters {
+object FunctionCharacters {
 
-    private final static String[] names = {
-            "NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK",
-            "BEL", "BS", "HT", "LF", "VT", "FF", "CR", "SO",
-            "SI", "DLE", "DC1", "DC2", "DC3", "DC4", "NAK",
-            "SYN", "ETB", "CAN", "EM", "SUB", "ESC", "FS",
-            "GS", "RS", "US", "SP"
-    };
+    private val names = arrayOf(
+        "NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK",
+        "BEL", "BS", "HT", "LF", "VT", "FF", "CR", "SO",
+        "SI", "DLE", "DC1", "DC2", "DC3", "DC4", "NAK",
+        "SYN", "ETB", "CAN", "EM", "SUB", "ESC", "FS",
+        "GS", "RS", "US", "SP"
+    )
 
     /**
      * Check if the letter is ASCII function character.
      */
-    public static boolean isFunctionCharacter(char letter) {
-        return letter < 32 || letter == 127;
+    @JvmStatic
+    fun isFunctionCharacter(letter: Char): Boolean {
+        val code = letter.code
+        return code < 32 || code == 127
     }
 
     /**
      * Check if the letter is ASCII function character, '\t' excluded.
      */
-    public static boolean isEditorFunctionChar(char letter) {
-        return letter != '\t' && isFunctionCharacter(letter);
+    @JvmStatic
+    fun isEditorFunctionChar(letter: Char): Boolean {
+        return letter != '\t' && isFunctionCharacter(letter)
     }
 
     /**
      * Get the name of function character
      */
-    @NonNull
-    public static String getNameForFunctionCharacter(char letter) {
-        if (letter < 32) {
-            return names[letter];
-        } else if (letter == 127) {
-            return "DEL";
+    @JvmStatic
+    fun getNameForFunctionCharacter(letter: Char): String {
+        val code = letter.code
+        return when {
+            code < 32 -> names[code]
+            code == 127 -> "DEL"
+            else -> "UNK"
         }
-        return "UNK";
     }
-
 }
