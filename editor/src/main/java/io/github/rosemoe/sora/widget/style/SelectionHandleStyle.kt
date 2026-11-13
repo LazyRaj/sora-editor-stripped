@@ -21,47 +21,43 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.widget.style;
+// Modified by Raj Dave (aka LazyRaj)
+package io.github.rosemoe.sora.widget.style
 
-import android.graphics.Canvas;
-import android.graphics.RectF;
-
-import androidx.annotation.NonNull;
-
-import io.github.rosemoe.sora.widget.schemes.EditorColorScheme;
+import android.graphics.Canvas
+import android.graphics.RectF
 
 /**
  * Class for custom handle style
  *
  * @author Rosemoe
  */
-public interface SelectionHandleStyle {
-
-    int HANDLE_TYPE_UNDEFINED = -1;
-    int HANDLE_TYPE_INSERT = 0;
-    int HANDLE_TYPE_LEFT = 1;
-    int HANDLE_TYPE_RIGHT = 2;
-
-    int ALIGN_CENTER = 0;
-    int ALIGN_LEFT = 1;
-    int ALIGN_RIGHT = 2;
+interface SelectionHandleStyle {
 
     /**
      * Draw a handle to the given canvas and return descriptor of handle.
      *
      * @param canvas     Canvas to draw
-     * @param handleType Type of handle being drawn at this position. Value can be {@link #HANDLE_TYPE_INSERT}, {@link #HANDLE_TYPE_LEFT}, {@link #HANDLE_TYPE_RIGHT} or {@link #HANDLE_TYPE_UNDEFINED}
+     * @param handleType Type of handle being drawn at this position.
      * @param x          The x of text position on canvas
      * @param y          The y of row bottom position on canvas
      * @param rowHeight  The height of a single row
-     * @param color      The color of handle configured in {@link EditorColorScheme}
+     * @param color      The color of handle configured in [io.github.rosemoe.sora.widget.schemes.EditorColorScheme]
      * @param descriptor The descriptor that should be adjusted
      */
-    void draw(@NonNull Canvas canvas, int handleType, float x, float y, int rowHeight, int color, @NonNull HandleDescriptor descriptor);
+    fun draw(
+        canvas: Canvas,
+        handleType: Int,
+        x: Float,
+        y: Float,
+        rowHeight: Int,
+        color: Int,
+        descriptor: HandleDescriptor
+    )
 
-    void setAlpha(int alpha);
+    fun setAlpha(alpha: Int)
 
-    void setScale(float factor);
+    fun setScale(factor: Float)
 
     /**
      * The descriptor of a drawn handle on canvas
@@ -71,27 +67,34 @@ public interface SelectionHandleStyle {
         /**
          * The position of handle
          */
-        public final RectF position = new RectF();
+        @JvmField
+        val position: RectF = RectF()
+
         /**
          * The alignment of the handle (of the x coordinate)
-         * For example, you can draw handle with align right of the x when you draw the left handle
-         *
-         * @see #ALIGN_CENTER
-         * @see #ALIGN_LEFT
-         * @see #ALIGN_RIGHT
          */
-        public int alignment = ALIGN_CENTER;
+        @JvmField
+        var alignment: Int = ALIGN_CENTER
 
-        public void set(float left, float top, float right, float bottom, int alignment) {
-            this.alignment = alignment;
-            position.set(left, top, right, bottom);
+        fun set(left: Float, top: Float, right: Float, bottom: Float, alignment: Int) {
+            this.alignment = alignment
+            position.set(left, top, right, bottom)
         }
 
-        public void setEmpty() {
-            position.setEmpty();
-            this.alignment = ALIGN_CENTER;
+        fun setEmpty() {
+            position.setEmpty()
+            alignment = ALIGN_CENTER
         }
-
     }
 
+    companion object {
+        const val HANDLE_TYPE_UNDEFINED = -1
+        const val HANDLE_TYPE_INSERT = 0
+        const val HANDLE_TYPE_LEFT = 1
+        const val HANDLE_TYPE_RIGHT = 2
+
+        const val ALIGN_CENTER = 0
+        const val ALIGN_LEFT = 1
+        const val ALIGN_RIGHT = 2
+    }
 }

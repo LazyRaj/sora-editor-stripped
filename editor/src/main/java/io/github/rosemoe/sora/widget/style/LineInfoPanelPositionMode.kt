@@ -21,16 +21,10 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.widget.style;
+// Modified by Raj Dave (aka LazyRaj)
+package io.github.rosemoe.sora.widget.style
 
-/**
- * Style for diagnostic displaying
- *
- * @author Rosemoe
- */
-public enum DiagnosticIndicatorStyle {
-    NONE,
-    LINE,
-    DOUBLE_LINE,
-    WAVY_LINE
+object LineInfoPanelPositionMode {
+    const val FIXED = 0
+    const val FOLLOW = 1
 }

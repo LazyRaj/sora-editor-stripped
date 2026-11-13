@@ -21,12 +21,13 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.widget.style;
+// Modified by Raj Dave (aka LazyRaj)
+package io.github.rosemoe.sora.widget.style
 
-public class LineInfoPanelPosition {
-    public static final int LEFT = 1;
-    public static final int TOP = 2;
-    public static final int RIGHT = 4;
-    public static final int BOTTOM = 8;
-    public static final int CENTER = 15;
+object LineInfoPanelPosition {
+    const val LEFT = 1
+    const val TOP = 2
+    const val RIGHT = 4
+    const val BOTTOM = 8
+    const val CENTER = 15
 }

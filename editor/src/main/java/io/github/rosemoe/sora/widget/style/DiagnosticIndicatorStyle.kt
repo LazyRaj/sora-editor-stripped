@@ -21,57 +21,17 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.widget.style;
+// Modified by Raj Dave (aka LazyRaj)
+package io.github.rosemoe.sora.widget.style
 
 /**
- * Interface for provide various cursor animations
+ * Style for diagnostic displaying
  *
- * @author Rosemoe, Dmitry Rubtsov
+ * @author Rosemoe
  */
-public interface CursorAnimator {
-
-    /**
-     * Mark the current cursor position as animation start position
-     */
-    void markStartPos();
-
-    /**
-     * Mark the current cursor position as animation end position
-     */
-    void markEndPos();
-
-    /**
-     * Start animation
-     */
-    void start();
-
-    /**
-     * Cancel animation
-     */
-    void cancel();
-
-    /**
-     * Check whether animation is in process
-     */
-    boolean isRunning();
-
-    /**
-     * The current x position of cursor in view offset
-     */
-    float animatedX();
-
-    /**
-     * The current y position of cursor in view offset
-     */
-    float animatedY();
-
-    /**
-     * Height of current line background
-     */
-    float animatedLineHeight();
-
-    /**
-     * Bottom Y position in view offset of current line background
-     */
-    float animatedLineBottom();
+enum class DiagnosticIndicatorStyle {
+    NONE,
+    LINE,
+    DOUBLE_LINE,
+    WAVY_LINE
 }

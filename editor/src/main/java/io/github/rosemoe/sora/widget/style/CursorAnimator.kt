@@ -21,9 +21,58 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.widget.style;
+// Modified by Raj Dave (aka LazyRaj)
+package io.github.rosemoe.sora.widget.style
 
-public class LineInfoPanelPositionMode {
-    public static final int FIXED = 0;
-    public static final int FOLLOW = 1;
+/**
+ * Interface for provide various cursor animations
+ *
+ * @author Rosemoe, Dmitry Rubtsov
+ */
+interface CursorAnimator {
+
+    /**
+     * Mark the current cursor position as animation start position
+     */
+    fun markStartPos()
+
+    /**
+     * Mark the current cursor position as animation end position
+     */
+    fun markEndPos()
+
+    /**
+     * Start animation
+     */
+    fun start()
+
+    /**
+     * Cancel animation
+     */
+    fun cancel()
+
+    /**
+     * Check whether animation is in process
+     */
+    fun isRunning(): Boolean
+
+    /**
+     * The current x position of cursor in view offset
+     */
+    fun animatedX(): Float
+
+    /**
+     * The current y position of cursor in view offset
+     */
+    fun animatedY(): Float
+
+    /**
+     * Height of current line background
+     */
+    fun animatedLineHeight(): Float
+
+    /**
+     * Bottom Y position in view offset of current line background
+     */
+    fun animatedLineBottom(): Float
 }
