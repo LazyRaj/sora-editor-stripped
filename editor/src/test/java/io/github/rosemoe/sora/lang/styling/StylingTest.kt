@@ -211,4 +211,176 @@ class StylingTest {
         SpanFactory.recycleAll(spans)
         // Spans recycled
     }
+
+    @Test
+    fun testMappedSpansAndBuilder() {
+        val emptyBuilder = MappedSpans.Builder()
+        emptyBuilder.addNormalIfNull()
+        val emptySpans = emptyBuilder.build()
+        assertEquals(1, emptySpans.lineCount)
+
+        val builder = MappedSpans.Builder(10)
+        builder.add(0, SpanFactory.obtainNoExt(0, 100L))
+        builder.addIfNeeded(0, 5, 200L)
+        builder.addIfNeeded(0, 8, 200L) // Redundant style, should be skipped
+        builder.determine(2)
+
+        val mappedSpans = builder.build()
+        assertTrue(mappedSpans.supportsModify())
+        assertEquals(3, mappedSpans.lineCount)
+
+        val reader = mappedSpans.read()
+        reader.moveToLine(0)
+        assertEquals(2, reader.spanCount)
+        assertEquals(0, reader.getSpanAt(0).column)
+        assertEquals(5, reader.getSpanAt(1).column)
+        assertEquals(2, reader.getSpansOnLine(0).size)
+
+        reader.moveToLine(-1)
+
+        val modifier = mappedSpans.modify()
+        modifier.addLineAt(1, listOf(SpanFactory.obtainNoExt(0, 300L)))
+        assertEquals(4, mappedSpans.lineCount)
+
+        modifier.deleteLineAt(1)
+        assertEquals(3, mappedSpans.lineCount)
+
+        modifier.setSpansOnLine(5, listOf(SpanFactory.obtainNoExt(0, 400L)))
+        assertTrue(mappedSpans.lineCount >= 6)
+
+        // Test adjust on single/multi-line insert and delete
+        mappedSpans.adjustOnInsert(
+            io.github.rosemoe.sora.text.CharPosition(0, 2, 2),
+            io.github.rosemoe.sora.text.CharPosition(0, 4, 4)
+        )
+        mappedSpans.adjustOnDelete(
+            io.github.rosemoe.sora.text.CharPosition(0, 2, 2),
+            io.github.rosemoe.sora.text.CharPosition(0, 4, 4)
+        )
+        mappedSpans.adjustOnInsert(
+            io.github.rosemoe.sora.text.CharPosition(0, 2, 2),
+            io.github.rosemoe.sora.text.CharPosition(1, 4, 10)
+        )
+        mappedSpans.adjustOnDelete(
+            io.github.rosemoe.sora.text.CharPosition(0, 2, 2),
+            io.github.rosemoe.sora.text.CharPosition(1, 4, 10)
+        )
+    }
+
+    @Test
+    fun testCodeBlockAndBinarySearch() {
+        val block1 = CodeBlock(startLine = 1, startColumn = 0, endLine = 5, endColumn = 4, toBottomOfEndLine = false)
+        val block2 = CodeBlock(startLine = 6, startColumn = 2, endLine = 10, endColumn = 0, toBottomOfEndLine = true)
+
+        assertEquals(1, block1.startLine)
+        assertEquals(5, block1.endLine)
+        assertFalse(block1.toBottomOfEndLine)
+        assertTrue(block2.toBottomOfEndLine)
+
+        val blocks = listOf(block1, block2)
+        assertEquals(0, CodeBlock.binarySearchEndBlock(3, blocks))
+        assertEquals(0, CodeBlock.binarySearchEndBlock(5, blocks))
+        assertEquals(1, CodeBlock.binarySearchEndBlock(6, blocks))
+        assertEquals(1, CodeBlock.binarySearchEndBlock(10, blocks))
+        assertEquals(-1, CodeBlock.binarySearchEndBlock(15, blocks))
+
+        val copy1 = CodeBlock(startLine = 1, startColumn = 0, endLine = 5, endColumn = 4, toBottomOfEndLine = false)
+        assertEquals(block1, copy1)
+        assertEquals(block1.hashCode(), copy1.hashCode())
+        assertTrue(block1.toString().contains("startLine=1"))
+
+        assertTrue(CodeBlock.COMPARATOR_START.compare(block1, block2) < 0)
+        assertTrue(CodeBlock.COMPARATOR_END.compare(block1, block2) < 0)
+
+        block1.clear()
+        assertEquals(0, block1.startLine)
+        assertEquals(0, block1.endLine)
+    }
+
+    @Test
+    fun testBlocksUpdater() {
+        val blocks = mutableListOf(
+            CodeBlock(1, 0, 5, 0),
+            CodeBlock(6, 0, 10, 0)
+        )
+
+        BlocksUpdater.update(blocks, restrict = 3, delta = 2)
+        assertEquals(1, blocks[0].startLine)
+        assertEquals(7, blocks[0].endLine)
+        assertEquals(8, blocks[1].startLine)
+        assertEquals(12, blocks[1].endLine)
+
+        // Test deletion causing invalid block
+        val blocks2 = mutableListOf(CodeBlock(5, 0, 6, 0))
+        BlocksUpdater.update(blocks2, restrict = 0, delta = 0) // No-op
+        assertEquals(1, blocks2.size)
+
+        BlocksUpdater.update(blocks2, restrict = 6, delta = -2)
+        // startLine=5, endLine=4 -> removed
+        assertEquals(0, blocks2.size)
+    }
+
+    @Test
+    fun testStylesAndStylesUtils() {
+        val styles = Styles()
+        assertNotNull(styles.blocks)
+        styles.addCodeBlock(CodeBlock(0, 0, 5, 0))
+        assertEquals(1, styles.blocks?.size)
+
+        styles.suppressSwitch = 50
+        assertEquals(50, styles.getSuppressSwitch())
+        styles.setSuppressSwitch(100)
+        assertEquals(100, styles.suppressSwitch)
+
+        styles.indentCountMode = true
+        assertTrue(styles.isIndentCountMode())
+        styles.setIndentCountMode(false)
+        assertFalse(styles.indentCountMode)
+
+        val anchorStyle = object : LineAnchorStyle(2) {}
+        styles.addLineStyle(anchorStyle)
+        assertNotNull(styles.lineStyles)
+        assertEquals(1, styles.lineStyles?.size)
+
+        styles.eraseLineStyle(2, anchorStyle.javaClass)
+        styles.eraseAllLineStyles()
+        assertEquals(0, styles.lineStyles?.size)
+
+        val builder = MappedSpans.Builder()
+        builder.add(0, SpanFactory.obtainNoExt(0, TextStyle.makeStyle(1, noCompletion = true)))
+        styles.spans = builder.build()
+        assertEquals(styles.spans, styles.getSpans())
+
+        styles.finishBuilding()
+
+        val pos0 = io.github.rosemoe.sora.text.CharPosition(0, 0, 0)
+        assertTrue(StylesUtils.checkNoCompletion(styles, pos0))
+        val span = StylesUtils.getSpanForPosition(styles, pos0)
+        assertNotNull(span)
+        assertEquals(0, span?.column)
+        assertNull(StylesUtils.getFollowingSpanForPosition(styles, pos0))
+    }
+
+    @Test
+    fun testSpanMerger() {
+        val lower = listOf(
+            SpanFactory.obtainNoExt(0, TextStyle.makeStyle(1)),
+            SpanFactory.obtainNoExt(5, TextStyle.makeStyle(2))
+        )
+        val upper = listOf(
+            SpanFactory.obtainNoExt(3, TextStyle.makeStyle(10))
+        )
+
+        val merged = SpanMerger.merge(lower, upper)
+        assertEquals(3, merged.size)
+        assertEquals(0, merged[0].column)
+        assertEquals(3, merged[1].column)
+        assertEquals(10, merged[1].foregroundColorId)
+        assertEquals(5, merged[2].column)
+        assertEquals(10, merged[2].foregroundColorId)
+
+        val emptyUpper = emptyList<Span>()
+        val mergedEmpty = SpanMerger.merge(lower, emptyUpper)
+        assertEquals(2, mergedEmpty.size)
+    }
 }

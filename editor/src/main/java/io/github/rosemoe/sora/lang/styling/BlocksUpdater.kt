@@ -21,14 +21,13 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.lang.styling;
-
-import java.util.List;
+// Modified by Raj Dave (aka LazyRaj)
+package io.github.rosemoe.sora.lang.styling
 
 /**
  * Update block line positions on edit
  */
-public class BlocksUpdater {
+object BlocksUpdater {
 
     /**
      * Update blocks
@@ -37,23 +36,23 @@ public class BlocksUpdater {
      * @param restrict Min line to update
      * @param delta    Delta for line index
      */
-    public static void update(List<CodeBlock> blocks, int restrict, int delta) {
+    @JvmStatic
+    fun update(blocks: MutableList<CodeBlock>, restrict: Int, delta: Int) {
         if (delta == 0) {
-            return;
+            return
         }
-        var itr = blocks.iterator();
+        val itr = blocks.iterator()
         while (itr.hasNext()) {
-            var block = itr.next();
+            val block = itr.next()
             if (block.startLine >= restrict) {
-                block.startLine += delta;
+                block.startLine += delta
             }
             if (block.endLine >= restrict) {
-                block.endLine += delta;
+                block.endLine += delta
             }
             if (block.startLine >= block.endLine) {
-                itr.remove();
+                itr.remove()
             }
         }
     }
-
 }

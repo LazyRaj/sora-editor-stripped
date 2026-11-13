@@ -21,112 +21,119 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.lang.styling;
+// Modified by Raj Dave (aka LazyRaj)
+package io.github.rosemoe.sora.lang.styling
 
-import java.util.List;
-
-import io.github.rosemoe.sora.text.CharPosition;
-import io.github.rosemoe.sora.widget.schemes.EditorColorScheme;
+import io.github.rosemoe.sora.text.CharPosition
 
 /**
  * Spans object saves spans in editor.
  */
-public interface Spans {
+interface Spans {
+
+    /**
+     * Get line count of the spans
+     */
+    fun getLineCount(): Int
 
     /**
      * Adjust spans on insert.
      * Must be implemented.
      */
-    void adjustOnInsert(CharPosition start, CharPosition end);
+    fun adjustOnInsert(start: CharPosition, end: CharPosition)
 
     /**
      * Adjust spans on delete.
      * Must be implemented.
      */
-    void adjustOnDelete(CharPosition start, CharPosition end);
+    fun adjustOnDelete(start: CharPosition, end: CharPosition)
 
     /**
      * Read spans.
      * Must be implemented.
      */
-    Reader read();
+    fun read(): Reader
 
     /**
-     * Check whether the class supports {@link #modify()}
+     * Check whether the class supports [modify]
      */
-    boolean supportsModify();
+    fun supportsModify(): Boolean
 
     /**
      * Modify the content.
-     * <p>
+     *
      * Optional to implement.
      */
-    Modifier modify();
+    fun modify(): Modifier
 
     /**
-     * Get line count of the spans
-     */
-    int getLineCount();
-
-    /**
-     * Reader reads the spans in a {@link Spans} object.
+     * Reader reads the spans in a [Spans] object.
      */
     interface Reader {
 
         /**
-         * Start reading the spans on the given line.
-         * You may prepare some data here if the actual spans are not stored by {@link Span} objects.
-         * <p>
-         * line may be -1 to release the reader.
-         */
-        void moveToLine(int line);
-
-        /**
          * Get span count on current line
          */
-        int getSpanCount();
+        fun getSpanCount(): Int
 
         /**
-         * Get span at position {@code index}.
+         * Start reading the spans on the given line.
+         * You may prepare some data here if the actual spans are not stored by [Span] objects.
+         *
+         * line may be -1 to release the reader.
+         */
+        fun moveToLine(line: Int)
+
+        /**
+         * Get span at position [index].
          * The result object is read-only. Callers should not modify this object.
          */
-        Span getSpanAt(int index);
+        fun getSpanAt(index: Int): Span
 
         /**
-         * Get all spans on the given line. This ignores the line argument set by {@link Reader#moveToLine(int)}
+         * Get all spans on the given line. This ignores the line argument set by [moveToLine].
          * The list contains at least 1 span. And the result list is unmodifiable.
          */
-        List<Span> getSpansOnLine(int line);
-
+        fun getSpansOnLine(line: Int): List<Span>
     }
 
     /**
-     * Modifier updates the spans in a {@link Spans} object.
+     * Modifier updates the spans in a [Spans] object.
      */
     interface Modifier {
 
         /**
-         * Set the line's spans to the new ones. The given {@code spans} list should not be stored,
+         * Set the line's spans to the new ones. The given [spans] list should not be stored,
          * but the content of it can be copied.
-         * <p>
+         *
          * If the line index exceeds the current capacity, implementation of this should expand the capacity
-         * without throwing an exception. Set spans of the filled lines to color {@link EditorColorScheme#TEXT_NORMAL}
+         * without throwing an exception. Set spans of the filled lines to color [io.github.rosemoe.sora.widget.schemes.EditorColorScheme.TEXT_NORMAL]
          * or extends previous styles.
          */
-        void setSpansOnLine(int line, List<Span> spans);
+        fun setSpansOnLine(line: Int, spans: List<Span>)
 
         /**
          * Add a line at the given position.
-         * The given {@code spans} list should not be stored,
+         * The given [spans] list should not be stored,
          * but the content of it can be copied.
          */
-        void addLineAt(int line, List<Span> spans);
+        fun addLineAt(line: Int, spans: List<Span>)
 
         /**
          * Remove a line
          */
-        void deleteLineAt(int line);
-
+        fun deleteLineAt(line: Int)
     }
-
 }
+
+/**
+ * Idiomatic Kotlin property accessor for line count
+ */
+inline val Spans.lineCount: Int
+    get() = getLineCount()
+
+/**
+ * Idiomatic Kotlin property accessor for span count
+ */
+inline val Spans.Reader.spanCount: Int
+    get() = getSpanCount()

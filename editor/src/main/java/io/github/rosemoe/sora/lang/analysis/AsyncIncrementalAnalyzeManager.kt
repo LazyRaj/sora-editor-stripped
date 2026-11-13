@@ -474,7 +474,7 @@ abstract class AsyncIncrementalAnalyzeManager<S, T> @JvmOverloads constructor(
                                 currentContent.insert(IntPair.getFirst(mod.start), IntPair.getSecond(mod.start), mod.changedText)
                                 var state: S? = if (startLine == 0) getInitialState() else states[startLine - 1].state
                                 var line = startLine
-                                val spansModifier = currentStyles.spans.modify()
+                                val spansModifier = currentStyles.spans!!.modify()
                                 // Add Lines
                                 while (line <= endLine) {
                                     val res = tokenizeLine(currentContent.getLine(line), state, line)
