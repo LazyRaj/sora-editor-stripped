@@ -375,4 +375,208 @@ class TextSubpackagesTest {
 
         content.removeContentListener(listener)
     }
+
+    @Test
+    fun testICUUtils() {
+        val text = "val myVariable = 123"
+        // Word at "myVariable" (offset 6)
+        val range = ICUUtils.getWordRange(text, 6, true)
+        val start = IntPair.getFirst(range)
+        val end = IntPair.getSecond(range)
+        assertEquals("myVariable", text.substring(start, end))
+
+        // Fallback implementation
+        val fallbackRange = ICUUtils.getWordRangeFallback(text, 6)
+        assertEquals(range, fallbackRange)
+    }
+
+    @Test
+    fun testTextRange() {
+        val pos1 = CharPosition().apply { index = 5; line = 0; column = 5 }
+        val pos2 = CharPosition().apply { index = 15; line = 1; column = 5 }
+        val range = TextRange(pos1, pos2)
+
+        assertEquals(5, range.startIndex)
+        assertEquals(15, range.endIndex)
+
+        val insidePos = CharPosition().apply { index = 10 }
+        val outsidePos = CharPosition().apply { index = 20 }
+        assertTrue(range.isPositionInside(insidePos))
+        assertFalse(range.isPositionInside(outsidePos))
+        assertTrue(range.toString().contains("TextRange"))
+    }
+
+    @Test
+    fun testSpanRecycler() {
+        val recycler = SpanRecycler.getInstance()
+        assertNotNull(recycler)
+        // Should handle null and empty lists gracefully
+        recycler.recycle(null)
+        recycler.recycle(mutableListOf())
+    }
+
+    @Test
+    fun testUnicodeIterator() {
+        val text = "A\uD83D\uDE00B" // A + 😀 (surrogate pair) + B
+        val iterator = UnicodeIterator.obtain(text, 0, text.length)
+        assertTrue(iterator.hasNext())
+
+        assertEquals('A'.code, iterator.nextCodePoint())
+        assertEquals(0, iterator.startIndex)
+        assertEquals(1, iterator.endIndex)
+
+        assertTrue(iterator.hasNext())
+        assertEquals(0x1F600, iterator.nextCodePoint()) // 😀
+        assertEquals(1, iterator.startIndex)
+        assertEquals(3, iterator.endIndex)
+
+        assertTrue(iterator.hasNext())
+        assertEquals('B'.code, iterator.nextCodePoint())
+        assertEquals(3, iterator.startIndex)
+        assertEquals(4, iterator.endIndex)
+
+        assertFalse(iterator.hasNext())
+        assertEquals(0, iterator.nextCodePoint())
+        iterator.recycle()
+    }
+
+    @Test
+    fun testComposingText() {
+        val comp = ComposingText()
+        assertFalse(comp.isComposing)
+
+        comp.set(2, 5)
+        assertEquals(2, comp.startIndex)
+        assertEquals(5, comp.endIndex)
+        assertTrue(comp.isComposing)
+
+        comp.adjustLength(5)
+        assertEquals(7, comp.endIndex)
+
+        comp.shiftOnInsert(0, 2)
+        assertEquals(4, comp.startIndex)
+        assertEquals(9, comp.endIndex)
+
+        comp.shiftOnDelete(0, 2)
+        assertEquals(2, comp.startIndex)
+        assertEquals(7, comp.endIndex)
+
+        comp.reset()
+        assertFalse(comp.isComposing)
+        assertEquals(-1, comp.startIndex)
+    }
+
+    @Test
+    fun testCharSequenceIterator() {
+        val text = "Hello"
+        val itr = CharSequenceIterator(text)
+
+        assertEquals(0, itr.beginIndex)
+        assertEquals(5, itr.endIndex)
+
+        assertEquals('H', itr.first())
+        assertEquals(0, itr.index)
+
+        assertEquals('e', itr.next())
+        assertEquals('l', itr.next())
+        assertEquals('l', itr.next())
+        assertEquals('o', itr.next())
+        assertEquals(java.text.CharacterIterator.DONE, itr.next())
+
+        assertEquals('o', itr.last())
+        assertEquals('l', itr.previous())
+
+        assertEquals('l', itr.setIndex(2))
+        assertEquals(2, itr.index)
+
+        val clone = itr.clone() as CharSequenceIterator
+        assertEquals(itr.index, clone.index)
+        assertEquals(itr.current(), clone.current())
+
+        assertThrows(IllegalArgumentException::class.java) {
+            itr.setIndex(10)
+        }
+    }
+
+    @Test
+    fun testInsertTextHelper() {
+        val helper = InsertTextHelper.forInsertion("Line1\nLine2\r\nLine3")
+
+        assertEquals(InsertTextHelper.TYPE_LINE_CONTENT, helper.forward())
+        assertEquals("Line1", "Line1\nLine2\r\nLine3".substring(helper.index, helper.indexNext))
+
+        assertEquals(InsertTextHelper.TYPE_NEWLINE, helper.forward())
+        assertEquals("\n", "Line1\nLine2\r\nLine3".substring(helper.index, helper.indexNext))
+
+        assertEquals(InsertTextHelper.TYPE_LINE_CONTENT, helper.forward())
+        assertEquals("Line2", "Line1\nLine2\r\nLine3".substring(helper.index, helper.indexNext))
+
+        assertEquals(InsertTextHelper.TYPE_NEWLINE, helper.forward())
+        assertEquals("\r\n", "Line1\nLine2\r\nLine3".substring(helper.index, helper.indexNext))
+
+        assertEquals(InsertTextHelper.TYPE_LINE_CONTENT, helper.forward())
+        assertEquals("Line3", "Line1\nLine2\r\nLine3".substring(helper.index, helper.indexNext))
+
+        assertEquals(InsertTextHelper.TYPE_EOF, helper.forward())
+        helper.recycle()
+    }
+
+    @Test
+    fun testTextLayoutHelper() {
+        val helper = TextLayoutHelper.get()
+        assertNotNull(helper)
+
+        val text = "Line of text for layout helper"
+        val left = helper.getCurPosLeft(5, text)
+        val right = helper.getCurPosRight(5, text)
+        assertTrue(left >= 0)
+        assertTrue(right >= 0)
+    }
+
+    @Test
+    fun testLineSeparator() {
+        assertEquals("\n", LineSeparator.LF.content)
+        assertEquals(1, LineSeparator.LF.length)
+        assertEquals("\r\n", LineSeparator.CRLF.content)
+        assertEquals(2, LineSeparator.CRLF.length)
+        assertEquals("\r", LineSeparator.CR.content)
+        assertEquals("", LineSeparator.NONE.content)
+
+        assertEquals(LineSeparator.LF, LineSeparator.fromSeparatorString("\n"))
+        assertEquals(LineSeparator.CRLF, LineSeparator.fromSeparatorString("\r\n"))
+        assertEquals(LineSeparator.CR, LineSeparator.fromSeparatorString("\r"))
+        assertEquals(LineSeparator.NONE, LineSeparator.fromSeparatorString(""))
+
+        val text = "A\nB\r\nC\rD"
+        assertEquals(LineSeparator.LF, LineSeparator.fromSeparatorString(text, 1, 2))
+        assertEquals(LineSeparator.CRLF, LineSeparator.fromSeparatorString(text, 3, 5))
+        assertEquals(LineSeparator.CR, LineSeparator.fromSeparatorString(text, 6, 7))
+        assertEquals(LineSeparator.NONE, LineSeparator.fromSeparatorString(text, 0, 0))
+
+        assertThrows(IllegalArgumentException::class.java) {
+            LineSeparator.fromSeparatorString("invalid")
+        }
+    }
+
+    @Test
+    fun testTextReference() {
+        val original = "0123456789"
+        val ref = TextReference(original, 2, 7) // "23456"
+
+        assertEquals(5, ref.length)
+        assertEquals('2', ref[0])
+        assertEquals('6', ref[4])
+        assertEquals("23456", ref.toString())
+        assertEquals("345", ref.subSequence(1, 4).toString())
+
+        var validated = false
+        ref.setValidator { validated = true }
+        assertEquals(5, ref.length)
+        assertTrue(validated)
+
+        ref.setValidator { throw TextReference.ValidateFailedException("Rejected") }
+        assertThrows(TextReference.ValidateFailedException::class.java) {
+            ref.length
+        }
+    }
 }

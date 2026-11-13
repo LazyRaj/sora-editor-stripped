@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2024  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,64 +22,33 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.text;
 
-import androidx.annotation.NonNull;
+package io.github.rosemoe.sora.text
 
 /**
- * A range made up of two {@link CharPosition} objects.
+ * A range made up of two [CharPosition] objects.
  *
  * @author Rosemoe
  */
-public class TextRange {
+open class TextRange(
+    var start: CharPosition,
+    var end: CharPosition
+) {
 
-    private CharPosition start;
-    private CharPosition end;
+    val startIndex: Int
+        get() = start.index
 
-    public TextRange(@NonNull CharPosition start, @NonNull CharPosition end) {
-        this.start = start;
-        this.end = end;
-    }
-
-    @NonNull
-    public CharPosition getStart() {
-        return start;
-    }
-
-    public void setStart(@NonNull CharPosition start) {
-        this.start = start;
-    }
-
-    @NonNull
-    public CharPosition getEnd() {
-        return end;
-    }
-
-    public void setEnd(@NonNull CharPosition end) {
-        this.end = end;
-    }
-
-    public int getStartIndex() {
-        return start.index;
-    }
-
-    public int getEndIndex() {
-        return end.index;
-    }
+    val endIndex: Int
+        get() = end.index
 
     /**
      * Check if the given position is inside the range
      */
-    public boolean isPositionInside(@NonNull CharPosition pos) {
-        return pos.index >= start.index && pos.index < end.index;
+    open fun isPositionInside(pos: CharPosition): Boolean {
+        return pos.index >= start.index && pos.index < end.index
     }
 
-    @NonNull
-    @Override
-    public String toString() {
-        return "TextRange{" +
-                "start=" + start +
-                ", end=" + end +
-                '}';
+    override fun toString(): String {
+        return "TextRange{start=$start, end=$end}"
     }
 }
