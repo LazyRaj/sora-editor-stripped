@@ -21,9 +21,35 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-
+/*
+ * Modified by Raj Dave (aka LazyRaj)
+ */
+package io.github.rosemoe.sora.widget.component
 
 /**
- * This package contains classes related to editor rendering.
+ * Builtin editor component.
+ *
+ * @author Rosemoe
+ * @see EditorAutoCompletion
+ * @see EditorTextActionWindow
+ * @see Magnifier
  */
-package io.github.rosemoe.sora.widget.rendering;
+interface EditorBuiltinComponent {
+
+    /**
+     * Check whether this component is enabled
+     */
+    fun isEnabled(): Boolean
+
+    /**
+     * Enable/disable this builtin component
+     */
+    fun setEnabled(enabled: Boolean)
+}
+
+/**
+ * Synthetic property compatibility for Kotlin callers
+ */
+var EditorBuiltinComponent.isEnabled: Boolean
+    get() = isEnabled()
+    set(value) = setEnabled(value)
