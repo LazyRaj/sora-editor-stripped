@@ -4,7 +4,10 @@ import com.google.common.truth.Truth.assertThat
 import io.github.rosemoe.sora.text.CharPosition
 import org.eclipse.lsp4j.Position
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class LspUtilsTest {
 
     @Test

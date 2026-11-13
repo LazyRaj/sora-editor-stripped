@@ -527,10 +527,19 @@ open class EditorAutoCompletion(
         maxHeight = height
     }
 
+    /**
+     * Scroll the completion list back to its first item.
+     *
+     * The adapter is set again so that rows of the previous result are dropped. Otherwise,
+     * if the list is resized before its next layout (window height, loading bar, layout
+     * animations), [android.widget.AbsListView] restores the old first visible row.
+     */
     open fun resetScrollPosition() {
-        editor.postDelayedInLifecycle({
-            layout.ensureListPositionVisible(0, 0)
-        }, 10)
+        val list = layout.getCompletionList()
+        if (list.firstVisiblePosition > 0 || (list.childCount > 0
+                && list.getChildAt(0).top < list.paddingTop)) {
+            list.adapter = adapter
+        }
     }
 
     /**

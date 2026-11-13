@@ -2,9 +2,12 @@ package io.github.rosemoe.sora.lsp.utils
 
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.io.File
 import java.net.URI
 
+@RunWith(RobolectricTestRunner::class)
 class URIUtilsTest {
 
     @Test
