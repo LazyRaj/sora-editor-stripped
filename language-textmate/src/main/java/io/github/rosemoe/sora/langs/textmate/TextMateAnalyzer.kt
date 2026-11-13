@@ -169,16 +169,16 @@ class TextMateAnalyzer(
     }
 
     @Synchronized
-    override fun tokenizeLine(lineC: CharSequence, state: MyState?, lineIndex: Int): LineTokenizeResult<MyState, Span> {
-        val line = if (lineC is ContentLine) lineC.toStringWithNewline() else lineC.toString()
+    override fun tokenizeLine(line: CharSequence, state: MyState?, lineIndex: Int): LineTokenizeResult<MyState, Span> {
+        val lineStr = if (line is ContentLine) line.toStringWithNewline() else line.toString()
         val tokens = ArrayList<Span>()
-        val surrogate = StringUtils.checkSurrogate(line)
-        val lineTokens = grammar.tokenizeLine2(line, state?.tokenizeState, Duration.ofSeconds(2))
+        val surrogate = StringUtils.checkSurrogate(lineStr)
+        val lineTokens = grammar.tokenizeLine2(lineStr, state?.tokenizeState, Duration.ofSeconds(2))
         val tokensLength = lineTokens.tokens.size / 2
         val identifiers = if (language.collectIdentifiers) ArrayList<String>() else null
 
         for (i in 0 until tokensLength) {
-            val startIndex = StringUtils.convertUnicodeOffsetToUtf16(line, lineTokens.tokens[2 * i], surrogate)
+            val startIndex = StringUtils.convertUnicodeOffsetToUtf16(lineStr, lineTokens.tokens[2 * i], surrogate)
             if (i == 0 && startIndex != 0) {
                 tokens.add(SpanFactory.obtainNoExt(0, EditorColorScheme.TEXT_NORMAL.toLong()))
             }
@@ -191,20 +191,20 @@ class TextMateAnalyzer(
             if (language.collectIdentifiers && identifiers != null) {
                 if (tokenType == StandardTokenType.Other) {
                     val end = if (i + 1 == tokensLength) {
-                        lineC.length
+                        line.length
                     } else {
-                        StringUtils.convertUnicodeOffsetToUtf16(line, lineTokens.tokens[2 * (i + 1)], surrogate)
+                        StringUtils.convertUnicodeOffsetToUtf16(lineStr, lineTokens.tokens[2 * (i + 1)], surrogate)
                     }
-                    if (end > startIndex && MyCharacter.isJavaIdentifierStart(line[startIndex])) {
+                    if (end > startIndex && MyCharacter.isJavaIdentifierStart(lineStr[startIndex])) {
                         var flag = true
                         for (j in startIndex + 1 until end) {
-                            if (!MyCharacter.isJavaIdentifierPart(line[j])) {
+                            if (!MyCharacter.isJavaIdentifierPart(lineStr[j])) {
                                 flag = false
                                 break
                             }
                         }
                         if (flag) {
-                            identifiers.add(line.substring(startIndex, end))
+                            identifiers.add(lineStr.substring(startIndex, end))
                         }
                     }
                 }
@@ -225,7 +225,7 @@ class TextMateAnalyzer(
                 SpanFactory.obtainNoExt(startIndex, style)
             }
 
-            span.setExtra(tokenType)
+            span.extra = tokenType
 
             if (needUnderline) {
                 val color = theme?.getColor(foreground)
@@ -240,8 +240,8 @@ class TextMateAnalyzer(
         return LineTokenizeResult(
             MyState(
                 lineTokens.ruleStack,
-                cachedRegExp?.search(OnigString.of(line), 0),
-                IndentRange.computeIndentLevel(lineC, line.length - 1, language.tabSize),
+                cachedRegExp?.search(OnigString.of(lineStr), 0),
+                IndentRange.computeIndentLevel(line, line.length, language.tabSize),
                 identifiers
             ),
             null,

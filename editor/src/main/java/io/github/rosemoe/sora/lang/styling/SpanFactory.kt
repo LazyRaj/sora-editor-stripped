@@ -21,52 +21,46 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.lang.styling;
+// Modified by Raj Dave (aka LazyRaj)
+package io.github.rosemoe.sora.lang.styling
 
-import androidx.annotation.NonNull;
-
-import java.util.Collection;
-
-import io.github.rosemoe.sora.lang.styling.span.internal.NoExtSpanImpl;
-import io.github.rosemoe.sora.lang.styling.span.internal.SpanImpl;
+import io.github.rosemoe.sora.lang.styling.span.internal.NoExtSpanImpl
+import io.github.rosemoe.sora.lang.styling.span.internal.SpanImpl
 
 /**
- * Factory for {@link Span}
+ * Factory for [Span]
  */
-public class SpanFactory {
+object SpanFactory {
 
-    private SpanFactory() {
-
+    /**
+     * Get an available [Span] object from either cache or new instance.
+     * The result object will be initialized with the given arguments.
+     */
+    @JvmStatic
+    fun obtain(column: Int, style: Long): Span {
+        return SpanImpl.obtain(column, style)
     }
 
     /**
-     * Get an available {@link Span} object from either cache or new instance.
+     * Get an available [Span] object from either cache or new instance.
      * The result object will be initialized with the given arguments.
+     *
+     * Note that the span can not have additional fields beside style and column.
      */
-    @NonNull
-    public static Span obtain(int column, long style) {
-        return SpanImpl.obtain(column, style);
-    }
-
-    /**
-     * Get an available {@link Span} object from either cache or new instance.
-     * The result object will be initialized with the given arguments.
-     * <p>
-     * Note that the span can not have additional fields beside
-     */
-    public static Span obtainNoExt(int column, long style) {
-        return NoExtSpanImpl.obtain(column, style);
+    @JvmStatic
+    fun obtainNoExt(column: Int, style: Long): Span {
+        return NoExtSpanImpl.obtain(column, style)
     }
 
     /**
      * Recycle all spans in the given collection
      */
-    public static void recycleAll(@NonNull Collection<Span> spans) {
-        for (Span span : spans) {
+    @JvmStatic
+    fun recycleAll(spans: Collection<Span>) {
+        for (span in spans) {
             if (!span.recycle()) {
-                return;
+                return
             }
         }
     }
-
 }

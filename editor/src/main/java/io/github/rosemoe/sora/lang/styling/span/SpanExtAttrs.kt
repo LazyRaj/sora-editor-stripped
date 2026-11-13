@@ -21,46 +21,43 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.lang.styling.span;
+// Modified by Raj Dave (aka LazyRaj)
+package io.github.rosemoe.sora.lang.styling.span
 
-import io.github.rosemoe.sora.lang.styling.color.ResolvableColor;
+import io.github.rosemoe.sora.lang.styling.color.ResolvableColor
 
-public class SpanExtAttrs {
+object SpanExtAttrs {
     /**
      * @see SpanColorResolver
      */
-    public final static int EXT_COLOR_RESOLVER = 0;
+    const val EXT_COLOR_RESOLVER: Int = 0
+
     /**
      * @see SpanExternalRenderer
      */
-    public final static int EXT_EXTERNAL_RENDERER = 1;
+    const val EXT_EXTERNAL_RENDERER: Int = 1
+
     /**
      * @see SpanInteractionInfo
      */
-    public final static int EXT_INTERACTION_INFO = 2;
-    /**
-     * Set a {@link ResolvableColor} object for underline color resolving
-     */
-    public final static int EXT_UNDERLINE_COLOR = 3;
+    const val EXT_INTERACTION_INFO: Int = 2
 
-    public static boolean checkType(int extType, SpanExt ext) {
+    /**
+     * Set a [ResolvableColor] object for underline color resolving
+     */
+    const val EXT_UNDERLINE_COLOR: Int = 3
+
+    @JvmStatic
+    fun checkType(extType: Int, ext: SpanExt?): Boolean {
         if (ext == null) {
-            return true;
+            return true
         }
-        switch (extType) {
-            case EXT_COLOR_RESOLVER -> {
-                return ext instanceof SpanColorResolver;
-            }
-            case EXT_EXTERNAL_RENDERER -> {
-                return ext instanceof SpanExternalRenderer;
-            }
-            case EXT_INTERACTION_INFO -> {
-                return ext instanceof SpanInteractionInfo;
-            }
-            case EXT_UNDERLINE_COLOR -> {
-                return ext instanceof ResolvableColor;
-            }
+        return when (extType) {
+            EXT_COLOR_RESOLVER -> ext is SpanColorResolver
+            EXT_EXTERNAL_RENDERER -> ext is SpanExternalRenderer
+            EXT_INTERACTION_INFO -> ext is SpanInteractionInfo
+            EXT_UNDERLINE_COLOR -> ext is ResolvableColor
+            else -> true
         }
-        return true;
     }
 }

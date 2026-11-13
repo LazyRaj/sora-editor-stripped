@@ -21,21 +21,17 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.lang.styling;
+// Modified by Raj Dave (aka LazyRaj)
+package io.github.rosemoe.sora.lang.styling
 
-import androidx.annotation.NonNull;
-
-import java.util.List;
-
-import io.github.rosemoe.sora.lang.styling.line.LineAnchorStyle;
+import io.github.rosemoe.sora.lang.styling.line.LineAnchorStyle
 
 /**
  * Provider for extra styles that are not language specific.
  *
  * @author KonerDev
  */
-@FunctionalInterface
-public interface ExtraStylesProvider {
+fun interface ExtraStylesProvider {
 
     /**
      * Get extra styles for the given line.
@@ -43,6 +39,5 @@ public interface ExtraStylesProvider {
      * @param line The 0-indexed line number.
      * @param styles The list to add extra styles to.
      */
-    void getExtraStyles(int line, @NonNull List<LineAnchorStyle> styles);
-
+    fun getExtraStyles(line: Int, styles: MutableList<LineAnchorStyle>)
 }

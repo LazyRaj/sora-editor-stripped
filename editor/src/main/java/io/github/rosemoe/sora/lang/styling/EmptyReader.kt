@@ -21,45 +21,35 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.lang.styling;
+// Modified by Raj Dave (aka LazyRaj)
+package io.github.rosemoe.sora.lang.styling
 
-import java.util.ArrayList;
-import java.util.List;
+import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
 
-import io.github.rosemoe.sora.widget.schemes.EditorColorScheme;
+open class EmptyReader : Spans.Reader {
 
-public class EmptyReader implements Spans.Reader {
+    private val spans: MutableList<Span> = mutableListOf(
+        SpanFactory.obtainNoExt(0, EditorColorScheme.TEXT_NORMAL.toLong())
+    )
 
-    private final static EmptyReader INSTANCE = new EmptyReader();
-
-    private final List<Span> spans;
-
-    public EmptyReader() {
-        spans = new ArrayList<>(1);
-        spans.add(SpanFactory.obtainNoExt(0, EditorColorScheme.TEXT_NORMAL));
+    override fun moveToLine(line: Int) {
+        // no-op
     }
 
-    public static EmptyReader getInstance() {
-        return INSTANCE;
+    override fun getSpanAt(index: Int): Span {
+        return spans[index]
     }
 
-    @Override
-    public void moveToLine(int line) {
+    override fun getSpanCount(): Int = 1
 
+    override fun getSpansOnLine(line: Int): List<Span> {
+        return ArrayList(spans)
     }
 
-    @Override
-    public Span getSpanAt(int index) {
-        return spans.get(index);
-    }
+    companion object {
+        private val INSTANCE: EmptyReader = EmptyReader()
 
-    @Override
-    public int getSpanCount() {
-        return 1;
-    }
-
-    @Override
-    public List<Span> getSpansOnLine(int line) {
-        return new ArrayList<>(spans);
+        @JvmStatic
+        fun getInstance(): EmptyReader = INSTANCE
     }
 }
