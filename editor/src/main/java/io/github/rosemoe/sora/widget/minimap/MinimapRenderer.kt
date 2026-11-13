@@ -398,7 +398,7 @@ class MinimapRenderer(val editor: CodeEditor) : AutoCloseable {
     private fun drawViewportIndicator(canvas: Canvas) {
         val renderedBitmap = bitmap ?: return
         val height = editor.height
-        val all = (editor.getScrollMaxY() + height).toFloat()
+        val all = (editor.scrollMaxY + height).toFloat()
         if (renderedBitmap.height <= 0 || all <= 0) {
             return
         }
@@ -406,7 +406,7 @@ class MinimapRenderer(val editor: CodeEditor) : AutoCloseable {
             height / all * height,
             editor.dpUnit * RenderingConstants.SCROLLBAR_LENGTH_MIN_DIP
         )
-        val viewportTop = editor.offsetY * 1.0f / editor.getScrollMaxY() * (height - length)
+        val viewportTop = editor.offsetY * 1.0f / editor.scrollMaxY * (height - length)
         val top = viewportTop.coerceIn(0f, renderedBitmap.height.toFloat())
         val bottom = (viewportTop + length).coerceIn(top, renderedBitmap.height.toFloat())
         if (bottom <= top) {

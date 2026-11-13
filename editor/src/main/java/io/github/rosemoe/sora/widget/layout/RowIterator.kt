@@ -26,8 +26,6 @@
  */
 package io.github.rosemoe.sora.widget.layout
 
-import java.util.NoSuchElementException
-
 /**
  * Row iterator.
  * This iterator is able to return a series of Row objects linearly

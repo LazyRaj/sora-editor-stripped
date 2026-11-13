@@ -127,7 +127,10 @@ open class EditorStyleDelegate(
         }
     }
 
-    open fun setHighlightTexts(sourceManager: AnalyzeManager, highlightTexts: HighlightTextContainer?) {
+    open fun setHighlightTexts(
+        sourceManager: AnalyzeManager,
+        highlightTexts: HighlightTextContainer?
+    ) {
         val editor = editorRef.get()
         if (editor != null && sourceManager === editor.editorLanguage.analyzeManager) {
             this.highlightTexts = highlightTexts
@@ -164,7 +167,11 @@ open class EditorStyleDelegate(
         }
     }
 
-    override fun updateStyles(sourceManager: AnalyzeManager, styles: Styles, range: StyleUpdateRange) {
+    override fun updateStyles(
+        sourceManager: AnalyzeManager,
+        styles: Styles,
+        range: StyleUpdateRange
+    ) {
         val editor = editorRef.get()
         if (editor != null && sourceManager === editor.editorLanguage.analyzeManager) {
             runOnUiThread { editor.updateStyles(styles, range) }

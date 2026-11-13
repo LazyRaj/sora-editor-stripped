@@ -24,11 +24,6 @@
 
 package io.github.rosemoe.sora.lang.styling.patching
 
-import java.lang.IllegalStateException
-import java.lang.UnsupportedOperationException
-import java.util.Arrays
-import java.util.Collections
-
 /*******************************************************************************
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor

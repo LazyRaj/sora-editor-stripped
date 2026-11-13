@@ -12,10 +12,13 @@ import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
 interface DiagnosticTooltipLayout {
     /** Bind the host window so the layout can interact with it. */
     fun attach(window: EditorDiagnosticTooltipWindow)
+
     /** Build the root view that will be shown inside the tooltip popup. */
     fun createView(inflater: LayoutInflater): View
+
     /** Apply the editor color scheme to all relevant views. */
     fun applyColorScheme(colorScheme: EditorColorScheme)
+
     /** Render the provided diagnostic information inside the layout. */
     fun renderDiagnostic(diagnostic: DiagnosticDetail?)
 
@@ -32,12 +35,16 @@ interface DiagnosticTooltipLayout {
      * Default implementation is a no-op for backwards compatibility.
      */
     fun onTextSizeChanged(oldSizePx: Float, newSizePx: Float) {}
+
     /** Measure the layout and return the width/height that should be used for the popup window. */
     fun measureContent(maxWidth: Int, maxHeight: Int): Pair<Int, Int>
+
     /** Returns true if the pointer is currently hovering over the popup content. */
     fun isPointerOverPopup(): Boolean
+
     /** Returns true if the overflow popup/menu is currently showing. */
     fun isMenuShowing(): Boolean
+
     /** Called when the tooltip window itself is dismissed. */
     fun onWindowDismissed()
 }

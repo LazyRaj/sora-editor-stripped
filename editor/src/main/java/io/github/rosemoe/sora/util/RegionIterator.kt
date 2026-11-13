@@ -94,7 +94,8 @@ open class RegionIterator(
      * @param i Index of provider
      */
     fun getRegionSourcePointer(i: Int): Int {
-        val pointerValue = if (pointers[i] < providers[i].pointCount) providers[i].getPointAt(i) else max
+        val pointerValue =
+            if (pointers[i] < providers[i].pointCount) providers[i].getPointAt(i) else max
         return if ((endIndex <= pointerValue && pointerValue < max) || pointerStates[i]) pointers[i] - 1 else pointers[i]
     }
 

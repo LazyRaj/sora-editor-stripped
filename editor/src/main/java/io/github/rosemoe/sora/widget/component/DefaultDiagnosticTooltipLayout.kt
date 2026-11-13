@@ -136,7 +136,10 @@ class DefaultDiagnosticTooltipLayout : DiagnosticTooltipLayout {
         var bottomBarHeight = 0
         var bottomBarWidth = 0
         if (quickfixPanel.visibility == View.VISIBLE) {
-            quickfixPanel.measure(widthSpec, MeasureSpec.makeMeasureSpec(maxHeight, MeasureSpec.AT_MOST))
+            quickfixPanel.measure(
+                widthSpec,
+                MeasureSpec.makeMeasureSpec(maxHeight, MeasureSpec.AT_MOST)
+            )
             bottomBarHeight = quickfixPanel.measuredHeight
             bottomBarWidth = quickfixPanel.measuredWidth.coerceAtMost(maxWidth)
         }
@@ -144,7 +147,10 @@ class DefaultDiagnosticTooltipLayout : DiagnosticTooltipLayout {
         val layoutParams = messagePanel.layoutParams
         layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
         messagePanel.layoutParams = layoutParams
-        messagePanel.measure(widthSpec, MeasureSpec.makeMeasureSpec(restHeight, MeasureSpec.AT_MOST))
+        messagePanel.measure(
+            widthSpec,
+            MeasureSpec.makeMeasureSpec(restHeight, MeasureSpec.AT_MOST)
+        )
         val messageHeight = messagePanel.measuredHeight.coerceAtMost(restHeight)
         layoutParams.height = messageHeight
         messagePanel.layoutParams = layoutParams

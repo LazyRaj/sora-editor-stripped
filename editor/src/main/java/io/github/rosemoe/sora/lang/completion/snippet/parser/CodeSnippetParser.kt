@@ -122,7 +122,12 @@ class CodeSnippetParser private constructor(
 
     private fun parseEscaped(): Boolean {
         if (accept(TokenType.Backslash)) {
-            var escaped = acceptAnyText(TokenType.CurlyClose, TokenType.Dollar, TokenType.Backslash, TokenType.Backtick)
+            var escaped = acceptAnyText(
+                TokenType.CurlyClose,
+                TokenType.Dollar,
+                TokenType.Backslash,
+                TokenType.Backtick
+            )
             if (escaped == null) {
                 escaped = "\\"
             }
@@ -194,7 +199,11 @@ class CodeSnippetParser private constructor(
                     val sb = StringBuilder()
                     while (!accept(TokenType.CurlyClose)) {
                         if (accept(TokenType.Backslash)) {
-                            val text = acceptAnyText(TokenType.Backslash, TokenType.Dollar, TokenType.CurlyClose)
+                            val text = acceptAnyText(
+                                TokenType.Backslash,
+                                TokenType.Dollar,
+                                TokenType.CurlyClose
+                            )
                             if (text != null) {
                                 sb.append(text)
                             } else {
@@ -242,7 +251,11 @@ class CodeSnippetParser private constructor(
                     val elements = ArrayList<PlaceHolderElement>()
                     while (!accept(TokenType.CurlyClose)) {
                         if (accept(TokenType.Backslash)) {
-                            val text = acceptAnyText(TokenType.Backslash, TokenType.Dollar, TokenType.CurlyClose)
+                            val text = acceptAnyText(
+                                TokenType.Backslash,
+                                TokenType.Dollar,
+                                TokenType.CurlyClose
+                            )
                             val t = text ?: "\\"
                             appendPlaceholderElement(elements, t)
                         } else if (token.type == TokenType.EOF) {
@@ -525,7 +538,8 @@ class CodeSnippetParser private constructor(
                 return null
             }
             if (accept(TokenType.Backslash)) {
-                val text = acceptAnyText(TokenType.Backslash, TokenType.Dollar, TokenType.CurlyClose)
+                val text =
+                    acceptAnyText(TokenType.Backslash, TokenType.Dollar, TokenType.CurlyClose)
                 if (text != null) {
                     sb.append(text)
                 } else {

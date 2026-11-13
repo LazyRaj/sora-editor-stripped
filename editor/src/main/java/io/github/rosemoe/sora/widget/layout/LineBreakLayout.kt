@@ -36,7 +36,6 @@ import io.github.rosemoe.sora.text.ContentLine
 import io.github.rosemoe.sora.util.BlockIntList
 import io.github.rosemoe.sora.util.IntPair
 import io.github.rosemoe.sora.widget.CodeEditor
-import java.util.NoSuchElementException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -95,16 +94,21 @@ open class LineBreakLayout(
             override fun compute(): Void? {
                 wm.lock.lock()
                 try {
-                    content.runReadActionsOnLines(0, content.lineCount - 1, Content.ContentLineConsumer2 { index, line, abortFlag ->
-                        val width = measurerLocal.measureText(line, 0, line.length, shadowPaint).toInt()
-                        val inlineElementsWidth = measureInlayHints(getInlayHints(index), shadowPaint)
-                        if (shouldRun()) {
-                            wm.add(width + inlineElementsWidth)
-                            iew.add(inlineElementsWidth)
-                        } else {
-                            abortFlag.set = true
-                        }
-                    })
+                    content.runReadActionsOnLines(
+                        0,
+                        content.lineCount - 1,
+                        Content.ContentLineConsumer2 { index, line, abortFlag ->
+                            val width =
+                                measurerLocal.measureText(line, 0, line.length, shadowPaint).toInt()
+                            val inlineElementsWidth =
+                                measureInlayHints(getInlayHints(index), shadowPaint)
+                            if (shouldRun()) {
+                                wm.add(width + inlineElementsWidth)
+                                iew.add(inlineElementsWidth)
+                            } else {
+                                abortFlag.set = true
+                            }
+                        })
                 } finally {
                     wm.lock.unlock()
                 }
@@ -160,7 +164,10 @@ open class LineBreakLayout(
         return m.measureText(line, start, end, ed.textPaint).toInt()
     }
 
-    override fun obtainRowIterator(initialRow: Int, preloadedLines: SparseArray<ContentLine>?): RowIterator {
+    override fun obtainRowIterator(
+        initialRow: Int,
+        preloadedLines: SparseArray<ContentLine>?
+    ): RowIterator {
         val content = text ?: throw IllegalStateException("Layout destroyed")
         return LineBreakLayoutRowItr(this, content, initialRow, preloadedLines)
     }
@@ -202,7 +209,11 @@ open class LineBreakLayout(
                     iew.set(i, newInlayWidths)
                     wm.set(
                         i,
-                        wm.get(i) + measureTextRegion(i, startColumn, endColumn) + (newInlayWidths - oldInlayWidths)
+                        wm.get(i) + measureTextRegion(
+                            i,
+                            startColumn,
+                            endColumn
+                        ) + (newInlayWidths - oldInlayWidths)
                     )
                 } else {
                     wm.set(i, measureLineAndUpdateInlineWidths(i))
@@ -234,7 +245,9 @@ open class LineBreakLayout(
             val newInlayWidths = measureInlayHints(getInlayHints(startLine), ed.textPaint)
             iew.set(startLine, newInlayWidths)
             val m = measurer
-            val deletedTextWidth = m?.measureText(deletedContent, 0, endColumn - startColumn, ed.textPaint)?.toInt() ?: 0
+            val deletedTextWidth =
+                m?.measureText(deletedContent, 0, endColumn - startColumn, ed.textPaint)?.toInt()
+                    ?: 0
             wm.set(
                 startLine,
                 wm.get(startLine) - deletedTextWidth + (newInlayWidths - oldInlayWidths)
@@ -286,7 +299,10 @@ open class LineBreakLayout(
             return content.lineCount * ed.rowHeight
         }
 
-    override fun getVisualPositionForLayoutOffset(offsetX: Float, offsetY: Float): Layout.VisualLocation {
+    override fun getVisualPositionForLayoutOffset(
+        offsetX: Float,
+        offsetY: Float
+    ): Layout.VisualLocation {
         val content = text ?: return Layout.VisualLocation(0, 0)
         val ed = editor ?: return Layout.VisualLocation(0, 0)
         val lineCount = content.lineCount

@@ -59,7 +59,8 @@ class DefaultCompletionItemAdapter : EditorCompletionAdapter() {
     ): View {
         var view = convertView
         if (view == null) {
-            view = LayoutInflater.from(getContext()).inflate(R.layout.default_completion_result_item, parent, false)
+            view = LayoutInflater.from(getContext())
+                .inflate(R.layout.default_completion_result_item, parent, false)
         }
         val item = getItem(position)
 

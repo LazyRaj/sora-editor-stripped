@@ -57,24 +57,37 @@ object ViewMeasureHelper {
         val widthMode = View.MeasureSpec.getMode(wMeasureSpec)
         val heightMode = View.MeasureSpec.getMode(hMeasureSpec)
         val maxSize = 0x3FFFFFFF
-        val maxWidth = if (widthMode == View.MeasureSpec.UNSPECIFIED) maxSize else View.MeasureSpec.getSize(wMeasureSpec)
-        val maxHeight = if (heightMode == View.MeasureSpec.UNSPECIFIED) maxSize else View.MeasureSpec.getSize(hMeasureSpec)
+        val maxWidth =
+            if (widthMode == View.MeasureSpec.UNSPECIFIED) maxSize else View.MeasureSpec.getSize(
+                wMeasureSpec
+            )
+        val maxHeight =
+            if (heightMode == View.MeasureSpec.UNSPECIFIED) maxSize else View.MeasureSpec.getSize(
+                hMeasureSpec
+            )
         val measurer = SingleCharacterWidths(tabSize)
 
         if (wordwrap) {
             if (widthMode != View.MeasureSpec.EXACTLY) {
-                val lines = if (heightMode != View.MeasureSpec.EXACTLY) IntArray(text.lineCount) else null
+                val lines =
+                    if (heightMode != View.MeasureSpec.EXACTLY) IntArray(text.lineCount) else null
                 val lineMaxSize = MutableInt(0)
-                text.runReadActionsOnLines(0, text.lineCount - 1, Content.ContentLineConsumer { index, line, _ ->
-                    val measured = ceil(measurer.measureText(line, 0, line.length, paint).toDouble()).toInt()
-                    if (measured > lineMaxSize.value) {
-                        lineMaxSize.value = measured
-                    }
-                    if (lines != null) {
-                        lines[index] = measured
-                    }
-                })
-                val width = min(maxWidth.toDouble(), (lineMaxSize.value + gutterSize).toDouble()).toInt()
+                text.runReadActionsOnLines(
+                    0,
+                    text.lineCount - 1,
+                    Content.ContentLineConsumer { index, line, _ ->
+                        val measured = ceil(
+                            measurer.measureText(line, 0, line.length, paint).toDouble()
+                        ).toInt()
+                        if (measured > lineMaxSize.value) {
+                            lineMaxSize.value = measured
+                        }
+                        if (lines != null) {
+                            lines[index] = measured
+                        }
+                    })
+                val width =
+                    min(maxWidth.toDouble(), (lineMaxSize.value + gutterSize).toDouble()).toInt()
                 wMeasureSpec = View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY)
                 if (lines != null) {
                     val rowCount = MutableInt(0)
@@ -87,7 +100,8 @@ object ViewMeasureHelper {
                         }
                     }
                     val height = min((rowHeight * rowCount.value).toInt(), maxHeight)
-                    hMeasureSpec = View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY)
+                    hMeasureSpec =
+                        View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY)
                 }
             } else {
                 if (heightMode != View.MeasureSpec.EXACTLY) {
@@ -96,24 +110,38 @@ object ViewMeasureHelper {
                     if (availableSize <= 0) {
                         rowCount.value = text.length
                     } else {
-                        text.runReadActionsOnLines(0, text.lineCount - 1, Content.ContentLineConsumer { _, line, _ ->
-                            val measured = ceil(measurer.measureText(line, 0, line.length, paint).toDouble()).toInt()
-                            rowCount.value += max(1.0, ceil(1.0 * measured / availableSize)).toInt()
-                        })
+                        text.runReadActionsOnLines(
+                            0,
+                            text.lineCount - 1,
+                            Content.ContentLineConsumer { _, line, _ ->
+                                val measured = ceil(
+                                    measurer.measureText(line, 0, line.length, paint).toDouble()
+                                ).toInt()
+                                rowCount.value += max(
+                                    1.0,
+                                    ceil(1.0 * measured / availableSize)
+                                ).toInt()
+                            })
                     }
                     val height = min((rowHeight * rowCount.value).toInt(), maxHeight)
-                    hMeasureSpec = View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY)
+                    hMeasureSpec =
+                        View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY)
                 }
             }
         } else {
             if (widthMode != View.MeasureSpec.EXACTLY) {
                 val lineMaxSize = MutableInt(0)
-                text.runReadActionsOnLines(0, text.lineCount - 1, Content.ContentLineConsumer { _, line, _ ->
-                    val measured = ceil(measurer.measureText(line, 0, line.length, paint).toDouble()).toInt()
-                    if (measured > lineMaxSize.value) {
-                        lineMaxSize.value = measured
-                    }
-                })
+                text.runReadActionsOnLines(
+                    0,
+                    text.lineCount - 1,
+                    Content.ContentLineConsumer { _, line, _ ->
+                        val measured = ceil(
+                            measurer.measureText(line, 0, line.length, paint).toDouble()
+                        ).toInt()
+                        if (measured > lineMaxSize.value) {
+                            lineMaxSize.value = measured
+                        }
+                    })
                 val width = min((lineMaxSize.value + gutterSize).toInt(), maxWidth)
                 wMeasureSpec = View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY)
             }

@@ -33,7 +33,8 @@ import io.github.rosemoe.sora.widget.style.CursorAnimator
  *
  * @author Dmitry Rubtsov
  */
-open class ScaleCursorAnimator(private val editor: CodeEditor) : CursorAnimator, ValueAnimator.AnimatorUpdateListener {
+open class ScaleCursorAnimator(private val editor: CodeEditor) : CursorAnimator,
+    ValueAnimator.AnimatorUpdateListener {
 
     private val duration: Long = 180
 
@@ -115,14 +116,7 @@ open class ScaleCursorAnimator(private val editor: CodeEditor) : CursorAnimator,
     }
 
     private fun shouldReturnEndValue(): Boolean {
-        if (!scaleAnimator.isRunning || editor.insertHandleDescriptor.position.isEmpty) {
-            return true
-        }
-        return if (scaleAnimator.duration == duration) {
-            true
-        } else {
-            scaleAnimator.currentPlayTime > duration
-        }
+        return !scaleAnimator.isRunning || editor.insertHandleDescriptor.position.isEmpty || scaleAnimator.duration == duration || scaleAnimator.currentPlayTime > duration
     }
 
     override fun animatedX(): Float {

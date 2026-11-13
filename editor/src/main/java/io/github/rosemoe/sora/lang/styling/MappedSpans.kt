@@ -45,9 +45,20 @@ class MappedSpans private constructor(
         val startColumn = start.column
         val endColumn = end.column
         if (startLine == endLine) {
-            MappedSpanUpdater.shiftSpansOnSingleLineInsert(spanMap, startLine, startColumn, endColumn)
+            MappedSpanUpdater.shiftSpansOnSingleLineInsert(
+                spanMap,
+                startLine,
+                startColumn,
+                endColumn
+            )
         } else {
-            MappedSpanUpdater.shiftSpansOnMultiLineInsert(spanMap, startLine, startColumn, endLine, endColumn)
+            MappedSpanUpdater.shiftSpansOnMultiLineInsert(
+                spanMap,
+                startLine,
+                startColumn,
+                endLine,
+                endColumn
+            )
         }
     }
 
@@ -57,9 +68,20 @@ class MappedSpans private constructor(
         val startColumn = start.column
         val endColumn = end.column
         if (startLine == endLine) {
-            MappedSpanUpdater.shiftSpansOnSingleLineDelete(spanMap, startLine, startColumn, endColumn)
+            MappedSpanUpdater.shiftSpansOnSingleLineDelete(
+                spanMap,
+                startLine,
+                startColumn,
+                endColumn
+            )
         } else {
-            MappedSpanUpdater.shiftSpansOnMultiLineDelete(spanMap, startLine, startColumn, endLine, endColumn)
+            MappedSpanUpdater.shiftSpansOnMultiLineDelete(
+                spanMap,
+                startLine,
+                startColumn,
+                endLine,
+                endColumn
+            )
         }
     }
 
@@ -108,7 +130,8 @@ class MappedSpans private constructor(
             if (spanLine == mapLine) {
                 spans[spanLine].add(span)
             } else if (spanLine > mapLine) {
-                val extendedSpan = last ?: SpanFactory.obtainNoExt(0, EditorColorScheme.TEXT_NORMAL.toLong())
+                val extendedSpan =
+                    last ?: SpanFactory.obtainNoExt(0, EditorColorScheme.TEXT_NORMAL.toLong())
                 while (mapLine < spanLine) {
                     val lineSpans = mutableListOf<Span>()
                     lineSpans.add(copyAndSetColumn(extendedSpan, 0))
@@ -134,7 +157,8 @@ class MappedSpans private constructor(
          */
         fun determine(line: Int) {
             var mapLine = spans.size - 1
-            val extendedSpan = last ?: SpanFactory.obtainNoExt(0, EditorColorScheme.TEXT_NORMAL.toLong())
+            val extendedSpan =
+                last ?: SpanFactory.obtainNoExt(0, EditorColorScheme.TEXT_NORMAL.toLong())
             while (mapLine < line) {
                 val lineSpans = mutableListOf<Span>()
                 lineSpans.add(copyAndSetColumn(extendedSpan, 0))

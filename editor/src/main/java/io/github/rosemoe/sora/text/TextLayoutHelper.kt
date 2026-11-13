@@ -41,12 +41,13 @@ import android.text.TextPaint
 open class TextLayoutHelper private constructor() {
 
     private val text: Editable = Editable.Factory.getInstance().newEditable("")
-    private val layout: DynamicLayout = DynamicLayout.Builder.obtain(text, TextPaint(), Int.MAX_VALUE / 2)
-        .setIncludePad(true)
-        .setLineSpacing(0f, 0f)
-        .setTextDirection(TextDirectionHeuristics.FIRSTSTRONG_LTR)
-        .setAlignment(Layout.Alignment.ALIGN_NORMAL)
-        .build()
+    private val layout: DynamicLayout =
+        DynamicLayout.Builder.obtain(text, TextPaint(), Int.MAX_VALUE / 2)
+            .setIncludePad(true)
+            .setLineSpacing(0f, 0f)
+            .setTextDirection(TextDirectionHeuristics.FIRSTSTRONG_LTR)
+            .setAlignment(Layout.Alignment.ALIGN_NORMAL)
+            .build()
 
     /**
      * Get cursor position after moving left
@@ -82,7 +83,8 @@ open class TextLayoutHelper private constructor() {
 
     companion object {
         private const val CHAR_FACTOR: Int = 64
-        private val sLocal: ThreadLocal<TextLayoutHelper> = ThreadLocal.withInitial { TextLayoutHelper() }
+        private val sLocal: ThreadLocal<TextLayoutHelper> =
+            ThreadLocal.withInitial { TextLayoutHelper() }
 
         /**
          * Get TextLayoutHelper for current thread

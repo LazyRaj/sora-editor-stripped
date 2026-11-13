@@ -57,7 +57,11 @@ object StylesUtils {
         return getSpanForPositionImpl(styles, pos, 1)
     }
 
-    private fun getSpanForPositionImpl(styles: Styles?, pos: CharPosition, spanIndexOffset: Int): Span? {
+    private fun getSpanForPositionImpl(
+        styles: Styles?,
+        pos: CharPosition,
+        spanIndexOffset: Int
+    ): Span? {
         val line = pos.line
         val column = pos.column
         val spans = styles?.spans ?: return null

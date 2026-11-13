@@ -33,7 +33,12 @@ open class PlaceholderItem : SnippetItem {
         this.definition = definition
     }
 
-    private constructor(definition: PlaceholderDefinition, text: String?, start: Int, end: Int) : super(start, end) {
+    private constructor(
+        definition: PlaceholderDefinition,
+        text: String?,
+        start: Int,
+        end: Int
+    ) : super(start, end) {
         this.definition = definition
         this.text = text
     }

@@ -296,8 +296,10 @@ open class EditorTextActionWindow(
         pasteBtn.isEnabled = editor.hasClip()
         copyBtn.visibility = if (editor.cursor.isSelected) View.VISIBLE else View.GONE
         pasteBtn.visibility = if (editor.isEditable) View.VISIBLE else View.GONE
-        cutBtn.visibility = if (editor.cursor.isSelected && editor.isEditable) View.VISIBLE else View.GONE
-        longSelectBtn.visibility = if (!editor.cursor.isSelected && editor.isEditable) View.VISIBLE else View.GONE
+        cutBtn.visibility =
+            if (editor.cursor.isSelected && editor.isEditable) View.VISIBLE else View.GONE
+        longSelectBtn.visibility =
+            if (!editor.cursor.isSelected && editor.isEditable) View.VISIBLE else View.GONE
         rootView.measure(
             View.MeasureSpec.makeMeasureSpec(1000000, View.MeasureSpec.AT_MOST),
             View.MeasureSpec.makeMeasureSpec(100000, View.MeasureSpec.AT_MOST)
@@ -318,19 +320,23 @@ open class EditorTextActionWindow(
                 editor.selectAll()
                 return
             }
+
             R.id.panel_btn_cut -> {
                 if (editor.cursor.isSelected) {
                     editor.cutText()
                 }
             }
+
             R.id.panel_btn_paste -> {
                 editor.pasteText()
                 editor.setSelection(editor.cursor.rightLine, editor.cursor.rightColumn)
             }
+
             R.id.panel_btn_copy -> {
                 editor.copyText()
                 editor.setSelection(editor.cursor.rightLine, editor.cursor.rightColumn)
             }
+
             R.id.panel_btn_long_select -> {
                 editor.beginLongSelect()
             }

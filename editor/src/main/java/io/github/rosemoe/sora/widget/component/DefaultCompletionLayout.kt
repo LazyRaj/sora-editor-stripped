@@ -72,8 +72,20 @@ open class DefaultCompletionLayout : CompletionLayout {
                 enableTransitionType(LayoutTransition.CHANGE_APPEARING)
                 enableTransitionType(LayoutTransition.CHANGE_DISAPPEARING)
                 addTransitionListener(object : LayoutTransition.TransitionListener {
-                    override fun startTransition(transition: LayoutTransition, container: ViewGroup, view: View, transitionType: Int) {}
-                    override fun endTransition(transition: LayoutTransition, container: ViewGroup, view: View, transitionType: Int) {
+                    override fun startTransition(
+                        transition: LayoutTransition,
+                        container: ViewGroup,
+                        view: View,
+                        transitionType: Int
+                    ) {
+                    }
+
+                    override fun endTransition(
+                        transition: LayoutTransition,
+                        container: ViewGroup,
+                        view: View,
+                        transitionType: Int
+                    ) {
                         if (view === list) {
                             view.requestLayout()
                         }
@@ -104,7 +116,11 @@ open class DefaultCompletionLayout : CompletionLayout {
             pb,
             LinearLayout.LayoutParams(
                 -1,
-                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20f, context.resources.displayMetrics).toInt()
+                TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    20f,
+                    context.resources.displayMetrics
+                ).toInt()
             )
         )
         rootLayout.addView(lv, LinearLayout.LayoutParams(-1, -1))
@@ -112,10 +128,14 @@ open class DefaultCompletionLayout : CompletionLayout {
         pb.isIndeterminate = true
         val progressBarLayoutParams = pb.layoutParams as LinearLayout.LayoutParams
         val dm = context.resources.displayMetrics
-        progressBarLayoutParams.topMargin = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, -8f, dm).toInt()
-        progressBarLayoutParams.bottomMargin = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, -8f, dm).toInt()
-        progressBarLayoutParams.leftMargin = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4f, dm).toInt()
-        progressBarLayoutParams.rightMargin = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4f, dm).toInt()
+        progressBarLayoutParams.topMargin =
+            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, -8f, dm).toInt()
+        progressBarLayoutParams.bottomMargin =
+            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, -8f, dm).toInt()
+        progressBarLayoutParams.leftMargin =
+            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4f, dm).toInt()
+        progressBarLayoutParams.rightMargin =
+            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4f, dm).toInt()
 
         val gd = GradientDrawable().apply {
             cornerRadius = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8f, dm)
@@ -161,7 +181,8 @@ open class DefaultCompletionLayout : CompletionLayout {
 
     @Suppress("UNCHECKED_CAST")
     override fun getCompletionList(): AdapterView<Adapter> {
-        return (listView ?: throw IllegalStateException("Layout not inflated")) as AdapterView<Adapter>
+        return (listView
+            ?: throw IllegalStateException("Layout not inflated")) as AdapterView<Adapter>
     }
 
     private fun performScrollList(offset: Int) {
@@ -188,7 +209,11 @@ open class DefaultCompletionLayout : CompletionLayout {
                     0,
                     view.width,
                     view.height,
-                    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8f, view.context.resources.displayMetrics)
+                    TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP,
+                        8f,
+                        view.context.resources.displayMetrics
+                    )
                 )
             }
         }

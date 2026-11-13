@@ -38,7 +38,12 @@ open class SimpleSnippetCompletionItem(
 
     constructor(label: CharSequence, snippet: SnippetDescription) : this(label, null, null, snippet)
 
-    constructor(label: CharSequence, desc: CharSequence?, snippet: SnippetDescription) : this(label, desc, null, snippet)
+    constructor(label: CharSequence, desc: CharSequence?, snippet: SnippetDescription) : this(
+        label,
+        desc,
+        null,
+        snippet
+    )
 
     init {
         kind(CompletionItemKind.Snippet)
@@ -46,7 +51,8 @@ open class SimpleSnippetCompletionItem(
 
     override fun performCompletion(editor: CodeEditor, text: Content, position: CharPosition) {
         val prefixLength = snippet.selectedLength
-        val selectedText = text.subSequence(position.index - prefixLength, position.index).toString()
+        val selectedText =
+            text.subSequence(position.index - prefixLength, position.index).toString()
         var actionIndex = position.index
         if (snippet.deleteSelected) {
             text.delete(position.index - prefixLength, position.index)

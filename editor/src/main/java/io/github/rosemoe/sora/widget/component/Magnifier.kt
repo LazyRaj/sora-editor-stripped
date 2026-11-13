@@ -90,7 +90,11 @@ open class Magnifier(
         popup.height = (view.dpUnit * 70).toInt()
         popup.width = (view.dpUnit * 100).toInt()
         popup.contentView = popupView
-        maxTextSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 28f, popupView.resources.displayMetrics)
+        maxTextSize = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_SP,
+            28f,
+            popupView.resources.displayMetrics
+        )
         applyBackgroundTint()
         eventManager.subscribeAlways(ColorSchemeUpdateEvent::class.java) {
             applyBackgroundTint()
@@ -201,8 +205,10 @@ open class Magnifier(
                 clip,
                 { statusCode ->
                     if (statusCode == PixelCopy.SUCCESS) {
-                        val dest = Bitmap.createBitmap(popup.width, popup.height, Bitmap.Config.ARGB_8888)
-                        val scaled = Bitmap.createScaledBitmap(clip, popup.width, popup.height, true)
+                        val dest =
+                            Bitmap.createBitmap(popup.width, popup.height, Bitmap.Config.ARGB_8888)
+                        val scaled =
+                            Bitmap.createScaledBitmap(clip, popup.width, popup.height, true)
                         clip.recycle()
 
                         val canvas = Canvas(dest)

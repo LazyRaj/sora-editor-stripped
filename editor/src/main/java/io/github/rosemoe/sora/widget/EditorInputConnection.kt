@@ -47,7 +47,6 @@ import io.github.rosemoe.sora.event.ImePrivateCommandEvent
 import io.github.rosemoe.sora.event.SelectionChangeEvent
 import io.github.rosemoe.sora.lang.analysis.SequenceUpdateRange
 import io.github.rosemoe.sora.text.ComposingText
-import io.github.rosemoe.sora.text.Content
 import io.github.rosemoe.sora.text.Cursor
 import io.github.rosemoe.sora.util.Logger
 import kotlin.math.max
@@ -65,6 +64,7 @@ open class EditorInputConnection(
     companion object {
         private val logger = Logger.instance("EditorInputConnection")
         private const val MEMORY_EFFICIENT_TEXT_LENGTH = 2048
+
         @JvmField
         var DEBUG = false
     }
@@ -281,9 +281,14 @@ open class EditorInputConnection(
         val composingStateBefore = composingText.isComposing
         if (editor.props.trackComposingTextOnCommit) {
             if (composingText.isComposing) {
-                val currentComp = editor.text.subSequence(composingText.startIndex, composingText.endIndex).toString()
+                val currentComp =
+                    editor.text.subSequence(composingText.startIndex, composingText.endIndex)
+                        .toString()
                 val commitStr = mutableText.toString()
-                if (composingText.endIndex == cursor.left && !cursor.isSelected && commitStr.startsWith(currentComp) && commitStr.length > currentComp.length) {
+                if (composingText.endIndex == cursor.left && !cursor.isSelected && commitStr.startsWith(
+                        currentComp
+                    ) && commitStr.length > currentComp.length
+                ) {
                     mutableText = commitStr.substring(currentComp.length)
                     resetComposingText()
                 } else {
@@ -476,7 +481,10 @@ open class EditorInputConnection(
             val pos = content.indexer.getCharPosition(composingText.endIndex)
             content.insert(pos.line, pos.column, text.substring(current.length))
         } else if (current.length > text.length && current.startsWith(text)) {
-            content.delete(composingText.endIndex - (current.length - text.length), composingText.endIndex)
+            content.delete(
+                composingText.endIndex - (current.length - text.length),
+                composingText.endIndex
+            )
         } else {
             content.replace(composingText.startIndex, composingText.endIndex, text)
         }
@@ -529,7 +537,14 @@ open class EditorInputConnection(
         val content = editor.text
         val startPos = content.indexer.getCharPosition(s)
         val endPos = content.indexer.getCharPosition(e)
-        editor.setSelectionRegion(startPos.line, startPos.column, endPos.line, endPos.column, false, SelectionChangeEvent.CAUSE_IME)
+        editor.setSelectionRegion(
+            startPos.line,
+            startPos.column,
+            endPos.line,
+            endPos.column,
+            false,
+            SelectionChangeEvent.CAUSE_IME
+        )
         return true
     }
 
@@ -579,6 +594,7 @@ open class EditorInputConnection(
                 editor.selectAll()
                 return true
             }
+
             android.R.id.cut -> {
                 editor.copyText()
                 if (cursor.isSelected) {
@@ -586,19 +602,23 @@ open class EditorInputConnection(
                 }
                 return true
             }
+
             android.R.id.paste,
             android.R.id.pasteAsPlainText -> {
                 editor.pasteText()
                 return true
             }
+
             android.R.id.copy -> {
                 editor.copyText()
                 return true
             }
+
             android.R.id.undo -> {
                 editor.undo()
                 return true
             }
+
             android.R.id.redo -> {
                 editor.redo()
                 return true
@@ -642,7 +662,11 @@ open class EditorInputConnection(
     }
 
     @RequiresApi(31)
-    override fun getSurroundingText(beforeLength: Int, afterLength: Int, flags: Int): SurroundingText? {
+    override fun getSurroundingText(
+        beforeLength: Int,
+        afterLength: Int,
+        flags: Int
+    ): SurroundingText? {
         if (DEBUG) {
             logger.d("getSurroundingText, beforeLen = $beforeLength, afterLen = $afterLength")
         }

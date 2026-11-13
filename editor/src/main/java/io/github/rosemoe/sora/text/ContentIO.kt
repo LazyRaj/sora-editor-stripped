@@ -98,7 +98,11 @@ object ContentIO {
                         var line = content.lineCount - 1
                         content.insert(line, content.getColumnCount(line), wrapper)
                         line = content.lineCount - 1
-                        content.insert(line, content.getColumnCount(line), (peek.toChar()).toString())
+                        content.insert(
+                            line,
+                            content.getColumnCount(line),
+                            (peek.toChar()).toString()
+                        )
                         continue
                     }
                 }
@@ -156,23 +160,26 @@ object ContentIO {
         val buffered = if (writer is BufferedWriter) writer else BufferedWriter(writer, BUFFER_SIZE)
         val buf = CharArray(CHAR_BUFFER_SIZE)
         try {
-            text.runReadActionsOnLines(0, text.lineCount - 1, Content.ContentLineConsumer2 { _, line, _ ->
-                try {
-                    // Write line content
-                    var i = 0
-                    while (i < line.length) {
-                        val end = minOf(i + buf.size, line.length)
-                        line.getChars(i, end, buf, 0)
-                        buffered.write(buf, 0, end - i)
-                        i = end
+            text.runReadActionsOnLines(
+                0,
+                text.lineCount - 1,
+                Content.ContentLineConsumer2 { _, line, _ ->
+                    try {
+                        // Write line content
+                        var i = 0
+                        while (i < line.length) {
+                            val end = minOf(i + buf.size, line.length)
+                            line.getChars(i, end, buf, 0)
+                            buffered.write(buf, 0, end - i)
+                            i = end
+                        }
+                        // Write line feed (the last line has empty line feed)
+                        buffered.write(line.lineSeparator.chars)
+                    } catch (e: IOException) {
+                        // To be handled by outer code
+                        throw RuntimeException(e)
                     }
-                    // Write line feed (the last line has empty line feed)
-                    buffered.write(line.lineSeparator.chars)
-                } catch (e: IOException) {
-                    // To be handled by outer code
-                    throw RuntimeException(e)
-                }
-            })
+                })
         } catch (e: RuntimeException) {
             val cause = e.cause
             if (cause is IOException) {

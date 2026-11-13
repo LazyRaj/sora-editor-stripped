@@ -177,11 +177,12 @@ object MappedSpanUpdater {
         if (startLineSpans[extendedSpanIndex].column > startColumn) {
             extendedSpanIndex--
         }
-        val extendedSpan: Span = if (extendedSpanIndex < 0 || extendedSpanIndex >= startLineSpans.size) {
-            SpanFactory.obtainNoExt(0, EditorColorScheme.TEXT_NORMAL.toLong())
-        } else {
-            startLineSpans[extendedSpanIndex]
-        }
+        val extendedSpan: Span =
+            if (extendedSpanIndex < 0 || extendedSpanIndex >= startLineSpans.size) {
+                SpanFactory.obtainNoExt(0, EditorColorScheme.TEXT_NORMAL.toLong())
+            } else {
+                startLineSpans[extendedSpanIndex]
+            }
         // Create map lines for new lines
         for (i in 0 until endLine - startLine) {
             val list = mutableListOf<Span>()

@@ -41,12 +41,20 @@ open class TimeBasedSnippetVariableResolver : ISnippetVariableResolver {
     companion object {
         private fun getDisplayName(field: Int, shortType: Boolean): String {
             val c = Calendar.getInstance()
-            var result = c.getDisplayName(field, if (shortType) Calendar.SHORT else Calendar.LONG, Locale.getDefault())
+            var result = c.getDisplayName(
+                field,
+                if (shortType) Calendar.SHORT else Calendar.LONG,
+                Locale.getDefault()
+            )
             if (result == null && shortType) {
                 result = c.getDisplayName(field, Calendar.LONG, Locale.getDefault())
             }
             if (result == null) {
-                result = c.getDisplayName(field, if (shortType) Calendar.SHORT else Calendar.LONG, Locale.US)
+                result = c.getDisplayName(
+                    field,
+                    if (shortType) Calendar.SHORT else Calendar.LONG,
+                    Locale.US
+                )
             }
             if (result == null) {
                 // The very fallback
@@ -68,12 +76,22 @@ open class TimeBasedSnippetVariableResolver : ISnippetVariableResolver {
     override fun resolve(name: String): String {
         return when (name) {
             "CURRENT_YEAR" -> Calendar.getInstance().get(Calendar.YEAR).toString()
-            "CURRENT_YEAR_SHORT" -> (Calendar.getInstance().get(Calendar.YEAR) % 100).toString().padStart(2, '0')
-            "CURRENT_MONTH" -> Calendar.getInstance().get(Calendar.MONTH).toString().padStart(2, '0')
+            "CURRENT_YEAR_SHORT" -> (Calendar.getInstance().get(Calendar.YEAR) % 100).toString()
+                .padStart(2, '0')
+
+            "CURRENT_MONTH" -> Calendar.getInstance().get(Calendar.MONTH).toString()
+                .padStart(2, '0')
+
             "CURRENT_DATE" -> SimpleDateFormat.getDateInstance().format(Date())
-            "CURRENT_HOUR" -> Calendar.getInstance().get(Calendar.HOUR_OF_DAY).toString().padStart(2, '0')
-            "CURRENT_MINUTE" -> Calendar.getInstance().get(Calendar.MINUTE).toString().padStart(2, '0')
-            "CURRENT_SECOND" -> Calendar.getInstance().get(Calendar.SECOND).toString().padStart(2, '0')
+            "CURRENT_HOUR" -> Calendar.getInstance().get(Calendar.HOUR_OF_DAY).toString()
+                .padStart(2, '0')
+
+            "CURRENT_MINUTE" -> Calendar.getInstance().get(Calendar.MINUTE).toString()
+                .padStart(2, '0')
+
+            "CURRENT_SECOND" -> Calendar.getInstance().get(Calendar.SECOND).toString()
+                .padStart(2, '0')
+
             "CURRENT_DAY_NAME" -> getDisplayName(Calendar.DAY_OF_WEEK, false)
             "CURRENT_DAY_NAME_SHORT" -> getDisplayName(Calendar.DAY_OF_WEEK, true)
             "CURRENT_MONTH_NAME" -> getDisplayName(Calendar.MONTH, false)

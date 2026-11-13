@@ -115,7 +115,11 @@ abstract class AsyncFormatter : Formatter {
      * @return the new cursor range to be applied to the text
      */
     @WorkerThread
-    abstract fun formatRegionAsync(text: Content, rangeToFormat: TextRange, cursorRange: TextRange): TextRange?
+    abstract fun formatRegionAsync(
+        text: Content,
+        rangeToFormat: TextRange,
+        cursorRange: TextRange
+    ): TextRange?
 
     private fun sendUpdate(text: Content, cursorRange: TextRange?) {
         val r = receiver?.get()

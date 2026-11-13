@@ -151,12 +151,27 @@ open class Paint @JvmOverloads constructor(
                     val result = if (lastEnd == i) {
                         i
                     } else {
-                        breakTextImpl(text, lastEnd, i, contextStart, contextEnd, isRtl, advance - current)
+                        breakTextImpl(
+                            text,
+                            lastEnd,
+                            i,
+                            contextStart,
+                            contextEnd,
+                            isRtl,
+                            advance - current
+                        )
                     }
                     if (result < i) {
                         return result
                     }
-                    current += measureTextRunAdvance(text, lastEnd, i, contextStart, contextEnd, isRtl)
+                    current += measureTextRunAdvance(
+                        text,
+                        lastEnd,
+                        i,
+                        contextStart,
+                        contextEnd,
+                        isRtl
+                    )
                     current += measureText(FunctionCharacters.getNameForFunctionCharacter(ch))
                     if (current >= advance) {
                         return i
@@ -165,7 +180,15 @@ open class Paint @JvmOverloads constructor(
                 }
             }
             if (lastEnd < end) {
-                return breakTextImpl(text, lastEnd, end, contextStart, contextEnd, isRtl, advance - current)
+                return breakTextImpl(
+                    text,
+                    lastEnd,
+                    end,
+                    contextStart,
+                    contextEnd,
+                    isRtl,
+                    advance - current
+                )
             }
             return end
         } else {

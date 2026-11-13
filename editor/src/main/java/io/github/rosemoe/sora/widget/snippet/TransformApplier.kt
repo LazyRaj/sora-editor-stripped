@@ -95,15 +95,32 @@ object TransformApplier {
                 if (shorthand != null) {
                     if (group != null) {
                         when (shorthand) {
-                            "upcase" -> sb.append(applyFirstUpperCase(group.uppercase(Locale.ROOT), nextUpperCase))
-                            "lowcase" -> sb.append(applyFirstUpperCase(group.lowercase(Locale.ROOT), nextUpperCase))
+                            "upcase" -> sb.append(
+                                applyFirstUpperCase(
+                                    group.uppercase(Locale.ROOT),
+                                    nextUpperCase
+                                )
+                            )
+
+                            "lowcase" -> sb.append(
+                                applyFirstUpperCase(
+                                    group.lowercase(Locale.ROOT),
+                                    nextUpperCase
+                                )
+                            )
+
                             else -> sb.append(applyFirstUpperCase(group, nextUpperCase))
                         }
                     }
                 } else {
                     val ifValue = formatString.ifValue ?: group
                     val elseValue = formatString.elseValue ?: ""
-                    sb.append(applyFirstUpperCase(if (group != null) ifValue else elseValue, nextUpperCase))
+                    sb.append(
+                        applyFirstUpperCase(
+                            if (group != null) ifValue else elseValue,
+                            nextUpperCase
+                        )
+                    )
                 }
             }
             nextUpperCase = formatString is NextUpperCaseFormat

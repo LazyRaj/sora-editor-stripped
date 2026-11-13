@@ -33,7 +33,8 @@ import io.github.rosemoe.sora.widget.style.CursorAnimator
  *
  * @author Rosemoe
  */
-open class MoveCursorAnimator(private val editor: CodeEditor) : CursorAnimator, ValueAnimator.AnimatorUpdateListener {
+open class MoveCursorAnimator(private val editor: CodeEditor) : CursorAnimator,
+    ValueAnimator.AnimatorUpdateListener {
 
     private val duration: Long = 120
     private var animatorX: ValueAnimator = ValueAnimator()
@@ -90,7 +91,8 @@ open class MoveCursorAnimator(private val editor: CodeEditor) : CursorAnimator, 
         }
         val line = editor.cursor.leftLine
         animatorX.removeAllUpdateListeners()
-        val pos = editor.layout.getCharLayoutOffset(editor.cursor.leftLine, editor.cursor.leftColumn)
+        val pos =
+            editor.layout.getCharLayoutOffset(editor.cursor.leftLine, editor.cursor.leftColumn)
 
         animatorX = ValueAnimator.ofFloat(startX, pos[1] + editor.measureTextRegionOffset())
         animatorY = ValueAnimator.ofFloat(startY, pos[0] - minusHeight())

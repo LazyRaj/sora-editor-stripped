@@ -60,13 +60,13 @@ open class TextReference(
         }
     }
 
-    open override val length: Int
+    override val length: Int
         get() {
             validateAccess()
             return end - start
         }
 
-    open override fun get(index: Int): Char {
+    override fun get(index: Int): Char {
         if (index < 0 || index >= length) {
             throw StringIndexOutOfBoundsException(index)
         }
@@ -74,7 +74,7 @@ open class TextReference(
         return reference[start + index]
     }
 
-    open override fun subSequence(startIndex: Int, endIndex: Int): CharSequence {
+    override fun subSequence(startIndex: Int, endIndex: Int): CharSequence {
         if (startIndex < 0 || startIndex >= length) {
             throw StringIndexOutOfBoundsException(startIndex)
         }
@@ -82,7 +82,11 @@ open class TextReference(
             throw StringIndexOutOfBoundsException(endIndex)
         }
         validateAccess()
-        return TextReference(reference, start + startIndex, start + endIndex).setValidator(validator)
+        return TextReference(
+            reference,
+            start + startIndex,
+            start + endIndex
+        ).setValidator(validator)
     }
 
     override fun toString(): String {

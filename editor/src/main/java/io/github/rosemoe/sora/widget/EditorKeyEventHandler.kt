@@ -89,7 +89,12 @@ open class EditorKeyEventHandler(
             editor,
             event,
             EditorKeyEvent.Type.DOWN,
-            editor.canHandleKeyBinding(keyCode, event.isCtrlPressed, keyMetaStates.isShiftPressed, keyMetaStates.isAltPressed)
+            editor.canHandleKeyBinding(
+                keyCode,
+                event.isCtrlPressed,
+                keyMetaStates.isShiftPressed,
+                keyMetaStates.isAltPressed
+            )
         )
         if ((eventManager.dispatchEvent(editorKeyEvent) and InterceptTarget.TARGET_EDITOR) != 0) {
             return editorKeyEvent.result(false)
@@ -114,7 +119,15 @@ open class EditorKeyEventHandler(
             KeyEvent.KEYCODE_MOVE_END -> keyMetaStates.adjustAfterKeyPress()
         }
 
-        val result = handleKeyEvent(event, editorKeyEvent, keybindingEvent, keyCode, isShiftPressed, isAltPressed, isCtrlPressed)
+        val result = handleKeyEvent(
+            event,
+            editorKeyEvent,
+            keybindingEvent,
+            keyCode,
+            isShiftPressed,
+            isAltPressed,
+            isCtrlPressed
+        )
         if (result != null) {
             return editorKeyEvent.result(result)
         }
@@ -146,6 +159,7 @@ open class EditorKeyEventHandler(
                 }
                 return editorKeyEvent.result(false)
             }
+
             KeyEvent.KEYCODE_DEL -> {
                 if (editor.isEditable) {
                     if (editor.isTextSelected) {
@@ -164,6 +178,7 @@ open class EditorKeyEventHandler(
                 }
                 return editorKeyEvent.result(true)
             }
+
             KeyEvent.KEYCODE_FORWARD_DEL -> {
                 if (editor.isEditable) {
                     if (editor.isTextSelected) {
@@ -182,9 +197,17 @@ open class EditorKeyEventHandler(
                 }
                 return editorKeyEvent.result(true)
             }
+
             KeyEvent.KEYCODE_ENTER -> {
-                return handleEnterKeyEvent(editorKeyEvent, keybindingEvent, isShiftPressed, isAltPressed, isCtrlPressed)
+                return handleEnterKeyEvent(
+                    editorKeyEvent,
+                    keybindingEvent,
+                    isShiftPressed,
+                    isAltPressed,
+                    isCtrlPressed
+                )
             }
+
             KeyEvent.KEYCODE_DPAD_DOWN -> {
                 if (isCtrlPressed) {
                     if (isShiftPressed) {
@@ -197,15 +220,26 @@ open class EditorKeyEventHandler(
 
                         val next = editorText.getLine(right.line + 1).toString()
                         editorText.beginBatchEdit()
-                        editorText.delete(right.line, editorText.getColumnCount(right.line), right.line + 1, next.length)
+                        editorText.delete(
+                            right.line,
+                            editorText.getColumnCount(right.line),
+                            right.line + 1,
+                            next.length
+                        )
                         editorText.insert(left.line, 0, next + editor.lineSeparator.content)
                         editorText.endBatchEdit()
 
                         val newLeft = editorText.indexer.getCharPosition(left.line + 1, left.column)
-                        val newRight = editorText.indexer.getCharPosition(right.line + 1, right.column)
+                        val newRight =
+                            editorText.indexer.getCharPosition(right.line + 1, right.column)
                         if (left.index != right.index) {
                             val backupAnchor = editor.selectionAnchor
-                            editor.setSelectionRegion(newLeft.line, newLeft.column, newRight.line, newRight.column)
+                            editor.setSelectionRegion(
+                                newLeft.line,
+                                newLeft.column,
+                                newRight.line,
+                                newRight.column
+                            )
                             if (backupAnchor != null) {
                                 if (backupAnchor == left) {
                                     editor.selectionAnchor = newLeft
@@ -225,6 +259,7 @@ open class EditorKeyEventHandler(
                 editor.moveOrExtendSelection(SelectionMovement.DOWN, isShiftPressed)
                 return editorKeyEvent.result(true)
             }
+
             KeyEvent.KEYCODE_DPAD_UP -> {
                 if (isCtrlPressed) {
                     if (isShiftPressed) {
@@ -237,14 +272,24 @@ open class EditorKeyEventHandler(
                         val prev = editorText.getLine(left.line - 1).toString()
                         editorText.beginBatchEdit()
                         editorText.delete(left.line - 1, 0, left.line, 0)
-                        editorText.insert(right.line - 1, editorText.getColumnCount(right.line - 1), editor.lineSeparator.content + prev)
+                        editorText.insert(
+                            right.line - 1,
+                            editorText.getColumnCount(right.line - 1),
+                            editor.lineSeparator.content + prev
+                        )
                         editorText.endBatchEdit()
 
                         val newLeft = editorText.indexer.getCharPosition(left.line - 1, left.column)
-                        val newRight = editorText.indexer.getCharPosition(right.line - 1, right.column)
+                        val newRight =
+                            editorText.indexer.getCharPosition(right.line - 1, right.column)
                         if (left.index != right.index) {
                             val backupAnchor = editor.selectionAnchor
-                            editor.setSelectionRegion(newLeft.line, newLeft.column, newRight.line, newRight.column)
+                            editor.setSelectionRegion(
+                                newLeft.line,
+                                newLeft.column,
+                                newRight.line,
+                                newRight.column
+                            )
                             if (backupAnchor != null) {
                                 if (backupAnchor == left) {
                                     editor.selectionAnchor = newLeft
@@ -264,40 +309,53 @@ open class EditorKeyEventHandler(
                 editor.moveOrExtendSelection(SelectionMovement.UP, isShiftPressed)
                 return editorKeyEvent.result(true)
             }
+
             KeyEvent.KEYCODE_DPAD_LEFT -> {
                 if (isCtrlPressed) {
-                    editor.moveOrExtendSelection(SelectionMovement.PREVIOUS_WORD_BOUNDARY, isShiftPressed)
+                    editor.moveOrExtendSelection(
+                        SelectionMovement.PREVIOUS_WORD_BOUNDARY,
+                        isShiftPressed
+                    )
                 } else {
                     editor.moveOrExtendSelection(SelectionMovement.LEFT, isShiftPressed)
                 }
                 return editorKeyEvent.result(true)
             }
+
             KeyEvent.KEYCODE_DPAD_RIGHT -> {
                 if (isCtrlPressed) {
-                    editor.moveOrExtendSelection(SelectionMovement.NEXT_WORD_BOUNDARY, isShiftPressed)
+                    editor.moveOrExtendSelection(
+                        SelectionMovement.NEXT_WORD_BOUNDARY,
+                        isShiftPressed
+                    )
                 } else {
                     editor.moveOrExtendSelection(SelectionMovement.RIGHT, isShiftPressed)
                 }
                 return editorKeyEvent.result(true)
             }
+
             KeyEvent.KEYCODE_MOVE_END -> {
                 if (isCtrlPressed) {
                     editor.moveOrExtendSelection(SelectionMovement.TEXT_END, isShiftPressed)
                 } else {
-                    val movement = if (editor.props.rowBasedHomeEnd) SelectionMovement.ROW_END else SelectionMovement.LINE_END
+                    val movement =
+                        if (editor.props.rowBasedHomeEnd) SelectionMovement.ROW_END else SelectionMovement.LINE_END
                     editor.moveOrExtendSelection(movement, isShiftPressed)
                 }
                 return editorKeyEvent.result(true)
             }
+
             KeyEvent.KEYCODE_MOVE_HOME -> {
                 if (isCtrlPressed) {
                     editor.moveOrExtendSelection(SelectionMovement.TEXT_START, isShiftPressed)
                 } else {
-                    val movement = if (editor.props.rowBasedHomeEnd) SelectionMovement.ROW_START else SelectionMovement.LINE_START
+                    val movement =
+                        if (editor.props.rowBasedHomeEnd) SelectionMovement.ROW_START else SelectionMovement.LINE_START
                     editor.moveOrExtendSelection(movement, isShiftPressed)
                 }
                 return editorKeyEvent.result(true)
             }
+
             KeyEvent.KEYCODE_PAGE_DOWN -> {
                 if (isCtrlPressed) {
                     editor.moveOrExtendSelection(SelectionMovement.PAGE_BOTTOM, isShiftPressed)
@@ -306,6 +364,7 @@ open class EditorKeyEventHandler(
                 }
                 return editorKeyEvent.result(true)
             }
+
             KeyEvent.KEYCODE_PAGE_UP -> {
                 if (isCtrlPressed) {
                     editor.moveOrExtendSelection(SelectionMovement.PAGE_TOP, isShiftPressed)
@@ -314,6 +373,7 @@ open class EditorKeyEventHandler(
                 }
                 return editorKeyEvent.result(true)
             }
+
             KeyEvent.KEYCODE_TAB -> {
                 if (editor.isEditable) {
                     if (!isAltPressed && !isCtrlPressed) {
@@ -334,16 +394,19 @@ open class EditorKeyEventHandler(
                 }
                 return editorKeyEvent.result(true)
             }
+
             KeyEvent.KEYCODE_PASTE -> {
                 if (editor.isEditable) {
                     editor.pasteText()
                 }
                 return editorKeyEvent.result(true)
             }
+
             KeyEvent.KEYCODE_COPY -> {
                 editor.copyText()
                 return editorKeyEvent.result(true)
             }
+
             KeyEvent.KEYCODE_SPACE -> {
                 if (isCtrlPressed && !isAltPressed) {
                     editor.getComponent(EditorAutoCompletion::class.java).requireCompletion()
@@ -353,16 +416,24 @@ open class EditorKeyEventHandler(
                 }
                 return editorKeyEvent.result(true)
             }
+
             KeyEvent.KEYCODE_ESCAPE -> {
                 if (editorCursor.isSelected) {
-                    val newPosition = if (editor.props.positionOfCursorWhenExitSelecting) editorCursor.right() else editorCursor.left()
+                    val newPosition =
+                        if (editor.props.positionOfCursorWhenExitSelecting) editorCursor.right() else editorCursor.left()
                     editor.setSelection(newPosition.line, newPosition.column, true)
                 }
                 return editorKeyEvent.result(true)
             }
+
             else -> {
                 if (event.isCtrlPressed && !event.isAltPressed) {
-                    return handleCtrlKeyBinding(editorKeyEvent, keybindingEvent, keyCode, isShiftPressed)
+                    return handleCtrlKeyBinding(
+                        editorKeyEvent,
+                        keybindingEvent,
+                        keyCode,
+                        isShiftPressed
+                    )
                 }
             }
         }
@@ -401,10 +472,25 @@ open class EditorKeyEventHandler(
             if (dead) {
                 val cursor = editor.cursor
                 if (!editor.isTextSelected || editorCursor.left + 1 == editorCursor.right && editorText[editorCursor.left].code == code) {
-                    editor.setSelection(editorCursor.rightLine, editorCursor.rightColumn, SelectionChangeEvent.CAUSE_DEAD_KEYS)
+                    editor.setSelection(
+                        editorCursor.rightLine,
+                        editorCursor.rightColumn,
+                        SelectionChangeEvent.CAUSE_DEAD_KEYS
+                    )
                     editor.commitText(String(Character.toChars(code)))
-                    val charCount = Character.charCount(Character.codePointBefore(editor.text.getLine(cursor.rightLine), cursor.rightColumn))
-                    editor.setSelectionRegion(cursor.rightLine, cursor.rightColumn - charCount, cursor.rightLine, cursor.rightColumn, SelectionChangeEvent.CAUSE_DEAD_KEYS)
+                    val charCount = Character.charCount(
+                        Character.codePointBefore(
+                            editor.text.getLine(cursor.rightLine),
+                            cursor.rightColumn
+                        )
+                    )
+                    editor.setSelectionRegion(
+                        cursor.rightLine,
+                        cursor.rightColumn - charCount,
+                        cursor.rightLine,
+                        cursor.rightColumn,
+                        SelectionChangeEvent.CAUSE_DEAD_KEYS
+                    )
                 }
                 return true
             }
@@ -435,6 +521,7 @@ open class EditorKeyEventHandler(
                     editor.pasteText()
                 }
             }
+
             KeyEvent.KEYCODE_C -> editor.copyText()
             KeyEvent.KEYCODE_X -> {
                 if (editor.isEditable) {
@@ -443,22 +530,26 @@ open class EditorKeyEventHandler(
                     editor.copyText()
                 }
             }
+
             KeyEvent.KEYCODE_A -> editor.selectAll()
             KeyEvent.KEYCODE_Z -> {
                 if (editor.isEditable) {
                     editor.undo()
                 }
             }
+
             KeyEvent.KEYCODE_Y -> {
                 if (editor.isEditable) {
                     editor.redo()
                 }
             }
+
             KeyEvent.KEYCODE_D -> {
                 if (editor.isEditable) {
                     editor.duplicateLine()
                 }
             }
+
             KeyEvent.KEYCODE_W -> editor.selectCurrentWord()
             KeyEvent.KEYCODE_J -> {
                 if (!isShiftPressed || editorCursor.isSelected) {
@@ -470,6 +561,7 @@ open class EditorKeyEventHandler(
                     editor.ensureSelectionVisible()
                 }
             }
+
             else -> return null
         }
         return keybindingEvent.result(editorResult) || e.result(editorResult)
@@ -490,7 +582,13 @@ open class EditorKeyEventHandler(
             val editorLanguage = editor.editorLanguage
 
             if (isShiftPressed && !isAltPressed && !isCtrlPressed) {
-                return startNewLine(editor, editorCursor, editorText, editorKeyEvent, keybindingEvent)
+                return startNewLine(
+                    editor,
+                    editorCursor,
+                    editorText,
+                    editorKeyEvent,
+                    keybindingEvent
+                )
             }
 
             if (isCtrlPressed && !isShiftPressed) {
@@ -504,7 +602,13 @@ open class EditorKeyEventHandler(
                     } else {
                         line--
                         editor.setSelection(line, editorText.getColumnCount(line))
-                        return startNewLine(editor, editorCursor, editorText, editorKeyEvent, keybindingEvent)
+                        return startNewLine(
+                            editor,
+                            editorCursor,
+                            editorText,
+                            editorKeyEvent,
+                            keybindingEvent
+                        )
                     }
                 }
 
@@ -521,9 +625,19 @@ open class EditorKeyEventHandler(
             } else {
                 var consumed = false
                 for (handler in handlers) {
-                    if (handler.matchesRequirement(editorText, editorCursor.left(), editor.styles)) {
+                    if (handler.matchesRequirement(
+                            editorText,
+                            editorCursor.left(),
+                            editor.styles
+                        )
+                    ) {
                         try {
-                            val result = handler.handleNewline(editorText, editorCursor.left(), editor.styles, editor.tabWidth)
+                            val result = handler.handleNewline(
+                                editorText,
+                                editorCursor.left(),
+                                editor.styles,
+                                editor.tabWidth
+                            )
                             editor.commitText(result.text, false)
                             val delta = result.shiftLeft
                             if (delta != 0) {
@@ -575,7 +689,12 @@ open class EditorKeyEventHandler(
                 editor,
                 event,
                 EditorKeyEvent.Type.UP,
-                editor.canHandleKeyBinding(keyCode, event.isCtrlPressed, keyMetaStates.isShiftPressed, keyMetaStates.isAltPressed)
+                editor.canHandleKeyBinding(
+                    keyCode,
+                    event.isCtrlPressed,
+                    keyMetaStates.isShiftPressed,
+                    keyMetaStates.isAltPressed
+                )
             )
 
             if ((eventManager.dispatchEvent(keybindingEvent) and InterceptTarget.TARGET_EDITOR) != 0) {

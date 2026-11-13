@@ -80,7 +80,7 @@ private val scratchLocal =
         override fun initialValue(): Scratch {
             return Scratch()
         }
-    };
+    }
 
 private inline fun <T> withScratch(block: Scratch.() -> T): T {
     val scratch = scratchLocal.get()
@@ -188,10 +188,7 @@ fun isUpperCaseAtPos(pos: Int, word: String, wordLow: String): Boolean {
 
 
 fun isSeparatorAtPos(value: String, index: Int): Boolean {
-    if (index < 0 || index >= value.length) {
-        return false
-    }
-    return when (val code = value.codePointAt(index)) {
+    return !(index < 0 || index >= value.length) && when (val code = value.codePointAt(index)) {
         CharCode.Underline,
         CharCode.Dash,
         CharCode.Period,
@@ -217,11 +214,7 @@ fun isSeparatorAtPos(value: String, index: Int): Boolean {
 }
 
 fun isWhitespaceAtPos(value: String, index: Int): Boolean {
-    if (index < 0 || index >= value.length) {
-        return false
-    }
-
-    return when (value[index].code) {
+    return !(index < 0 || index >= value.length) && when (value[index].code) {
         CharCode.Space,
         CharCode.Tab -> true
 

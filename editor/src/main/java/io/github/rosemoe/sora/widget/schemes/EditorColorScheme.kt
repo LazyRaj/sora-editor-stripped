@@ -150,11 +150,16 @@ open class EditorColorScheme @JvmOverloads constructor(
             STATIC_SPAN_BACKGROUND, WHOLE_BACKGROUND, COMPLETION_WND_BACKGROUND, COMPLETION_WND_CORNER -> {
                 color = if (isDark()) BACKGROUND_COLOR_DARK else 0xffffffff.toInt()
             }
+
             MINIMAP_BACKGROUND -> {
-                color = (((if (isDark()) BACKGROUND_COLOR_DARK else 0xffffffff.toInt()) and 0x00ffffff) or 0xa0000000.toInt())
+                color =
+                    (((if (isDark()) BACKGROUND_COLOR_DARK else 0xffffffff.toInt()) and 0x00ffffff) or 0xa0000000.toInt())
             }
+
             MINIMAP_VIEWPORT -> color = if (isDark()) 0x30ffffff else 0x30333333
-            MINIMAP_VIEWPORT_BORDER -> color = if (isDark()) 0xb0ffffff.toInt() else 0xb0333333.toInt()
+            MINIMAP_VIEWPORT_BORDER -> color =
+                if (isDark()) 0xb0ffffff.toInt() else 0xb0333333.toInt()
+
             LINE_NUMBER_PANEL_TEXT -> color = 0xffffffff.toInt()
             OPERATOR -> color = 0xFF0066D6.toInt()
             STATIC_SPAN_FOREGROUND, TEXT_NORMAL -> color = 0xFF333333.toInt()
@@ -164,6 +169,7 @@ open class EditorColorScheme @JvmOverloads constructor(
             ANNOTATION, SIGNATURE_TEXT_HIGHLIGHTED_PARAMETER, HOVER_TEXT_HIGHLIGHTED, IDENTIFIER_NAME -> {
                 color = 0xFF03A9F4.toInt()
             }
+
             CURRENT_LINE -> color = 0x10000000
             SELECTED_TEXT_BACKGROUND, FUNCTION_CHAR_BACKGROUND_STROKE -> color = 0x2D3F51B5
             KEYWORD -> color = 0xFF2196F3.toInt()
@@ -186,25 +192,40 @@ open class EditorColorScheme @JvmOverloads constructor(
             HIGHLIGHTED_DELIMITERS_FOREGROUND, HIGHLIGHTED_DELIMITERS_UNDERLINE -> color = 0
             HIGHLIGHTED_DELIMITERS_BACKGROUND -> color = 0x1D000000
             HIGHLIGHTED_DELIMITERS_BORDER -> color = 0xff3f51b5.toInt()
-            COMPLETION_WND_TEXT_PRIMARY, TEXT_INLAY_HINT_FOREGROUND -> color = if (isDark()) 0xffffffff.toInt() else 0xff000000.toInt()
-            COMPLETION_WND_TEXT_SECONDARY -> color = if (isDark()) 0xffaaaaaa.toInt() else 0xff545454.toInt()
+            COMPLETION_WND_TEXT_PRIMARY, TEXT_INLAY_HINT_FOREGROUND -> color =
+                if (isDark()) 0xffffffff.toInt() else 0xff000000.toInt()
+
+            COMPLETION_WND_TEXT_SECONDARY -> color =
+                if (isDark()) 0xffaaaaaa.toInt() else 0xff545454.toInt()
+
             COMPLETION_WND_ITEM_CURRENT -> color = 0xffeeeeee.toInt()
             SNIPPET_BACKGROUND_EDITING -> color = 0xffcccccc.toInt()
             SNIPPET_BACKGROUND_RELATED -> color = 0xaadddddd.toInt()
             SNIPPET_BACKGROUND_INACTIVE -> color = 0x66dddddd
-            SIGNATURE_TEXT_NORMAL, HOVER_TEXT_NORMAL -> color = if (isDark()) 0xffeeeeee.toInt() else 0xff000000.toInt()
+            SIGNATURE_TEXT_NORMAL, HOVER_TEXT_NORMAL -> color =
+                if (isDark()) 0xffeeeeee.toInt() else 0xff000000.toInt()
+
             STICKY_SCROLL_DIVIDER -> color = 0x99eeeeee.toInt()
             TEXT_INLAY_HINT_BACKGROUND -> color = if (isDark()) 0x1deeeeee else 0x1D000000
             HARD_WRAP_MARKER -> color = if (!isDark()) 0xffeeeeee.toInt() else 0x1D000000
-            DIAGNOSTIC_TOOLTIP_BRIEF_MSG -> color = if (isDark()) PRIMARY_TEXT_COLOR_DEFAULT_DARK else PRIMARY_TEXT_COLOR_DEFAULT_LIGHT
-            DIAGNOSTIC_TOOLTIP_DETAILED_MSG -> color = if (isDark()) SECONDARY_TEXT_COLOR_DARK else SECONDARY_TEXT_COLOR_LIGHT
+            DIAGNOSTIC_TOOLTIP_BRIEF_MSG -> color =
+                if (isDark()) PRIMARY_TEXT_COLOR_DEFAULT_DARK else PRIMARY_TEXT_COLOR_DEFAULT_LIGHT
+
+            DIAGNOSTIC_TOOLTIP_DETAILED_MSG -> color =
+                if (isDark()) SECONDARY_TEXT_COLOR_DARK else SECONDARY_TEXT_COLOR_LIGHT
+
             SIGNATURE_BACKGROUND, HOVER_BACKGROUND, DIAGNOSTIC_TOOLTIP_BACKGROUND, TEXT_ACTION_WINDOW_BACKGROUND -> {
                 color = if (isDark()) BACKGROUND_COLOR_DARK else BACKGROUND_COLOR_LIGHT
             }
-            TEXT_ACTION_WINDOW_ICON_COLOR -> color = if (isDark()) 0xffeeeeee.toInt() else Color.GRAY
+
+            TEXT_ACTION_WINDOW_ICON_COLOR -> color =
+                if (isDark()) 0xffeeeeee.toInt() else Color.GRAY
+
             HOVER_BORDER, SIGNATURE_BORDER -> color = 0xff999999.toInt()
             DIAGNOSTIC_TOOLTIP_ACTION -> color = 0xff42A5F5.toInt()
-            TEXT_HIGHLIGHT_STRONG_BACKGROUND -> color = if (isDark()) 0xB8004972.toInt() else 0x400e639c
+            TEXT_HIGHLIGHT_STRONG_BACKGROUND -> color =
+                if (isDark()) 0xB8004972.toInt() else 0x400e639c
+
             TEXT_HIGHLIGHT_BACKGROUND -> color = if (isDark()) 0xB8575757.toInt() else 0x40575757
         }
         setColor(type, color)

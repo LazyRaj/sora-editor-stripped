@@ -62,7 +62,7 @@ abstract class AsyncIncrementalAnalyzeManager<S, T> @JvmOverloads constructor(
      * `tokenizeLine` on the manager, so taking the same monitor here made every edit on the
      * UI thread wait for the analysis thread to finish tokenizing its current line.
      */
-    private final val runCount = AtomicLong()
+    private val runCount = AtomicLong()
 
     /**
      * Run the given code block only when the receiver is currently non-null
@@ -80,7 +80,11 @@ abstract class AsyncIncrementalAnalyzeManager<S, T> @JvmOverloads constructor(
             increaseRunCount()
             currentThread.offerMessage(
                 MSG_MOD,
-                TextModification(IntPair.pack(start.line, start.column), IntPair.pack(end.line, end.column), insertedContent)
+                TextModification(
+                    IntPair.pack(start.line, start.column),
+                    IntPair.pack(end.line, end.column),
+                    insertedContent
+                )
             )
         }
     }
@@ -91,7 +95,11 @@ abstract class AsyncIncrementalAnalyzeManager<S, T> @JvmOverloads constructor(
             increaseRunCount()
             currentThread.offerMessage(
                 MSG_MOD,
-                TextModification(IntPair.pack(start.line, start.column), IntPair.pack(end.line, end.column), null)
+                TextModification(
+                    IntPair.pack(start.line, start.column),
+                    IntPair.pack(end.line, end.column),
+                    null
+                )
             )
         }
     }
@@ -363,6 +371,7 @@ abstract class AsyncIncrementalAnalyzeManager<S, T> @JvmOverloads constructor(
     internal inner class LooperThread : Thread() {
 
         private val messageQueue: BlockingQueue<Message> = LinkedBlockingQueue()
+
         @Volatile
         var abort: Boolean = false
         var shadowed: Content? = null
@@ -426,6 +435,7 @@ abstract class AsyncIncrementalAnalyzeManager<S, T> @JvmOverloads constructor(
                             initialize()
                         }
                     }
+
                     MSG_MOD -> {
                         var updateStart = 0
                         var updateEnd = 0
@@ -443,7 +453,8 @@ abstract class AsyncIncrementalAnalyzeManager<S, T> @JvmOverloads constructor(
                                     IntPair.getFirst(mod.start), IntPair.getSecond(mod.start),
                                     IntPair.getFirst(mod.end), IntPair.getSecond(mod.end)
                                 )
-                                var state: S? = if (startLine == 0) getInitialState() else states[startLine - 1].state
+                                var state: S? =
+                                    if (startLine == 0) getInitialState() else states[startLine - 1].state
                                 // Remove states
                                 if (endLine >= startLine + 1) {
                                     val subList = states.subList(startLine + 1, endLine + 1)
@@ -458,8 +469,12 @@ abstract class AsyncIncrementalAnalyzeManager<S, T> @JvmOverloads constructor(
                                 }
                                 var line = startLine
                                 while (line < currentContent.lineCount) {
-                                    val res = tokenizeLine(currentContent.getLine(line), state, line)
-                                    mdf.setSpansOnLine(line, res.spans ?: generateSpansForLine(res) ?: emptyList())
+                                    val res =
+                                        tokenizeLine(currentContent.getLine(line), state, line)
+                                    mdf.setSpansOnLine(
+                                        line,
+                                        res.spans ?: generateSpansForLine(res) ?: emptyList()
+                                    )
                                     val old = states.set(line, res.clearSpans())
                                     old.state?.let { onAbandonState(it) }
                                     res.state?.let { onAddState(it) }
@@ -471,19 +486,31 @@ abstract class AsyncIncrementalAnalyzeManager<S, T> @JvmOverloads constructor(
                                 }
                                 updateEnd = line
                             } else {
-                                currentContent.insert(IntPair.getFirst(mod.start), IntPair.getSecond(mod.start), mod.changedText)
-                                var state: S? = if (startLine == 0) getInitialState() else states[startLine - 1].state
+                                currentContent.insert(
+                                    IntPair.getFirst(mod.start),
+                                    IntPair.getSecond(mod.start),
+                                    mod.changedText
+                                )
+                                var state: S? =
+                                    if (startLine == 0) getInitialState() else states[startLine - 1].state
                                 var line = startLine
                                 val spansModifier = currentStyles.spans!!.modify()
                                 // Add Lines
                                 while (line <= endLine) {
-                                    val res = tokenizeLine(currentContent.getLine(line), state, line)
+                                    val res =
+                                        tokenizeLine(currentContent.getLine(line), state, line)
                                     if (line == startLine) {
-                                        spansModifier.setSpansOnLine(line, res.spans ?: generateSpansForLine(res) ?: emptyList())
+                                        spansModifier.setSpansOnLine(
+                                            line,
+                                            res.spans ?: generateSpansForLine(res) ?: emptyList()
+                                        )
                                         val old = states.set(line, res.clearSpans())
                                         old.state?.let { onAbandonState(it) }
                                     } else {
-                                        spansModifier.addLineAt(line, res.spans ?: generateSpansForLine(res) ?: emptyList())
+                                        spansModifier.addLineAt(
+                                            line,
+                                            res.spans ?: generateSpansForLine(res) ?: emptyList()
+                                        )
                                         states.add(line, res.clearSpans())
                                     }
                                     res.state?.let { onAddState(it) }
@@ -493,11 +520,15 @@ abstract class AsyncIncrementalAnalyzeManager<S, T> @JvmOverloads constructor(
                                 // line = end.line + 1, check whether the state equals
                                 var flag = true
                                 while (line < currentContent.lineCount && flag) {
-                                    val res = tokenizeLine(currentContent.getLine(line), state, line)
+                                    val res =
+                                        tokenizeLine(currentContent.getLine(line), state, line)
                                     if (stateEquals(res.state, states[line].state)) {
                                         flag = false
                                     }
-                                    spansModifier.setSpansOnLine(line, res.spans ?: generateSpansForLine(res) ?: emptyList())
+                                    spansModifier.setSpansOnLine(
+                                        line,
+                                        res.spans ?: generateSpansForLine(res) ?: emptyList()
+                                    )
                                     val old = states.set(line, res.clearSpans())
                                     old.state?.let { onAbandonState(it) }
                                     res.state?.let { onAddState(it) }
@@ -524,7 +555,7 @@ abstract class AsyncIncrementalAnalyzeManager<S, T> @JvmOverloads constructor(
                 }
                 return true
             } catch (e: Exception) {
-                Log.w("AsyncAnalysis", "Thread ${Thread.currentThread().name} failed", e)
+                Log.w("AsyncAnalysis", "Thread ${currentThread().name} failed", e)
             }
             return false
         }

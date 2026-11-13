@@ -48,7 +48,7 @@ object ICUUtils {
     fun getWordRange(text: CharSequence, offset: Int, useIcu: Boolean): Long {
         if (useIcu) {
             val itr = BreakIterator.getWordInstance()
-            itr.setText(CharSequenceIterator(text))
+            itr.text = CharSequenceIterator(text)
             val end = itr.following(offset)
             val start = itr.previous()
             return if (offset in start..end) {

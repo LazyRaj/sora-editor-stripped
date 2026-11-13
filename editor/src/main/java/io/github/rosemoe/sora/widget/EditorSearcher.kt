@@ -185,7 +185,13 @@ open class EditorSearcher(
                 val start = IntPair.getFirst(data)
                 val pos1 = editor.text.indexer.getCharPosition(start)
                 val pos2 = editor.text.indexer.getCharPosition(IntPair.getSecond(data))
-                editor.setSelectionRegion(pos1.line, pos1.column, pos2.line, pos2.column, SelectionChangeEvent.CAUSE_SEARCH)
+                editor.setSelectionRegion(
+                    pos1.line,
+                    pos1.column,
+                    pos2.line,
+                    pos2.column,
+                    SelectionChangeEvent.CAUSE_SEARCH
+                )
                 return true
             }
         }
@@ -212,7 +218,13 @@ open class EditorSearcher(
                 val end = IntPair.getSecond(data)
                 val pos1 = editor.text.indexer.getCharPosition(IntPair.getFirst(data))
                 val pos2 = editor.text.indexer.getCharPosition(end)
-                editor.setSelectionRegion(pos1.line, pos1.column, pos2.line, pos2.column, SelectionChangeEvent.CAUSE_SEARCH)
+                editor.setSelectionRegion(
+                    pos1.line,
+                    pos1.column,
+                    pos2.line,
+                    pos2.column,
+                    SelectionChangeEvent.CAUSE_SEARCH
+                )
                 return true
             }
         }
@@ -244,7 +256,11 @@ open class EditorSearcher(
                     if (!matcher.find()) {
                         return
                     }
-                    rep = RegexBackrefHelper.computeReplacement(matcher, opts.regexBackrefGrammar, rep)
+                    rep = RegexBackrefHelper.computeReplacement(
+                        matcher,
+                        opts.regexBackrefGrammar,
+                        rep
+                    )
                 }
                 if (replaceOptions.preserveCase) {
                     val cursor = editor.cursor
@@ -310,9 +326,13 @@ open class EditorSearcher(
                             continue
                         }
                         if (tokens == null) {
-                            tokens = RegexBackrefParser(options.regexBackrefGrammar).parse(replacement, matcher.groupCount())
+                            tokens = RegexBackrefParser(options.regexBackrefGrammar).parse(
+                                replacement,
+                                matcher.groupCount()
+                            )
                         }
-                        var computedReplacement = RegexBackrefHelper.computeReplacement(matcher, tokens)
+                        var computedReplacement =
+                            RegexBackrefHelper.computeReplacement(matcher, tokens)
                         val newLength = computedReplacement.length
                         val oldLength = end - start
                         if (replaceOptions.preserveCase) {
@@ -345,7 +365,13 @@ open class EditorSearcher(
                 }
                 editor.postInLifecycle {
                     val pos = editor.cursor.left()
-                    editor.text.replace(0, 0, editor.lineCount - 1, editor.text.getColumnCount(editor.lineCount - 1), sb)
+                    editor.text.replace(
+                        0,
+                        0,
+                        editor.lineCount - 1,
+                        editor.text.getColumnCount(editor.lineCount - 1),
+                        sb
+                    )
                     editor.setSelectionAround(pos.line, pos.column)
                     dialog.dismiss()
                     whenSucceeded?.run()
@@ -433,6 +459,7 @@ open class EditorSearcher(
                         }
                     }
                 }
+
                 SearchOptions.TYPE_WHOLE_WORD,
                 SearchOptions.TYPE_REGULAR_EXPRESSION -> {
                     if (options.type == SearchOptions.TYPE_WHOLE_WORD) {

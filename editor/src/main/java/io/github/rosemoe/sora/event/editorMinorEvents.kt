@@ -29,7 +29,6 @@ import android.view.ContextMenu
 import android.view.MotionEvent
 import android.view.inputmethod.EditorInfo
 import io.github.rosemoe.sora.lang.Language
-import io.github.rosemoe.sora.lang.diagnostic.DiagnosticDetail
 import io.github.rosemoe.sora.lang.diagnostic.DiagnosticRegion
 import io.github.rosemoe.sora.lang.styling.Span
 import io.github.rosemoe.sora.text.CharPosition
@@ -170,4 +169,4 @@ class PublishDiagnosticsEvent(
     editor: CodeEditor,
     val oldDiagnostics: List<DiagnosticRegion>,
     val newDiagnosticsEvent: List<DiagnosticRegion>
-): Event(editor)
+) : Event(editor)

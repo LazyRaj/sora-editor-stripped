@@ -34,7 +34,8 @@ import io.github.rosemoe.sora.widget.style.CursorAnimator
  *
  * @author Dmitry Rubtsov
  */
-open class FadeCursorAnimator(private val editor: CodeEditor) : CursorAnimator, ValueAnimator.AnimatorUpdateListener {
+open class FadeCursorAnimator(private val editor: CodeEditor) : CursorAnimator,
+    ValueAnimator.AnimatorUpdateListener {
 
     private val duration: Long = 200
 
@@ -103,6 +104,7 @@ open class FadeCursorAnimator(private val editor: CodeEditor) : CursorAnimator, 
                 override fun onAnimationStart(animator: Animator) {
                     phaseEnded = false
                 }
+
                 override fun onAnimationEnd(animator: Animator) {
                     phaseEnded = true
                 }

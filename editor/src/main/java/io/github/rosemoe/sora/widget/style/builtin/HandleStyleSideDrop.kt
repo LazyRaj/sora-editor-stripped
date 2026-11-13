@@ -32,7 +32,11 @@ import io.github.rosemoe.sora.widget.style.SelectionHandleStyle
 
 open class HandleStyleSideDrop(context: Context) : HandleStyleDrop(context) {
 
-    private val size: Int = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 22f, context.resources.displayMetrics).toInt()
+    private val size: Int = TypedValue.applyDimension(
+        TypedValue.COMPLEX_UNIT_DIP,
+        22f,
+        context.resources.displayMetrics
+    ).toInt()
     private val paint: Paint = Paint().apply {
         isAntiAlias = true
     }
@@ -54,7 +58,13 @@ open class HandleStyleSideDrop(context: Context) : HandleStyleDrop(context) {
             val isLeft = handleType == SelectionHandleStyle.HANDLE_TYPE_LEFT
             val cx = if (isLeft) x - radius else x + radius
             canvas.drawCircle(cx, y + radius, radius, paint)
-            canvas.drawRect(if (isLeft) cx else cx - radius, y, if (isLeft) cx + radius else cx, y + radius, paint)
+            canvas.drawRect(
+                if (isLeft) cx else cx - radius,
+                y,
+                if (isLeft) cx + radius else cx,
+                y + radius,
+                paint
+            )
             descriptor.set(
                 cx - radius,
                 y,

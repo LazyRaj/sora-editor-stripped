@@ -1,7 +1,5 @@
 package io.github.rosemoe.sora.lang.styling.inlayHint
 
-import androidx.annotation.NonNull
-
 /**
  * Provider for inlay hints
  */

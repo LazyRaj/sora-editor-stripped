@@ -30,7 +30,6 @@ import io.github.rosemoe.sora.lang.styling.span.SpanExt
 import io.github.rosemoe.sora.lang.styling.span.SpanExtAttrs
 import java.util.AbstractList
 import java.util.Collections
-import java.util.RandomAccess
 
 /**
  * Composes two read-only span layers without copying unaffected spans.
@@ -247,7 +246,10 @@ object SpanMerger {
             if (upper != null) {
                 val resolver = upper.getSpanExt<SpanColorResolver>(SpanExtAttrs.EXT_COLOR_RESOLVER)
                 if (resolver != null) {
-                    val color = if (foreground) resolver.getForegroundColor(upper) else resolver.getBackgroundColor(upper)
+                    val color =
+                        if (foreground) resolver.getForegroundColor(upper) else resolver.getBackgroundColor(
+                            upper
+                        )
                     if (color != null) {
                         return color
                     }
@@ -257,7 +259,11 @@ object SpanMerger {
                 }
             }
             val resolver = lower.getSpanExt<SpanColorResolver>(SpanExtAttrs.EXT_COLOR_RESOLVER)
-            return resolver?.let { if (foreground) it.getForegroundColor(lower) else it.getBackgroundColor(lower) }
+            return resolver?.let {
+                if (foreground) it.getForegroundColor(lower) else it.getBackgroundColor(
+                    lower
+                )
+            }
         }
 
         override fun copy(): Span {

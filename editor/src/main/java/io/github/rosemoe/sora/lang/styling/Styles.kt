@@ -55,7 +55,8 @@ open class Styles @JvmOverloads constructor(
     var styleTypeCount: MutableMap<Class<*>, MutableInt>? = null
 
     @JvmField
-    var blocks: (@JvmSuppressWildcards List<CodeBlock>)? = if (initCodeBlocks) ArrayList(128) else null
+    var blocks: (@JvmSuppressWildcards List<CodeBlock>)? =
+        if (initCodeBlocks) ArrayList(128) else null
 
     @JvmField
     var suppressSwitch: Int = Int.MAX_VALUE
@@ -74,7 +75,8 @@ open class Styles @JvmOverloads constructor(
      * @param block Info of code block
      */
     fun addCodeBlock(block: CodeBlock) {
-        val list = (blocks as? MutableList<CodeBlock>) ?: ArrayList<CodeBlock>(128).also { blocks = it }
+        val list =
+            (blocks as? MutableList<CodeBlock>) ?: ArrayList<CodeBlock>(128).also { blocks = it }
         list.add(block)
     }
 
@@ -173,7 +175,8 @@ open class Styles @JvmOverloads constructor(
     }
 
     private fun styleCountUpdate(type: Class<*>, delta: Int) {
-        val counts = styleTypeCount ?: ConcurrentHashMap<Class<*>, MutableInt>().also { styleTypeCount = it }
+        val counts =
+            styleTypeCount ?: ConcurrentHashMap<Class<*>, MutableInt>().also { styleTypeCount = it }
         var res = counts[type]
         if (res == null) {
             res = MutableInt(0)

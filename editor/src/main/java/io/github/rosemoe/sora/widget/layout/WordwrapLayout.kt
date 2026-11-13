@@ -38,8 +38,6 @@ import io.github.rosemoe.sora.text.Content
 import io.github.rosemoe.sora.text.ContentLine
 import io.github.rosemoe.sora.util.IntPair
 import io.github.rosemoe.sora.widget.CodeEditor
-import java.util.Collections
-import java.util.NoSuchElementException
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.ceil
 import kotlin.math.min
@@ -76,6 +74,7 @@ open class WordwrapLayout(
     private val width: Int
     private val miniGraphWidth: Float
     private var rowTable: MutableList<RowRegion>?
+
     /**
      * Bumped on every text edit, so results of an async break that started before the edit are discarded
      */
@@ -90,12 +89,14 @@ open class WordwrapLayout(
         if (clearCache) {
             rowTable?.clear()
         }
-        miniGraphWidth = if ((editor.nonPrintablePaintingFlags and CodeEditor.FLAG_DRAW_SOFT_WRAP) != 0) {
-            editor.renderer.miniGraphWidth
-        } else {
-            0f
-        }
-        width = editor.width - (editor.measureTextRegionOffset() + editor.textPaint.measureText("a")).toInt() - (miniGraphWidth * 2).toInt()
+        miniGraphWidth =
+            if ((editor.nonPrintablePaintingFlags and CodeEditor.FLAG_DRAW_SOFT_WRAP) != 0) {
+                editor.renderer.miniGraphWidth
+            } else {
+                0f
+            }
+        width =
+            editor.width - (editor.measureTextRegionOffset() + editor.textPaint.measureText("a")).toInt() - (miniGraphWidth * 2).toInt()
         breakAllLines()
     }
 
@@ -103,7 +104,10 @@ open class WordwrapLayout(
         val content = text ?: return
         val ed = editor ?: return
         val editCountLocal = editCount.get()
-        val taskCount = min(SUBTASK_COUNT, ceil(content.lineCount.toFloat() / MIN_LINE_COUNT_FOR_SUBTASK).toInt()).coerceAtLeast(1)
+        val taskCount = min(
+            SUBTASK_COUNT,
+            ceil(content.lineCount.toFloat() / MIN_LINE_COUNT_FOR_SUBTASK).toInt()
+        ).coerceAtLeast(1)
         val sizeEachTask = content.lineCount / taskCount
         val monitor = TaskMonitor(taskCount) { results, _ ->
             val curEditor = this.editor
@@ -347,11 +351,19 @@ open class WordwrapLayout(
         return if (row >= table.size) table[table.size - 1].line else table[row].line
     }
 
-    override fun obtainRowIterator(initialRow: Int, preloadedLines: SparseArray<ContentLine>?): RowIterator {
+    override fun obtainRowIterator(
+        initialRow: Int,
+        preloadedLines: SparseArray<ContentLine>?
+    ): RowIterator {
         val table = rowTable
         val content = text
         return if (table == null || table.isEmpty() || content == null) {
-            LineBreakLayout.LineBreakLayoutRowItr(this, content ?: throw IllegalStateException("No text"), initialRow, preloadedLines)
+            LineBreakLayout.LineBreakLayoutRowItr(
+                this,
+                content ?: throw IllegalStateException("No text"),
+                initialRow,
+                preloadedLines
+            )
         } else {
             WordwrapLayoutRowItr(initialRow)
         }
@@ -462,7 +474,10 @@ open class WordwrapLayout(
         }
     }
 
-    override fun getVisualPositionForLayoutOffset(offsetX: Float, offsetY: Float): Layout.VisualLocation {
+    override fun getVisualPositionForLayoutOffset(
+        offsetX: Float,
+        offsetY: Float
+    ): Layout.VisualLocation {
         val table = rowTable
         val content = text
         val ed = editor ?: return Layout.VisualLocation(0, 0)
@@ -483,7 +498,12 @@ open class WordwrapLayout(
         offX -= region.getRenderTranslateX(width.toFloat())
         val tr = ed.renderer.createTextRow(row)
         val pos = tr.getElementPositionForCursorOffset(offX)
-        return Layout.VisualLocation(region.line, pos.textOffset, pos.element, pos.isInElementBounds)
+        return Layout.VisualLocation(
+            region.line,
+            pos.textOffset,
+            pos.element,
+            pos.isInElementBounds
+        )
     }
 
     override fun getCharLayoutOffset(line: Int, column: Int, array: FloatArray?): FloatArray {
@@ -627,7 +647,8 @@ open class WordwrapLayout(
             result.endColumn = region.endColumn
             result.inlayHints = region.inlayHints ?: emptyList()
             result.isLeadingRow = currentRow <= 0 || table[currentRow - 1].line != region.line
-            result.isTrailingRow = currentRow + 1 >= table.size || table[currentRow + 1].line != region.line
+            result.isTrailingRow =
+                currentRow + 1 >= table.size || table[currentRow + 1].line != region.line
             result.renderTranslateX = region.getRenderTranslateX(width.toFloat())
             currentRow++
             return result
@@ -664,12 +685,15 @@ open class WordwrapLayout(
         override fun compute(): WordwrapResult {
             val list = ArrayList<RowRegion>()
             val content = text
-            content?.runReadActionsOnLines(start, end, Content.ContentLineConsumer2 { index, line, abortFlag ->
-                list.addAll(breakLine(index, line, paint))
-                if (!shouldRun()) {
-                    abortFlag.set = true
-                }
-            })
+            content?.runReadActionsOnLines(
+                start,
+                end,
+                Content.ContentLineConsumer2 { index, line, abortFlag ->
+                    list.addAll(breakLine(index, line, paint))
+                    if (!shouldRun()) {
+                        abortFlag.set = true
+                    }
+                })
             return WordwrapResult(id, list)
         }
 

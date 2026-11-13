@@ -24,11 +24,7 @@
 
 package io.github.rosemoe.sora.event
 
-fun ResultedEvent<Boolean>.getResultBoolean(): Boolean = if (isResultSet) {
-    result!!
-} else {
-    false
-}
+fun ResultedEvent<Boolean>.getResultBoolean(): Boolean = isResultSet && result!!
 
 inline fun <reified T : Event> EventManager.subscribeEvent(receiver: EventReceiver<T>) =
     subscribeEvent(T::class.java, receiver)

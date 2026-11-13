@@ -42,7 +42,7 @@ open class RandomBasedSnippetVariableResolver : ISnippetVariableResolver {
     override fun resolve(name: String): String {
         return when (name) {
             "RANDOM" -> random.nextInt().toString()
-            "RANDOM_HEX" -> java.lang.Integer.toString(random.nextInt(), 16)
+            "RANDOM_HEX" -> Integer.toString(random.nextInt(), 16)
             "UUID" -> UUID.randomUUID().toString()
             else -> throw IllegalArgumentException("Unsupported variable name:$name")
         }

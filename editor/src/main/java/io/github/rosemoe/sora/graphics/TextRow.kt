@@ -115,7 +115,8 @@ open class TextRow {
             if (composingStart >= composingEnd) {
                 return lower
             }
-            val backgrounds = composing.getSpans(composingStart, composingEnd, BackgroundColorSpan::class.java)
+            val backgrounds =
+                composing.getSpans(composingStart, composingEnd, BackgroundColorSpan::class.java)
             if (backgrounds.isEmpty()) {
                 return lower
             }
@@ -155,7 +156,10 @@ open class TextRow {
                         SpanFactory.obtainNoExt(offset + boundary, 0L)
                     } else {
                         SpanFactory.obtain(offset + boundary, 0L).apply {
-                            setSpanExt(SpanExtAttrs.EXT_COLOR_RESOLVER, SpanConstColorResolver(0, color))
+                            setSpanExt(
+                                SpanExtAttrs.EXT_COLOR_RESOLVER,
+                                SpanConstColorResolver(0, color)
+                            )
                         }
                     }
                     upper.add(span)
@@ -166,7 +170,12 @@ open class TextRow {
                 return lower
             }
             return SpanMerger.merge(
-                if (lower.isNullOrEmpty()) listOf(SpanFactory.obtainNoExt(0, EditorColorScheme.TEXT_NORMAL.toLong())) else lower,
+                if (lower.isNullOrEmpty()) listOf(
+                    SpanFactory.obtainNoExt(
+                        0,
+                        EditorColorScheme.TEXT_NORMAL.toLong()
+                    )
+                ) else lower,
                 upper
             )
         }
@@ -201,7 +210,19 @@ open class TextRow {
         measureCache: TextAdvancesCache?,
         params: TextRowParams
     ) {
-        set(text, start, end, spans, inlineElements, directions, paint, measureCache, params, null, 0)
+        set(
+            text,
+            start,
+            end,
+            spans,
+            inlineElements,
+            directions,
+            paint,
+            measureCache,
+            params,
+            null,
+            0
+        )
     }
 
     /**
@@ -226,7 +247,8 @@ open class TextRow {
         this.text = text
         textStart = start
         textEnd = end
-        val resolvedSpans = mergeComposingBackgrounds(spans, start, end, composingText, composingTextStartColumn)
+        val resolvedSpans =
+            mergeComposingBackgrounds(spans, start, end, composingText, composingTextStartColumn)
         this.spans = if (resolvedSpans.isNullOrEmpty()) {
             listOf(SpanFactory.obtainNoExt(0, EditorColorScheme.TEXT_NORMAL.toLong()))
         } else {
@@ -431,7 +453,14 @@ open class TextRow {
                 continue
             }
             pointers = seekStartIndices(segmentStart)
-            if (!generateAndConsumeSingleRun(segmentStart, segmentEnd, dirs.isRunRtl(i), pointers, consumer)) {
+            if (!generateAndConsumeSingleRun(
+                    segmentStart,
+                    segmentEnd,
+                    dirs.isRunRtl(i),
+                    pointers,
+                    consumer
+                )
+            ) {
                 break
             }
         }
@@ -550,13 +579,18 @@ open class TextRow {
         val nonNullPaint = paint ?: return emptyList()
         val nonNullParams = params ?: return emptyList()
         val rows = ArrayList<WordwrapRow>()
-        val optimizer = if (antiWordBreaking) WordBreaker.Factory.newInstance(nonNullText) else WordBreakerEmpty.INSTANCE
+        val optimizer =
+            if (antiWordBreaking) WordBreaker.Factory.newInstance(nonNullText) else WordBreakerEmpty.INSTANCE
 
         class TextBreaker : RunElementsConsumer {
             var currentRow = WordwrapRow()
             var currentWidth = 0f
 
-            override fun accept(e: List<RowElement>, isRtl: Boolean, pointers: ListPointers): Boolean {
+            override fun accept(
+                e: List<RowElement>,
+                isRtl: Boolean,
+                pointers: ListPointers
+            ): Boolean {
                 for (element in e) {
                     if (element.type == RowElementTypes.TEXT) {
                         handleText(element)
@@ -638,7 +672,8 @@ open class TextRow {
 
             fun handleInlineElement(e: RowElement) {
                 val inlay = e.inlayHint ?: return
-                val renderer = nonNullParams.inlayHintRendererProvider.getInlayHintRendererForType(inlay.type)
+                val renderer =
+                    nonNullParams.inlayHintRendererProvider.getInlayHintRendererForType(inlay.type)
                 var w = 0f
                 if (renderer != null && inlayHintRenderParams != null) {
                     w = max(0f, renderer.measure(inlay, nonNullPaint, inlayHintRenderParams!!))
@@ -706,7 +741,12 @@ open class TextRow {
     /**
      * Clip text region to patch certain regions
      */
-    private fun clipRegionForPatchDrawing(textOffset: Float, width: Float, italics: Boolean, canvas: Canvas) {
+    private fun clipRegionForPatchDrawing(
+        textOffset: Float,
+        width: Float,
+        italics: Boolean,
+        canvas: Canvas
+    ) {
         val nonNullParams = params ?: return
         if (!italics) {
             canvas.clipRect(textOffset, 0f, textOffset + width, nonNullParams.rowHeight.toFloat())
@@ -725,7 +765,12 @@ open class TextRow {
     /**
      * Draw a single function character
      */
-    protected open fun drawFunctionCharacter(canvas: Canvas, offsetX: Float, width: Float, ch: Char) {
+    protected open fun drawFunctionCharacter(
+        canvas: Canvas,
+        offsetX: Float,
+        width: Float,
+        ch: Char
+    ) {
         val nonNullParams = params ?: return
         val nonNullPaint = paint ?: return
         val paintGraph = nonNullParams.graphPaint
@@ -745,7 +790,8 @@ open class TextRow {
         tmpRect.left = offsetX + width / 2f - actualWidth / 2f
         tmpRect.right = offsetX + width / 2f + actualWidth / 2f
         val color = nonNullPaint.color
-        nonNullPaint.color = nonNullParams.colorScheme.getColor(EditorColorScheme.FUNCTION_CHAR_BACKGROUND_STROKE)
+        nonNullPaint.color =
+            nonNullParams.colorScheme.getColor(EditorColorScheme.FUNCTION_CHAR_BACKGROUND_STROKE)
         nonNullPaint.style = android.graphics.Paint.Style.STROKE
         nonNullPaint.strokeWidth = nonNullParams.rowHeight * 0.05f
         val radius = nonNullParams.rowHeight * nonNullParams.roundTextBackgroundFactor
@@ -777,7 +823,9 @@ open class TextRow {
             var drawOffset = initOffset
             for (i in paintStart..paintEnd) {
                 var ch = '\u0000'
-                if (i == paintEnd || FunctionCharacters.isEditorFunctionChar(nonNullText[i].also { ch = it })) {
+                if (i == paintEnd || FunctionCharacters.isEditorFunctionChar(nonNullText[i].also {
+                        ch = it
+                    })) {
                     if (i - lastEnd > 0) {
                         if (isRtl) {
                             nonNullPaint.textAlign = android.graphics.Paint.Align.RIGHT
@@ -801,8 +849,10 @@ open class TextRow {
                     if (i == paintEnd) {
                         break
                     }
-                    val chAdvance = nonNullPaint.measureText(FunctionCharacters.getNameForFunctionCharacter(ch))
-                    var advance = getRunAdvanceCacheable(i, paintStart, paintEnd, paintStart, paintEnd, isRtl)
+                    val chAdvance =
+                        nonNullPaint.measureText(FunctionCharacters.getNameForFunctionCharacter(ch))
+                    var advance =
+                        getRunAdvanceCacheable(i, paintStart, paintEnd, paintStart, paintEnd, isRtl)
                     drawFunctionCharacter(
                         canvas,
                         if (isRtl) initOffset - advance - chAdvance else initOffset + advance,
@@ -876,15 +926,48 @@ open class TextRow {
         val nonNullPaint = paint ?: return
         if (paintEnd - paintStart < MIN_AUTO_TRUNCATE_LENGTH || measureCache == null) {
             if (ctx.drawTextConsumer != null) {
-                commitTextRunToConsumer(paintStart, paintEnd, contextStart, contextEnd, isRtl, canvas, offset, width, ctx)
+                commitTextRunToConsumer(
+                    paintStart,
+                    paintEnd,
+                    contextStart,
+                    contextEnd,
+                    isRtl,
+                    canvas,
+                    offset,
+                    width,
+                    ctx
+                )
             } else if (canvas != null) {
-                commitTextRunToCanvas(paintStart, paintEnd, contextStart, contextEnd, isRtl, canvas, offset, width)
+                commitTextRunToCanvas(
+                    paintStart,
+                    paintEnd,
+                    contextStart,
+                    contextEnd,
+                    isRtl,
+                    canvas,
+                    offset,
+                    width
+                )
             }
         } else {
             val runAdvanceLeft = max(0f, ctx.minOffset - offset) - nonNullPaint.spaceWidth
             val runAdvanceRight = min(width, ctx.maxOffset - offset) + nonNullPaint.spaceWidth
-            val boundForLeft = findOffsetByAdvanceCacheable(paintStart, paintEnd, contextStart, contextEnd, isRtl, runAdvanceLeft)
-            val boundForRight = findOffsetByAdvanceCacheable(paintStart, paintEnd, contextStart, contextEnd, isRtl, runAdvanceRight)
+            val boundForLeft = findOffsetByAdvanceCacheable(
+                paintStart,
+                paintEnd,
+                contextStart,
+                contextEnd,
+                isRtl,
+                runAdvanceLeft
+            )
+            val boundForRight = findOffsetByAdvanceCacheable(
+                paintStart,
+                paintEnd,
+                contextStart,
+                contextEnd,
+                isRtl,
+                runAdvanceRight
+            )
             val commitStart = min(boundForLeft, boundForRight)
             val commitEnd = max(boundForLeft, boundForRight)
 
@@ -904,14 +987,47 @@ open class TextRow {
                     commitContextEnd++
                 }
 
-                val advanceStart = measureAdvanceInRun(commitStart, paintStart, paintEnd, contextStart, contextEnd, isRtl)
-                val advanceEnd = measureAdvanceInRun(commitEnd, paintStart, paintEnd, contextStart, contextEnd, isRtl)
+                val advanceStart = measureAdvanceInRun(
+                    commitStart,
+                    paintStart,
+                    paintEnd,
+                    contextStart,
+                    contextEnd,
+                    isRtl
+                )
+                val advanceEnd = measureAdvanceInRun(
+                    commitEnd,
+                    paintStart,
+                    paintEnd,
+                    contextStart,
+                    contextEnd,
+                    isRtl
+                )
                 val newWidth = abs(advanceStart - advanceEnd)
                 val commitOffset = if (isRtl) offset + width - advanceEnd else offset + advanceStart
                 if (ctx.drawTextConsumer != null) {
-                    commitTextRunToConsumer(commitStart, commitEnd, contextStart, contextEnd, isRtl, canvas, commitOffset, newWidth, ctx)
+                    commitTextRunToConsumer(
+                        commitStart,
+                        commitEnd,
+                        contextStart,
+                        contextEnd,
+                        isRtl,
+                        canvas,
+                        commitOffset,
+                        newWidth,
+                        ctx
+                    )
                 } else if (canvas != null) {
-                    commitTextRunToCanvas(commitStart, commitEnd, contextStart, contextEnd, isRtl, canvas, commitOffset, newWidth)
+                    commitTextRunToCanvas(
+                        commitStart,
+                        commitEnd,
+                        contextStart,
+                        contextEnd,
+                        isRtl,
+                        canvas,
+                        commitOffset,
+                        newWidth
+                    )
                 }
             }
         }
@@ -948,11 +1064,19 @@ open class TextRow {
                 continue
             }
             if (commitStart >= selectionStart && commitEnd <= selectionEnd) {
-                nonNullPaint.color = nonNullParams.colorScheme.getColor(EditorColorScheme.TEXT_SELECTED)
+                nonNullPaint.color =
+                    nonNullParams.colorScheme.getColor(EditorColorScheme.TEXT_SELECTED)
             } else {
                 nonNullPaint.color = color
             }
-            val segmentWidth = getRunAdvanceCacheable(commitEnd, commitStart, commitEnd, paintStart, paintEnd, isRtl)
+            val segmentWidth = getRunAdvanceCacheable(
+                commitEnd,
+                commitStart,
+                commitEnd,
+                paintStart,
+                paintEnd,
+                isRtl
+            )
             if (isRtl) {
                 commitTextRunAutoTruncated(
                     commitStart,
@@ -1002,7 +1126,8 @@ open class TextRow {
             val styleBits = span.styleBits
             if (styleBits != ctx.lastStyle) {
                 paintGeneral.isFakeBoldText = TextStyle.isBold(styleBits)
-                paintGeneral.textSkewX = if (TextStyle.isItalics(styleBits)) RenderingConstants.TEXT_SKEW_X else 0f
+                paintGeneral.textSkewX =
+                    if (TextStyle.isItalics(styleBits)) RenderingConstants.TEXT_SKEW_X else 0f
                 ctx.lastStyle = styleBits
             }
         }
@@ -1028,7 +1153,14 @@ open class TextRow {
         }
         if (checkCursorOffsetInSegment(ctx.targetCharOffset, paintStart, paintEnd)) {
             ctx.maxOffset = 0f
-            val advance = getRunAdvanceCacheable(ctx.targetCharOffset, paintStart, paintEnd, paintStart, paintEnd, isRtl)
+            val advance = getRunAdvanceCacheable(
+                ctx.targetCharOffset,
+                paintStart,
+                paintEnd,
+                paintStart,
+                paintEnd,
+                isRtl
+            )
             ctx.resultOffset = if (isRtl) offset + width - advance else offset + advance
             return width
         }
@@ -1043,7 +1175,14 @@ open class TextRow {
             } else if (runOffset <= 0f) {
                 ctx.resultCharOffset = paintStart
             } else {
-                ctx.resultCharOffset = findOffsetByAdvanceCacheable(paintStart, paintEnd, paintStart, paintEnd, isRtl, runOffset)
+                ctx.resultCharOffset = findOffsetByAdvanceCacheable(
+                    paintStart,
+                    paintEnd,
+                    paintStart,
+                    paintEnd,
+                    isRtl,
+                    runOffset
+                )
             }
         }
 
@@ -1057,8 +1196,22 @@ open class TextRow {
                     regionLeft = offset
                     regionRight = offset + width
                 } else {
-                    var startAdvance = getRunAdvanceCacheable(sharedTextStart, paintStart, paintEnd, paintStart, paintEnd, isRtl)
-                    var endAdvance = getRunAdvanceCacheable(sharedTextEnd, paintStart, paintEnd, paintStart, paintEnd, isRtl)
+                    var startAdvance = getRunAdvanceCacheable(
+                        sharedTextStart,
+                        paintStart,
+                        paintEnd,
+                        paintStart,
+                        paintEnd,
+                        isRtl
+                    )
+                    var endAdvance = getRunAdvanceCacheable(
+                        sharedTextEnd,
+                        paintStart,
+                        paintEnd,
+                        paintStart,
+                        paintEnd,
+                        isRtl
+                    )
                     startAdvance = if (isRtl) width - startAdvance else startAdvance
                     endAdvance = if (isRtl) width - endAdvance else endAdvance
                     regionLeft = offset + min(startAdvance, endAdvance)
@@ -1086,10 +1239,25 @@ open class TextRow {
             }
             if (ctx.autoClip) {
                 canvas.save()
-                clipRegionForPatchDrawing(regionLeft, regionRight - regionLeft, TextStyle.isItalics(span.styleBits), canvas)
+                clipRegionForPatchDrawing(
+                    regionLeft,
+                    regionRight - regionLeft,
+                    TextStyle.isItalics(span.styleBits),
+                    canvas
+                )
             }
             ctx.currentSpan = span
-            commitTextRunAutoTruncated(paintStart, paintEnd, paintStart, paintEnd, isRtl, canvas, offset, width, ctx)
+            commitTextRunAutoTruncated(
+                paintStart,
+                paintEnd,
+                paintStart,
+                paintEnd,
+                isRtl,
+                canvas,
+                offset,
+                width,
+                ctx
+            )
             ctx.currentSpan = null
             ctx.lastStyle = -1
             if (ctx.autoClip) {
@@ -1104,7 +1272,12 @@ open class TextRow {
         if (renderer != null && renderer.requirePreDraw()) {
             val saveCount = canvas.save()
             canvas.translate(offset, 0f)
-            canvas.clipRect(0f, nonNullParams.rowTop.toFloat(), width, nonNullParams.rowHeight.toFloat())
+            canvas.clipRect(
+                0f,
+                nonNullParams.rowTop.toFloat(),
+                width,
+                nonNullParams.rowHeight.toFloat()
+            )
             try {
                 renderer.draw(canvas, paintGeneral, nonNullParams.colorScheme, true)
             } catch (e: Exception) {
@@ -1115,7 +1288,12 @@ open class TextRow {
 
         val backgroundColor = RendererUtils.getBackgroundColor(span, nonNullParams.colorScheme)
         if (backgroundColor != 0 && paintStart != paintEnd) {
-            tmpRect.set(offset, nonNullParams.rowTop.toFloat(), offset + width, nonNullParams.rowBottom.toFloat())
+            tmpRect.set(
+                offset,
+                nonNullParams.rowTop.toFloat(),
+                offset + width,
+                nonNullParams.rowBottom.toFloat()
+            )
             paintGeneral.color = backgroundColor
             val radius = nonNullParams.rowHeight * nonNullParams.roundTextBackgroundFactor
             canvas.drawRoundRect(tmpRect, radius, radius, paintGeneral)
@@ -1126,14 +1304,35 @@ open class TextRow {
             nonNullParams.colorScheme.getColor(EditorColorScheme.TEXT_SELECTED) == 0
         ) {
             paintGeneral.color = foregroundColor
-            commitTextRunAutoTruncated(paintStart, paintEnd, paintStart, paintEnd, isRtl, canvas, offset, width, ctx)
+            commitTextRunAutoTruncated(
+                paintStart,
+                paintEnd,
+                paintStart,
+                paintEnd,
+                isRtl,
+                canvas,
+                offset,
+                width,
+                ctx
+            )
         } else {
-            splitRegionsAndCommit(paintStart, paintEnd, isRtl, canvas, offset, width, foregroundColor, ctx)
+            splitRegionsAndCommit(
+                paintStart,
+                paintEnd,
+                isRtl,
+                canvas,
+                offset,
+                width,
+                foregroundColor,
+                ctx
+            )
         }
 
         if (TextStyle.isStrikeThrough(span.style)) {
-            val strikethroughColor = nonNullParams.colorScheme.getColor(EditorColorScheme.STRIKETHROUGH)
-            paintOther.color = if (strikethroughColor == 0) paintGeneral.color else strikethroughColor
+            val strikethroughColor =
+                nonNullParams.colorScheme.getColor(EditorColorScheme.STRIKETHROUGH)
+            paintOther.color =
+                if (strikethroughColor == 0) paintGeneral.color else strikethroughColor
             val y = nonNullParams.rowTop + nonNullParams.rowHeight / 2f
             canvas.drawLine(offset, y, offset + width, y, paintOther)
         }
@@ -1143,7 +1342,8 @@ open class TextRow {
             val underlineColorInt = underlineColor.resolve(nonNullParams.colorScheme)
             if (underlineColorInt != 0) {
                 tmpRect.bottom = nonNullParams.textBottom.toFloat()
-                tmpRect.top = tmpRect.bottom - nonNullParams.textHeight * RenderingConstants.TEXT_UNDERLINE_WIDTH_FACTOR
+                tmpRect.top =
+                    tmpRect.bottom - nonNullParams.textHeight * RenderingConstants.TEXT_UNDERLINE_WIDTH_FACTOR
                 tmpRect.left = offset
                 tmpRect.right = offset + width
                 paintGeneral.color = underlineColorInt
@@ -1189,12 +1389,14 @@ open class TextRow {
             while (nextEnd > start) {
                 var moveSpanIndex = true
                 val span = spans[spanIndex]
-                val segmentStart = max(start, if (spanIndex == 0) {
-                    moveSpanIndex = false
-                    0
-                } else {
-                    span.column
-                })
+                val segmentStart = max(
+                    start, if (spanIndex == 0) {
+                        moveSpanIndex = false
+                        0
+                    } else {
+                        span.column
+                    }
+                )
                 val segmentEnd = nextEnd
 
                 localOffset += handleSingleStyledText(
@@ -1314,7 +1516,10 @@ open class TextRow {
                         }
                     }
                     if (ctx.regionBuffer != null && index >= ctx.startCharOffset && index < ctx.endCharOffset) {
-                        ctx.regionBuffer?.commitRegion(offset + localOffset, offset + localOffset + tabWidth)
+                        ctx.regionBuffer?.commitRegion(
+                            offset + localOffset,
+                            offset + localOffset + tabWidth
+                        )
                     }
                     ctx.advances?.setAdvanceAt(index, tabWidth)
                     if (ctx.drawTextConsumer != null && index >= ctx.startCharOffset && index < ctx.endCharOffset) {
@@ -1356,7 +1561,8 @@ open class TextRow {
         val inlay = e.inlayHint ?: return 0f
         val nonNullParams = params ?: return 0f
         val nonNullPaint = paint ?: return 0f
-        val renderer = nonNullParams.inlayHintRendererProvider.getInlayHintRendererForType(inlay.type)
+        val renderer =
+            nonNullParams.inlayHintRendererProvider.getInlayHintRendererForType(inlay.type)
         var w = 0f
         if (renderer != null && inlayHintRenderParams != null) {
             w = max(0f, renderer.measure(inlay, nonNullPaint, inlayHintRenderParams!!))
@@ -1372,7 +1578,14 @@ open class TextRow {
         if (renderer != null && sharedStart < sharedEnd && inlayHintRenderParams != null) {
             val saveCount = canvas.save()
             canvas.translate(offset, nonNullParams.rowTop.toFloat())
-            renderer.render(inlay, canvas, nonNullPaint, inlayHintRenderParams!!, nonNullParams.colorScheme, w)
+            renderer.render(
+                inlay,
+                canvas,
+                nonNullPaint,
+                inlayHintRenderParams!!,
+                nonNullParams.colorScheme,
+                w
+            )
             canvas.restoreToCount(saveCount)
             ctx.lastStyle = -1
         }
@@ -1395,14 +1608,17 @@ open class TextRow {
         for (element in visualElements) {
             var offsetAdvance = 0f
             if (element.type == RowElementTypes.TEXT) {
-                offsetAdvance = handleSingleTextElement(element, pointers, canvas, offset + localOffset, ctx)
+                offsetAdvance =
+                    handleSingleTextElement(element, pointers, canvas, offset + localOffset, ctx)
             } else if (element.type == RowElementTypes.INLAY_HINT) {
-                offsetAdvance = handleSingleInlineElement(element, canvas, offset + localOffset, ctx)
+                offsetAdvance =
+                    handleSingleInlineElement(element, canvas, offset + localOffset, ctx)
             }
             if (ctx.targetHorizontalOffset != -1f) {
                 ctx.resultElement = element
                 val leftOffset = offset + localOffset
-                ctx.isInElementBounds = leftOffset <= ctx.targetHorizontalOffset && ctx.targetHorizontalOffset <= leftOffset + offsetAdvance
+                ctx.isInElementBounds =
+                    leftOffset <= ctx.targetHorizontalOffset && ctx.targetHorizontalOffset <= leftOffset + offsetAdvance
             }
             localOffset += offsetAdvance
             if (offset + localOffset > ctx.maxOffset) {
@@ -1425,17 +1641,24 @@ open class TextRow {
             minOffset = minHorizontalOffset
             maxOffset = maxHorizontalOffset
         }
+
         class DrawHandler : RunElementsConsumer {
             var horizontalOffset = 0f
             var isExhausted = true
 
-            override fun accept(e: List<RowElement>, isRtl: Boolean, pointers: ListPointers): Boolean {
-                val runWidth = handleMultiElementRun(e, isRtl, pointers, canvas, horizontalOffset, ctx)
+            override fun accept(
+                e: List<RowElement>,
+                isRtl: Boolean,
+                pointers: ListPointers
+            ): Boolean {
+                val runWidth =
+                    handleMultiElementRun(e, isRtl, pointers, canvas, horizontalOffset, ctx)
                 horizontalOffset += runWidth
                 isExhausted = horizontalOffset < maxHorizontalOffset
                 return isExhausted
             }
         }
+
         val handler = DrawHandler()
         iterateRuns(handler, true)
         return IntPair.packIntFloat(if (handler.isExhausted) 1 else 0, handler.horizontalOffset)
@@ -1448,15 +1671,22 @@ open class TextRow {
         val ctx = IteratingContext().apply {
             targetCharOffset = index
         }
+
         class CursorOffsetHandler : RunElementsConsumer {
             var horizontalOffset = 0f
 
-            override fun accept(e: List<RowElement>, isRtl: Boolean, pointers: ListPointers): Boolean {
-                val runWidth = handleMultiElementRun(e, isRtl, pointers, null, horizontalOffset, ctx)
+            override fun accept(
+                e: List<RowElement>,
+                isRtl: Boolean,
+                pointers: ListPointers
+            ): Boolean {
+                val runWidth =
+                    handleMultiElementRun(e, isRtl, pointers, null, horizontalOffset, ctx)
                 horizontalOffset += runWidth
                 return ctx.maxOffset != 0f
             }
         }
+
         val handler = CursorOffsetHandler()
         iterateRuns(handler, true)
         return ctx.resultOffset
@@ -1493,7 +1723,8 @@ open class TextRow {
         val ctx = IteratingContext().apply {
             startCharOffset = start
             endCharOffset = end
-            regionBuffer = RegionBuffer(this, handler, allowLeadingBackground, allowTrailingBackground)
+            regionBuffer =
+                RegionBuffer(this, handler, allowLeadingBackground, allowTrailingBackground)
         }
         iterateRuns(MaxOffsetIterationConsumer(ctx), true)
         ctx.regionBuffer?.commitCurrentIfPresent()
@@ -1586,7 +1817,14 @@ open class TextRow {
         var horizontalOffset: Float = 0f
 
         override fun accept(e: List<RowElement>, isRtl: Boolean, pointers: ListPointers): Boolean {
-            horizontalOffset += handleMultiElementRun(e, isRtl, pointers, canvas, horizontalOffset, ctx)
+            horizontalOffset += handleMultiElementRun(
+                e,
+                isRtl,
+                pointers,
+                canvas,
+                horizontalOffset,
+                ctx
+            )
             return horizontalOffset < ctx.maxOffset
         }
     }

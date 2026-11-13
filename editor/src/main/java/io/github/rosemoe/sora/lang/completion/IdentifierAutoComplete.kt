@@ -269,7 +269,11 @@ class IdentifierAutoComplete {
                 val score = fuzzyScore?.score ?: -100
 
                 if ((TextUtils.startsWith(identifier, prefix, true) || score >= -20) &&
-                    !(prefix.length == identifier.length && TextUtils.startsWith(prefix, identifier, false))
+                    !(prefix.length == identifier.length && TextUtils.startsWith(
+                        prefix,
+                        identifier,
+                        false
+                    ))
                 ) {
                     dest.add(identifier)
                 }

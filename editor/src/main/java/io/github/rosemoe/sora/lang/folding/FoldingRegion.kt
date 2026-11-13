@@ -65,7 +65,12 @@ open class FoldingRegion {
     val endColumn: Int
         get() = IntPair.getSecond(end)
 
-    open fun createChild(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int): FoldingRegion {
+    open fun createChild(
+        startLine: Int,
+        startColumn: Int,
+        endLine: Int,
+        endColumn: Int
+    ): FoldingRegion {
         if (startLine < this.startLine || (startLine == this.startLine && startColumn < this.startColumn)) {
             throw IllegalArgumentException("child start is before parent start")
         }

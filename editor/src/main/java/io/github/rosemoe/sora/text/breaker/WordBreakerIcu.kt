@@ -37,13 +37,16 @@ open class WordBreakerIcu(protected val text: ContentLine) : WordBreaker {
     init {
         val textIterator: CharacterIterator = CharSequenceIterator(text)
         wrappingIterator = BreakIterator.getLineInstance()
-        wrappingIterator.setText(textIterator)
+        wrappingIterator.text = textIterator
     }
 
     override fun getOptimizedBreakPoint(start: Int, end: Int): Int {
         var resultEnd = end
         // Merging trailing whitespaces is not supported by editor, so force to break here
-        if (resultEnd > 0 && !Character.isWhitespace(text[resultEnd - 1]) && !wrappingIterator.isBoundary(resultEnd)) {
+        if (resultEnd > 0 && !Character.isWhitespace(text[resultEnd - 1]) && !wrappingIterator.isBoundary(
+                resultEnd
+            )
+        ) {
             // Break text at last boundary
             val lastBoundary = wrappingIterator.preceding(resultEnd)
             if (lastBoundary != BreakIterator.DONE) {

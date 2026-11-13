@@ -89,12 +89,13 @@ open class NoExtSpanImpl internal constructor(
     override fun hashCode(): Int {
         var result = column
         result = 31 * result + style.hashCode()
-        result = 31 * result + (extra?.hashCode() ?: 0)
+        result = 31 * result + extra.hashCode()
         return result
     }
 
     companion object {
-        private val pool: SpanPool<NoExtSpanImpl> = SpanPool { column, style -> NoExtSpanImpl(column, style) }
+        private val pool: SpanPool<NoExtSpanImpl> =
+            SpanPool { column, style -> NoExtSpanImpl(column, style) }
 
         @JvmStatic
         fun obtain(column: Int, style: Long): NoExtSpanImpl {

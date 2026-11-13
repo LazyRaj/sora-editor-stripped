@@ -36,8 +36,16 @@ import io.github.rosemoe.sora.widget.style.SelectionHandleStyle
 open class HandleStyleDrop(context: Context) : SelectionHandleStyle {
 
     private val drawable: Drawable = context.getDrawable(R.drawable.ic_sora_handle_drop)!!.mutate()
-    private val width: Int = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20f, context.resources.displayMetrics).toInt()
-    private val height: Int = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30f, context.resources.displayMetrics).toInt()
+    private val width: Int = TypedValue.applyDimension(
+        TypedValue.COMPLEX_UNIT_DIP,
+        20f,
+        context.resources.displayMetrics
+    ).toInt()
+    private val height: Int = TypedValue.applyDimension(
+        TypedValue.COMPLEX_UNIT_DIP,
+        30f,
+        context.resources.displayMetrics
+    ).toInt()
     private var lastColor = 0
 
     private var alpha = 255
@@ -63,7 +71,13 @@ open class HandleStyleDrop(context: Context) : SelectionHandleStyle {
         drawable.setBounds(left, top, right, bottom)
         drawable.alpha = alpha
         drawable.draw(canvas)
-        descriptor.set(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat(), SelectionHandleStyle.ALIGN_CENTER)
+        descriptor.set(
+            left.toFloat(),
+            top.toFloat(),
+            right.toFloat(),
+            bottom.toFloat(),
+            SelectionHandleStyle.ALIGN_CENTER
+        )
     }
 
     override fun setAlpha(alpha: Int) {

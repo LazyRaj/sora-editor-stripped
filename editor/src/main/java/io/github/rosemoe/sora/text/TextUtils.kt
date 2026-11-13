@@ -103,7 +103,12 @@ object TextUtils {
     }
 
     @JvmStatic
-    fun indexOf(text: CharSequence, pattern: CharSequence, ignoreCase: Boolean, fromIndex: Int): Int {
+    fun indexOf(
+        text: CharSequence,
+        pattern: CharSequence,
+        ignoreCase: Boolean,
+        fromIndex: Int
+    ): Int {
         val max = text.length - pattern.length
         val len = pattern.length
         for (i in fromIndex..max) {
@@ -124,7 +129,12 @@ object TextUtils {
     }
 
     @JvmStatic
-    fun lastIndexOf(text: CharSequence, pattern: CharSequence, ignoreCase: Boolean, fromIndex: Int): Int {
+    fun lastIndexOf(
+        text: CharSequence,
+        pattern: CharSequence,
+        ignoreCase: Boolean,
+        fromIndex: Int
+    ): Int {
         val len = pattern.length
         val actualFromIndex = min(fromIndex, text.length - len)
         for (i in actualFromIndex downTo 0) {
@@ -271,12 +281,14 @@ object TextUtils {
                         else -> stateFinished
                     }
                 }
+
                 stateLf -> {
                     if (codePoint == CARRIAGE_RETURN) {
                         ++deleteCharCount
                     }
                     state = stateFinished
                 }
+
                 stateOddNumberedRis -> {
                     if (AndroidEmoji.isRegionalIndicatorSymbol(codePoint)) {
                         deleteCharCount += 2
@@ -285,6 +297,7 @@ object TextUtils {
                         state = stateFinished
                     }
                 }
+
                 stateEvenNumberedRis -> {
                     if (AndroidEmoji.isRegionalIndicatorSymbol(codePoint)) {
                         deleteCharCount -= 2
@@ -293,6 +306,7 @@ object TextUtils {
                         state = stateFinished
                     }
                 }
+
                 stateBeforeKeycap -> {
                     if (AndroidEmoji.isVariationSelector(codePoint)) {
                         lastSeenVSCharCount = Character.charCount(codePoint)
@@ -304,12 +318,14 @@ object TextUtils {
                         state = stateFinished
                     }
                 }
+
                 stateBeforeVsAndKeycap -> {
                     if (AndroidEmoji.isKeycapBase(codePoint)) {
                         deleteCharCount += lastSeenVSCharCount + Character.charCount(codePoint)
                     }
                     state = stateFinished
                 }
+
                 stateBeforeEmojiModifier -> {
                     if (AndroidEmoji.isVariationSelector(codePoint)) {
                         lastSeenVSCharCount = Character.charCount(codePoint)
@@ -321,23 +337,29 @@ object TextUtils {
                         state = stateFinished
                     }
                 }
+
                 stateBeforeVsAndEmojiModifier -> {
                     if (AndroidEmoji.isEmojiModifierBase(codePoint)) {
                         deleteCharCount += lastSeenVSCharCount + Character.charCount(codePoint)
                     }
                     state = stateFinished
                 }
+
                 stateBeforeVs -> {
                     if (AndroidEmoji.isEmoji(codePoint)) {
                         deleteCharCount += Character.charCount(codePoint)
                         state = stateBeforeEmoji
                     } else {
-                        if (!AndroidEmoji.isVariationSelector(codePoint) && UCharacter.getCombiningClass(codePoint) == 0) {
+                        if (!AndroidEmoji.isVariationSelector(codePoint) && UCharacter.getCombiningClass(
+                                codePoint
+                            ) == 0
+                        ) {
                             deleteCharCount += Character.charCount(codePoint)
                         }
                         state = stateFinished
                     }
                 }
+
                 stateBeforeEmoji -> {
                     state = if (codePoint == AndroidEmoji.ZERO_WIDTH_JOINER) {
                         stateBeforeZwj
@@ -345,6 +367,7 @@ object TextUtils {
                         stateFinished
                     }
                 }
+
                 stateBeforeZwj -> {
                     if (AndroidEmoji.isEmoji(codePoint)) {
                         deleteCharCount += Character.charCount(codePoint) + 1
@@ -360,6 +383,7 @@ object TextUtils {
                         state = stateFinished
                     }
                 }
+
                 stateBeforeVsAndZwj -> {
                     if (AndroidEmoji.isEmoji(codePoint)) {
                         deleteCharCount += lastSeenVSCharCount + 1 + Character.charCount(codePoint)
@@ -369,6 +393,7 @@ object TextUtils {
                         state = stateFinished
                     }
                 }
+
                 stateInTagSequence -> {
                     if (AndroidEmoji.isTagSpecChar(codePoint)) {
                         deleteCharCount += 2
@@ -380,6 +405,7 @@ object TextUtils {
                         state = stateFinished
                     }
                 }
+
                 else -> throw IllegalArgumentException("state $state is unknown")
             }
         } while (tmpOffset > 0 && state != stateFinished)

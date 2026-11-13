@@ -66,6 +66,7 @@ open class InsertTextHelper private constructor() {
                 indexNext = index + 1
                 TYPE_NEWLINE
             }
+
             '\r' -> {
                 indexNext = if (index + 1 < length && nonNullText[index + 1] == '\n') {
                     index + 2
@@ -74,6 +75,7 @@ open class InsertTextHelper private constructor() {
                 }
                 TYPE_NEWLINE
             }
+
             else -> {
                 indexNext = index + 1
                 while (indexNext < length) {

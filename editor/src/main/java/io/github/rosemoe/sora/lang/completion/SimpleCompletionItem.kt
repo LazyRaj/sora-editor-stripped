@@ -51,11 +51,28 @@ open class SimpleCompletionItem(
         this.prefixLength = prefixLength
     }
 
-    constructor(prefixLength: Int, commitText: String) : this(commitText, null, null, prefixLength, commitText)
+    constructor(prefixLength: Int, commitText: String) : this(
+        commitText,
+        null,
+        null,
+        prefixLength,
+        commitText
+    )
 
-    constructor(label: CharSequence, prefixLength: Int, commitText: String) : this(label, null, null, prefixLength, commitText)
+    constructor(label: CharSequence, prefixLength: Int, commitText: String) : this(
+        label,
+        null,
+        null,
+        prefixLength,
+        commitText
+    )
 
-    constructor(label: CharSequence, desc: CharSequence?, prefixLength: Int, commitText: String) : this(label, desc, null, prefixLength, commitText)
+    constructor(
+        label: CharSequence,
+        desc: CharSequence?,
+        prefixLength: Int,
+        commitText: String
+    ) : this(label, desc, null, prefixLength, commitText)
 
     override fun desc(desc: CharSequence?): SimpleCompletionItem {
         super.desc(desc)

@@ -28,7 +28,6 @@ package io.github.rosemoe.sora.text
 
 import io.github.rosemoe.sora.text.bidi.ContentBidi
 import io.github.rosemoe.sora.text.bidi.Directions
-import java.util.ArrayList
 import java.util.LinkedList
 import java.util.Objects
 import java.util.concurrent.atomic.AtomicLong
@@ -264,11 +263,10 @@ open class Content @JvmOverloads constructor(
                 false
             } else {
                 val text = getLine(line)
-                if (column > text.length + text.lineSeparator.length || column < 0) {
-                    false
-                } else {
-                    indexer.getCharIndex(line, column) == index
-                }
+                !(column > text.length + text.lineSeparator.length || column < 0) && indexer.getCharIndex(
+                    line,
+                    column
+                ) == index
             }
         }
     }
@@ -321,14 +319,16 @@ open class Content @JvmOverloads constructor(
                 currLine.insert(workIndex, text, helper.index, helper.indexNext)
                 workIndex += helper.indexNext - helper.index
             } else {
-                val separator = LineSeparator.fromSeparatorString(text, helper.index, helper.indexNext)
+                val separator =
+                    LineSeparator.fromSeparatorString(text, helper.index, helper.indexNext)
                 currLine.lineSeparator = separator
 
                 // Peek!
                 peekType = helper.forward()
                 fromPeek = true
 
-                val newLine = ContentLine(currLine.length - workIndex + helper.indexNext - helper.index + 10)
+                val newLine =
+                    ContentLine(currLine.length - workIndex + helper.indexNext - helper.index + 10)
                 newLine.insert(0, currLine, workIndex, currLine.length)
                 currLine.delete(workIndex, currLine.length)
                 workIndex = 0
@@ -385,7 +385,12 @@ open class Content @JvmOverloads constructor(
         }
     }
 
-    private fun deleteInternal(startLine: Int, columnOnStartLine: Int, endLine: Int, columnOnEndLine: Int) {
+    private fun deleteInternal(
+        startLine: Int,
+        columnOnStartLine: Int,
+        endLine: Int,
+        columnOnEndLine: Int
+    ) {
         checkLineAndColumn(endLine, columnOnEndLine, CHECK_TYPE_CURSOR)
         checkLineAndColumn(startLine, columnOnStartLine, CHECK_TYPE_CURSOR)
         if (startLine == endLine && columnOnStartLine == columnOnEndLine) {
@@ -452,7 +457,13 @@ open class Content @JvmOverloads constructor(
         } else {
             throw IllegalArgumentException("start line > end line")
         }
-        this.dispatchAfterDelete(startLine, columnOnStartLine, endLine, columnOnEndLine, changedContent)
+        this.dispatchAfterDelete(
+            startLine,
+            columnOnStartLine,
+            endLine,
+            columnOnEndLine,
+            changedContent
+        )
     }
 
     /**
@@ -478,7 +489,13 @@ open class Content @JvmOverloads constructor(
      * @param columnOnEndLine   The end column position
      * @param text              The text to replace old text
      */
-    open fun replace(startLine: Int, columnOnStartLine: Int, endLine: Int, columnOnEndLine: Int, text: CharSequence) {
+    open fun replace(
+        startLine: Int,
+        columnOnStartLine: Int,
+        endLine: Int,
+        columnOnEndLine: Int,
+        text: CharSequence
+    ) {
         lock(true)
         documentVersionAtomic.getAndIncrement()
         try {
@@ -977,6 +994,7 @@ open class Content @JvmOverloads constructor(
                     )
                 }
             }
+
             CHECK_TYPE_CURSOR -> {
                 val len = text.length
                 if (column > len || column < 0) {
@@ -985,6 +1003,7 @@ open class Content @JvmOverloads constructor(
                     )
                 }
             }
+
             CHECK_TYPE_INDEX -> {
                 val len = text.length + text.lineSeparator.length
                 if (line == lineCount - 1) {

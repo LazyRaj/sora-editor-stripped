@@ -81,7 +81,7 @@ open class CharSequenceIterator(private val src: CharSequence) : CharacterIterat
 
     override fun getIndex(): Int = index
 
-    public override fun clone(): Any {
+    override fun clone(): Any {
         val another = CharSequenceIterator(src)
         another.index = index
         return another

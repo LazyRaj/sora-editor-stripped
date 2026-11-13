@@ -46,22 +46,42 @@ class RegexBackrefParser(val grammar: RegexBackrefGrammar) {
             when (state) {
                 0 -> {
                     if (ch == escapeChar) {
-                        result.add(RegexBackrefToken(false, workingPattern.substring(textStart, index), -1))
+                        result.add(
+                            RegexBackrefToken(
+                                false,
+                                workingPattern.substring(textStart, index),
+                                -1
+                            )
+                        )
                         state = 1
                     } else if (ch == backrefChar) {
-                        result.add(RegexBackrefToken(false, workingPattern.substring(textStart, index), -1))
+                        result.add(
+                            RegexBackrefToken(
+                                false,
+                                workingPattern.substring(textStart, index),
+                                -1
+                            )
+                        )
                         state = 2
                     }
                 }
+
                 1 -> {
                     if (ch == escapeChar || ch == backrefChar) {
                         result.add(RegexBackrefToken(false, ch.toString(), -1))
                     } else {
-                        result.add(RegexBackrefToken(false, workingPattern.substring(index - 1, index + 1), -1))
+                        result.add(
+                            RegexBackrefToken(
+                                false,
+                                workingPattern.substring(index - 1, index + 1),
+                                -1
+                            )
+                        )
                     }
                     state = 0
                     textStart = index + 1
                 }
+
                 2 -> {
                     if (ch in '0'..'9') {
                         currentGroup = (ch - '0').toLong()
@@ -80,6 +100,7 @@ class RegexBackrefParser(val grammar: RegexBackrefGrammar) {
                         state = 0
                     }
                 }
+
                 3 -> {
                     if (ch in '0'..'9') {
                         val newGroup = currentGroup * 10 + (ch - '0')

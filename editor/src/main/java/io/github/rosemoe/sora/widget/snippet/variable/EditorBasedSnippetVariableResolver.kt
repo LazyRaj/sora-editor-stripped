@@ -54,9 +54,11 @@ open class EditorBasedSnippetVariableResolver(
                 val res = ICUUtils.getWordRange(line, cursor.leftColumn, true)
                 line.subSequence(IntPair.getFirst(res), IntPair.getSecond(res)).toString()
             }
+
             "SELECTION", "TM_SELECTED_TEXT" -> {
                 editor.text.subSequence(cursor.left, cursor.right).toString()
             }
+
             else -> throw IllegalArgumentException("Unsupported variable name:$name")
         }
     }

@@ -219,7 +219,6 @@ open class EditorPopupWindow(
     }
 
 
-
     fun setSize(width: Int, height: Int) {
         this.width = width
         this.height = height
@@ -239,11 +238,8 @@ open class EditorPopupWindow(
     }
 
     private fun isCursorObscured(left: Int, top: Int, right: Int, bottom: Int): Boolean {
-        if (!isFeatureEnabled(FEATURE_DISMISS_WHEN_OBSCURING_CURSOR)) {
-            return false
-        }
-        return try {
-            val cursor = editor.cursor ?: return false
+        return isFeatureEnabled(FEATURE_DISMISS_WHEN_OBSCURING_CURSOR) && try {
+            val cursor = editor.cursor
             val line = cursor.leftLine
             val column = cursor.leftColumn
             val cursorLeft = editor.getCharOffsetX(line, column)

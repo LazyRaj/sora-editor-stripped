@@ -49,10 +49,7 @@ object SpanExtAttrs {
 
     @JvmStatic
     fun checkType(extType: Int, ext: SpanExt?): Boolean {
-        if (ext == null) {
-            return true
-        }
-        return when (extType) {
+        return ext == null || when (extType) {
             EXT_COLOR_RESOLVER -> ext is SpanColorResolver
             EXT_EXTERNAL_RENDERER -> ext is SpanExternalRenderer
             EXT_INTERACTION_INFO -> ext is SpanInteractionInfo

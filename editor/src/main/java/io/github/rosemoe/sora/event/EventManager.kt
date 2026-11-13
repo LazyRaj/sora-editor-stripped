@@ -27,7 +27,6 @@ package io.github.rosemoe.sora.event
 import java.util.Arrays
 import java.util.LinkedList
 import java.util.Vector
-import java.util.concurrent.locks.ReadWriteLock
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.read
 import kotlin.concurrent.write
@@ -131,14 +130,20 @@ class EventManager @JvmOverloads constructor(
     /**
      * @see subscribeEvent
      */
-    fun <T : Event> subscribe(eventType: Class<T>, receiver: EventReceiver<T>): SubscriptionReceipt<T> {
+    fun <T : Event> subscribe(
+        eventType: Class<T>,
+        receiver: EventReceiver<T>
+    ): SubscriptionReceipt<T> {
         return subscribeEvent(eventType, receiver)
     }
 
     /**
      * Subscribe an event and never unsubscribe from event receiver
      */
-    fun <T : Event> subscribeAlways(eventType: Class<T>, receiver: NoUnsubscribeReceiver<T>): SubscriptionReceipt<T> {
+    fun <T : Event> subscribeAlways(
+        eventType: Class<T>,
+        receiver: NoUnsubscribeReceiver<T>
+    ): SubscriptionReceipt<T> {
         return subscribeEvent(eventType) { event, _ -> receiver.onEvent(event) }
     }
 
@@ -149,7 +154,10 @@ class EventManager @JvmOverloads constructor(
      * @param receiver  Receiver of event
      * @param T         Event type
      */
-    fun <T : Event> subscribeEvent(eventType: Class<T>, receiver: EventReceiver<T>): SubscriptionReceipt<T> {
+    fun <T : Event> subscribeEvent(
+        eventType: Class<T>,
+        receiver: EventReceiver<T>
+    ): SubscriptionReceipt<T> {
         val receiversList = getReceivers(eventType)
         receiversList.lock.write {
             val list = receiversList.receivers

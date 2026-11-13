@@ -30,8 +30,6 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
-import android.widget.Adapter
-import android.widget.AdapterView
 import io.github.rosemoe.sora.event.ClickEvent
 import io.github.rosemoe.sora.event.ColorSchemeUpdateEvent
 import io.github.rosemoe.sora.event.ContentChangeEvent
@@ -58,7 +56,6 @@ import io.github.rosemoe.sora.text.TextReference
 import io.github.rosemoe.sora.util.KeyboardUtils
 import io.github.rosemoe.sora.widget.CodeEditor
 import io.github.rosemoe.sora.widget.base.EditorPopupWindow
-import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
 import java.lang.ref.WeakReference
 import kotlin.math.abs
 import kotlin.math.min
@@ -168,7 +165,10 @@ open class EditorAutoCompletion(
         subscribeEventForHide(SnippetEvent::class.java) { it.action == SnippetEvent.ACTION_SHIFT }
     }
 
-    protected open fun <T : Event> subscribeEventForHide(clazz: Class<T>, predicate: ((T) -> Boolean)?) {
+    protected open fun <T : Event> subscribeEventForHide(
+        clazz: Class<T>,
+        predicate: ((T) -> Boolean)?
+    ) {
         eventManager.subscribeEvent(clazz) { event, _ ->
             if (predicate == null || predicate(event)) {
                 hide()
@@ -176,7 +176,10 @@ open class EditorAutoCompletion(
         }
     }
 
-    protected open fun onColorSchemeUpdate(event: ColorSchemeUpdateEvent, unsubscribe: Unsubscribe) {
+    protected open fun onColorSchemeUpdate(
+        event: ColorSchemeUpdateEvent,
+        unsubscribe: Unsubscribe
+    ) {
         applyColorScheme()
     }
 
@@ -199,6 +202,7 @@ open class EditorAutoCompletion(
                 }
                 updateCompletionWindowPosition(isShowing)
             }
+
             ContentChangeEvent.ACTION_DELETE -> {
                 if (!editor.hasComposingText() && isShowing) {
                     if (start.line != end.line || start.column != end.column - 1) {
@@ -265,10 +269,12 @@ open class EditorAutoCompletion(
                     moveUp()
                     event.markAsConsumed()
                 }
+
                 KeyEvent.KEYCODE_DPAD_DOWN -> {
                     moveDown()
                     event.markAsConsumed()
                 }
+
                 KeyEvent.KEYCODE_PAGE_DOWN, KeyEvent.KEYCODE_PAGE_UP -> hide()
                 KeyEvent.KEYCODE_TAB -> {
                     if (currentSelection == -1) {
@@ -278,6 +284,7 @@ open class EditorAutoCompletion(
                         event.markAsConsumed()
                     }
                 }
+
                 KeyEvent.KEYCODE_ENTER -> {
                     if (currentSelection == -1 && editor.props.selectCompletionItemOnEnterForSoftKbd) {
                         moveDown()
@@ -299,7 +306,8 @@ open class EditorAutoCompletion(
         val cursor = editor.cursor
         var panelX = editor.updateCursorAnchor() + dp * 20
         val rowHeight = editor.rowHeight
-        val rightLayoutOffset = editor.layout.getCharLayoutOffset(cursor.rightLine, cursor.rightColumn)
+        val rightLayoutOffset =
+            editor.layout.getCharLayoutOffset(cursor.rightLine, cursor.rightColumn)
         var panelY = rightLayoutOffset[0] - editor.offsetY + rowHeight / 2f
         var restY = editor.height - panelY
         if (restY > dp * 200) {
@@ -313,12 +321,13 @@ open class EditorAutoCompletion(
             }
             editor.scroller.startScroll(editor.offsetX, editor.offsetY, 0, offset.toInt(), 0)
         }
-        val width = if ((editor.width < 500 * dp && completionWndPositionMode == WINDOW_POS_MODE_AUTO) || completionWndPositionMode == WINDOW_POS_MODE_FULL_WIDTH_ALWAYS) {
-            panelX = editor.width / 8f / 2f
-            editor.width * 7 / 8
-        } else {
-            min(300 * dp, editor.width / 2f).toInt()
-        }
+        val width =
+            if ((editor.width < 500 * dp && completionWndPositionMode == WINDOW_POS_MODE_AUTO) || completionWndPositionMode == WINDOW_POS_MODE_FULL_WIDTH_ALWAYS) {
+                panelX = editor.width / 8f / 2f
+                editor.width * 7 / 8
+            } else {
+                min(300 * dp, editor.width / 2f).toInt()
+            }
         val currentH = height
         maxHeight = restY.toInt()
         setLocation(panelX.toInt() + editor.offsetX, panelY.toInt() + editor.offsetY)
@@ -563,9 +572,14 @@ open class EditorAutoCompletion(
 
         override fun run() {
             try {
-                targetLanguage.requireAutoComplete(contentRef, requestPosition, localPublisher, extraData)
+                targetLanguage.requireAutoComplete(
+                    contentRef,
+                    requestPosition,
+                    localPublisher,
+                    extraData
+                )
                 if (localPublisher.hasData()) {
-                    if (this@EditorAutoCompletion.completionThread === Thread.currentThread()) {
+                    if (this@EditorAutoCompletion.completionThread === currentThread()) {
                         localPublisher.updateList(true)
                     }
                 } else {

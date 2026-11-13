@@ -106,7 +106,7 @@ open class SpanImpl internal constructor(
     override fun hashCode(): Int {
         var result = column
         result = 31 * result + style.hashCode()
-        result = 31 * result + (extMap?.hashCode() ?: 0)
+        result = 31 * result + extMap.hashCode()
         return result
     }
 

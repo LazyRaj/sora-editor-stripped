@@ -26,7 +26,6 @@
  */
 package io.github.rosemoe.sora.widget
 
-import io.github.rosemoe.sora.lang.analysis.AnalyzeManager
 import io.github.rosemoe.sora.text.CharPosition
 import io.github.rosemoe.sora.text.Content
 import io.github.rosemoe.sora.text.ContentLine
@@ -47,7 +46,7 @@ open class SymbolPairMatch(parent: SymbolPairMatch? = null) {
         setParent(parent)
     }
 
-    protected open fun setParent(parent: SymbolPairMatch?) {
+    open fun setParent(parent: SymbolPairMatch?) {
         this.parent = parent
     }
 
@@ -111,7 +110,8 @@ open class SymbolPairMatch(parent: SymbolPairMatch? = null) {
     ): SymbolPair? {
         val content = editor.text
         // do not apply single character pairs for text with length > 1
-        val singleCharPair = if (inputCharArray == null) matchBestPairBySingleChar(endChar) else null
+        val singleCharPair =
+            if (inputCharArray == null) matchBestPairBySingleChar(endChar) else null
 
         // matches single character symbol pair first
         if (singleCharPair != null) {
@@ -144,7 +144,8 @@ open class SymbolPairMatch(parent: SymbolPairMatch? = null) {
                         break
                     }
                     val contentChar = content[insertIndex]
-                    matchFlag = matchFlag and (if (contentChar == openCharArray[arrayIndex]) 1 else 0)
+                    matchFlag =
+                        matchFlag and (if (contentChar == openCharArray[arrayIndex]) 1 else 0)
                     arrayIndex--
                 }
             } else {
@@ -161,7 +162,8 @@ open class SymbolPairMatch(parent: SymbolPairMatch? = null) {
                 var pairIndex = openCharArray.size - 1
 
                 for (charIndex in inputCharArray.size - 1 downTo 1) {
-                    matchFlag = matchFlag and (if (inputCharArray[charIndex] == openCharArray[pairIndex]) 1 else 0)
+                    matchFlag =
+                        matchFlag and (if (inputCharArray[charIndex] == openCharArray[pairIndex]) 1 else 0)
                     pairIndex--
                 }
 
@@ -174,7 +176,8 @@ open class SymbolPairMatch(parent: SymbolPairMatch? = null) {
                     insertIndex--
 
                     while (pairIndex >= 0) {
-                        matchFlag = matchFlag and (if (content[insertIndex] == openCharArray[pairIndex]) 1 else 0)
+                        matchFlag =
+                            matchFlag and (if (content[insertIndex] == openCharArray[pairIndex]) 1 else 0)
                         insertIndex--
                         pairIndex--
                     }
@@ -241,7 +244,11 @@ open class SymbolPairMatch(parent: SymbolPairMatch? = null) {
              * @param currentLine The current line edit in the editor, quick analysis it to decide whether to replaced
              * @param leftColumn  return current cursor column
              */
-            fun shouldReplace(editor: CodeEditor, contentLine: ContentLine, leftColumn: Int): Boolean = true
+            fun shouldReplace(
+                editor: CodeEditor,
+                contentLine: ContentLine,
+                leftColumn: Int
+            ): Boolean = true
 
             /**
              * when before the replaced and select a range, surrounds the selected content with return true.
