@@ -21,35 +21,17 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.lang.completion.snippet;
+// Modified by Raj Dave (aka LazyRaj)
+package io.github.rosemoe.sora.lang.completion.snippet
 
-import androidx.annotation.NonNull;
+open class InterpolatedShellItem(
+    var shellCode: String,
+    index: Int
+) : SnippetItem(index) {
 
-public class PlainTextItem extends SnippetItem {
-
-    private String text;
-
-    public PlainTextItem(@NonNull String text, int index) {
-        this(text, index, index + text.length());
-    }
-
-    public PlainTextItem(@NonNull String text, int start, int end) {
-        setIndex(start, end);
-        this.text = text;
-    }
-
-    @NonNull
-    public String getText() {
-        return text;
-    }
-
-    public void setText(@NonNull String text) {
-        this.text = text;
-    }
-
-    @NonNull
-    @Override
-    public PlainTextItem clone() {
-        return new PlainTextItem(text, getStartIndex(), getEndIndex());
+    override fun clone(): InterpolatedShellItem {
+        val n = InterpolatedShellItem(shellCode, startIndex)
+        n.setIndex(startIndex, endIndex)
+        return n
     }
 }

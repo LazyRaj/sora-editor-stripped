@@ -21,22 +21,7 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.lang.completion.snippet;
+// Modified by Raj Dave (aka LazyRaj)
+package io.github.rosemoe.sora.lang.completion.snippet
 
-public class NoFormat implements FormatString {
-
-    private String text;
-
-    public NoFormat(String text) {
-        setText(text);
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-}
+interface FormatString

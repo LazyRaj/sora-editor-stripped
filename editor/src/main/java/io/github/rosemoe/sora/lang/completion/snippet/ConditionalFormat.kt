@@ -21,34 +21,12 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.lang.completion.snippet;
+// Modified by Raj Dave (aka LazyRaj)
+package io.github.rosemoe.sora.lang.completion.snippet
 
-import androidx.annotation.NonNull;
-
-public class InterpolatedShellItem extends SnippetItem {
-
-    private String shellCode;
-
-    public InterpolatedShellItem(@NonNull String shellCode, int index) {
-        super(index);
-        this.shellCode = shellCode;
-    }
-
-    @NonNull
-    public String getShellCode() {
-        return shellCode;
-    }
-
-    public void setShellCode(@NonNull String shellCode) {
-        this.shellCode = shellCode;
-    }
-
-    @NonNull
-    @Override
-    public InterpolatedShellItem clone() {
-        var n = new InterpolatedShellItem(shellCode, getStartIndex());
-        n.setIndex(getStartIndex(), getEndIndex());
-        return n;
-    }
-
-}
+open class ConditionalFormat(
+    var group: Int = 0,
+    var ifValue: String? = null,
+    var elseValue: String? = null,
+    var shorthand: String? = null
+) : FormatString

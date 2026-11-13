@@ -21,7 +21,24 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.lang.completion.snippet;
+// Modified by Raj Dave (aka LazyRaj)
+package io.github.rosemoe.sora.lang.completion.snippet
 
-public class NextUpperCaseFormat implements FormatString {
+open class PlaceholderItem : SnippetItem {
+
+    var definition: PlaceholderDefinition
+    private var text: String? = null
+
+    constructor(definition: PlaceholderDefinition, index: Int) : super(index, index) {
+        this.definition = definition
+    }
+
+    private constructor(definition: PlaceholderDefinition, text: String?, start: Int, end: Int) : super(start, end) {
+        this.definition = definition
+        this.text = text
+    }
+
+    override fun clone(): PlaceholderItem {
+        return PlaceholderItem(definition, text, startIndex, endIndex)
+    }
 }

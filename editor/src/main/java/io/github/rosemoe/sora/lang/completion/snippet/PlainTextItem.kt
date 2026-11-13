@@ -21,37 +21,18 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.lang.completion.snippet;
+// Modified by Raj Dave (aka LazyRaj)
+package io.github.rosemoe.sora.lang.completion.snippet
 
-import androidx.annotation.NonNull;
+open class PlainTextItem(
+    var text: String,
+    start: Int,
+    end: Int = start + text.length
+) : SnippetItem(start, end) {
 
-public class PlaceholderItem extends SnippetItem {
+    constructor(text: String, index: Int) : this(text, index, index + text.length)
 
-    private PlaceholderDefinition definition;
-    private String text;
-
-    public PlaceholderItem(@NonNull PlaceholderDefinition definition, int index) {
-        setIndex(index, index);
-        this.definition = definition;
-    }
-
-    private PlaceholderItem(@NonNull PlaceholderDefinition definition, String text, int start, int end) {
-        setIndex(start, end);
-        this.text = text;
-        this.definition = definition;
-    }
-
-    public void setDefinition(PlaceholderDefinition definition) {
-        this.definition = definition;
-    }
-
-    public PlaceholderDefinition getDefinition() {
-        return definition;
-    }
-
-    @NonNull
-    @Override
-    public PlaceholderItem clone() {
-        return new PlaceholderItem(definition, text, getStartIndex(), getEndIndex());
+    override fun clone(): PlainTextItem {
+        return PlainTextItem(text, startIndex, endIndex)
     }
 }

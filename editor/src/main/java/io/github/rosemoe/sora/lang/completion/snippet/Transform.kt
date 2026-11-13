@@ -21,49 +21,32 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.lang.completion.snippet;
+// Modified by Raj Dave (aka LazyRaj)
+package io.github.rosemoe.sora.lang.completion.snippet
 
-import androidx.annotation.NonNull;
+import java.util.regex.Pattern
 
-public abstract class SnippetItem implements Cloneable {
+open class Transform {
 
-    private int start;
-    private int end;
+    @JvmField
+    var regexp: Pattern? = null
 
-    public SnippetItem() {
-        this(0);
+    @JvmField
+    var globalMode: Boolean = false
+
+    @JvmField
+    var format: List<@JvmSuppressWildcards FormatString>? = null
+
+    fun getRegexp(): Pattern? = regexp
+
+    fun setRegexp(regexp: Pattern?) {
+        this.regexp = regexp
     }
 
-    public SnippetItem(int index) {
-        this(index, index);
-    }
+    @JvmSuppressWildcards
+    fun getFormat(): List<FormatString>? = format
 
-    public SnippetItem(int start, int end) {
-        setIndex(start, end);
+    fun setFormat(format: List<@JvmSuppressWildcards FormatString>?) {
+        this.format = format
     }
-
-    public int getStartIndex() {
-        return start;
-    }
-
-    public int getEndIndex() {
-        return end;
-    }
-
-    public void setIndex(int index) {
-        setIndex(index, index);
-    }
-
-    public void setIndex(int start, int end) {
-        this.start = start;
-        this.end = end;
-    }
-
-    public void shiftIndex(int deltaIndex) {
-        start += deltaIndex;
-        end += deltaIndex;
-    }
-
-    @NonNull
-    public abstract SnippetItem clone();
 }

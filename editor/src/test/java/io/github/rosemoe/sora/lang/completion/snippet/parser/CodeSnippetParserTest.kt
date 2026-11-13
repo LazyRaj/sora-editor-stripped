@@ -44,7 +44,7 @@ class CodeSnippetParserTest {
 
     CodeSnippetParser.parse("line: \${1:\$TM_CURRENT_LINE}").apply {
       assertThat(this).isNotNull()
-      this.items!!.apply {
+      this.items.apply {
         assertThat(this).hasSize(2)
 
         this[0].apply {
@@ -76,7 +76,7 @@ class CodeSnippetParserTest {
 
     CodeSnippetParser.parse("line: \${1:\${TM_CURRENT_LINE}}").apply {
       assertThat(this).isNotNull()
-      this.items!!.apply {
+      this.items.apply {
         assertThat(this).hasSize(2)
 
         this[0].apply {
@@ -108,7 +108,7 @@ class CodeSnippetParserTest {
 
     CodeSnippetParser.parse("filename: \${1:\${TM_FILENAME/(.*)/\${1:/upcase}/}}").apply {
       assertThat(this).isNotNull()
-      this.items!!.apply {
+      this.items.apply {
         assertThat(this).hasSize(2)
 
         this[0].apply {

@@ -21,33 +21,19 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.lang.completion.snippet;
+// Modified by Raj Dave (aka LazyRaj)
+package io.github.rosemoe.sora.lang.completion.snippet
 
-import java.util.List;
-import java.util.regex.Pattern;
+open class VariableItem @JvmOverloads constructor(
+    index: Int,
+    var name: String,
+    var defaultValue: String? = null,
+    var transform: Transform? = null
+) : SnippetItem(index), PlaceHolderElement {
 
-public class Transform {
-
-    public Pattern getRegexp() {
-        return regexp;
+    override fun clone(): VariableItem {
+        val n = VariableItem(startIndex, name, defaultValue, transform)
+        n.setIndex(startIndex, endIndex)
+        return n
     }
-
-    public void setRegexp(Pattern regexp) {
-        this.regexp = regexp;
-    }
-
-    public List<FormatString> getFormat() {
-        return format;
-    }
-
-    public void setFormat(List<FormatString> format) {
-        this.format = format;
-    }
-
-    public Pattern regexp;
-
-    public boolean globalMode;
-
-    public List<FormatString> format;
-
 }

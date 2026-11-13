@@ -239,7 +239,7 @@ class SnippetController(private val editor: CodeEditor) {
         currentTabStopIndex = -1
         snippetIndex = index
         // Stage 2: resolve the variables and execute shell codes
-        val elements = clonedSnippet.items!!
+        val elements = clonedSnippet.items
         val variableItemMapping = mutableMapOf<String, PlaceholderDefinition>()
         var maxTabStop = 0;
         elements.forEach {
@@ -456,7 +456,7 @@ class SnippetController(private val editor: CodeEditor) {
     fun getEditingRelatedTabStops(): List<SnippetItem> {
         val editing = getEditingTabStop()
         if (editing != null) {
-            return currentSnippet!!.items!!.filter { it is PlaceholderItem && it.definition == editing.definition && it != editing }
+            return currentSnippet!!.items.filter { it is PlaceholderItem && it.definition == editing.definition && it != editing }
         }
         return emptyList()
     }
@@ -472,7 +472,7 @@ class SnippetController(private val editor: CodeEditor) {
     fun getInactiveTabStops(): List<SnippetItem> {
         val editing = getEditingTabStop()
         if (editing != null) {
-            return currentSnippet!!.items!!.filter { (it is PlaceholderItem && it.definition != editing.definition) }
+            return currentSnippet!!.items.filter { (it is PlaceholderItem && it.definition != editing.definition) }
         }
         return emptyList()
     }
@@ -532,7 +532,7 @@ class SnippetController(private val editor: CodeEditor) {
         if (deltaIndex == 0) {
             return
         }
-        val items = currentSnippet!!.items!!
+        val items = currentSnippet!!.items
         for (i in itemIndex until items.size) {
             items[i].shiftIndex(deltaIndex)
         }

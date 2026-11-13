@@ -28,6 +28,14 @@ import android.os.Handler
 import android.os.Looper
 import io.github.rosemoe.sora.lang.Language
 import io.github.rosemoe.sora.lang.completion.snippet.CodeSnippet
+import io.github.rosemoe.sora.lang.completion.snippet.ConditionalFormat
+import io.github.rosemoe.sora.lang.completion.snippet.NextUpperCaseFormat
+import io.github.rosemoe.sora.lang.completion.snippet.NoFormat
+import io.github.rosemoe.sora.lang.completion.snippet.PlaceholderDefinition
+import io.github.rosemoe.sora.lang.completion.snippet.PlaceholderItem
+import io.github.rosemoe.sora.lang.completion.snippet.PlainTextItem
+import io.github.rosemoe.sora.lang.completion.snippet.Transform
+import io.github.rosemoe.sora.lang.completion.snippet.VariableItem
 import io.github.rosemoe.sora.text.CharPosition
 import io.github.rosemoe.sora.text.Content
 import io.github.rosemoe.sora.text.ContentReference
@@ -266,5 +274,89 @@ class CompletionCoreTest {
         dest.clear()
         sync.filterIdentifiers("f", dest)
         assertFalse(dest.contains("foo"))
+    }
+
+    @Test
+    fun testSnippetItemAndTextItem() {
+        val plain = PlainTextItem("hello", 5)
+        assertEquals(5, plain.startIndex)
+        assertEquals(10, plain.endIndex)
+        assertEquals("hello", plain.text)
+
+        plain.shiftIndex(3)
+        assertEquals(8, plain.startIndex)
+        assertEquals(13, plain.endIndex)
+
+        val cloned = plain.clone()
+        assertEquals(8, cloned.startIndex)
+        assertEquals(13, cloned.endIndex)
+        assertEquals("hello", cloned.text)
+    }
+
+    @Test
+    fun testPlaceholderAndVariableItem() {
+        val def = PlaceholderDefinition(1)
+        val placeholder = PlaceholderItem(def, 10)
+        assertEquals(10, placeholder.startIndex)
+        assertEquals(10, placeholder.endIndex)
+        assertEquals(1, placeholder.definition.id)
+
+        val variable = VariableItem(0, "MY_VAR", "defaultVal")
+        assertEquals("MY_VAR", variable.name)
+        assertEquals("defaultVal", variable.defaultValue)
+        assertNull(variable.transform)
+
+        val clonedVar = variable.clone()
+        assertEquals("MY_VAR", clonedVar.name)
+        assertEquals("defaultVal", clonedVar.defaultValue)
+    }
+
+    @Test
+    fun testFormatsAndTransform() {
+        val noFormat = NoFormat("raw")
+        assertEquals("raw", noFormat.text)
+
+        val condFormat = ConditionalFormat()
+        condFormat.group = 1
+        condFormat.ifValue = "yes"
+        condFormat.elseValue = "no"
+        condFormat.shorthand = "upcase"
+        assertEquals(1, condFormat.group)
+        assertEquals("yes", condFormat.ifValue)
+        assertEquals("no", condFormat.elseValue)
+        assertEquals("upcase", condFormat.shorthand)
+
+        val nextUpper = NextUpperCaseFormat()
+        assertNotNull(nextUpper)
+
+        val transform = Transform()
+        transform.regexp = java.util.regex.Pattern.compile("abc")
+        transform.globalMode = true
+        transform.format = listOf(noFormat, condFormat)
+        assertEquals("abc", transform.regexp?.pattern())
+        assertTrue(transform.globalMode)
+        assertEquals(2, transform.format?.size)
+    }
+
+    @Test
+    fun testCodeSnippetBuilderAndOperations() {
+        val snippet = CodeSnippet.Builder()
+            .addPlainText("val ")
+            .addPlaceholder(1, "x")
+            .addPlainText(" = ")
+            .addPlaceholder(2, listOf("1", "2"))
+            .addVariable("NAME", "foo")
+            .build()
+
+        assertTrue(snippet.checkContent())
+        assertEquals(5, snippet.items.size)
+        assertEquals(2, snippet.placeholderDefinitions.size)
+
+        val insertText = snippet.toInsertTextForLsp()
+        assertEquals("val x = 1", insertText)
+
+        val cloned = snippet.clone()
+        assertTrue(cloned.checkContent())
+        assertEquals(5, cloned.items.size)
     }
 }
