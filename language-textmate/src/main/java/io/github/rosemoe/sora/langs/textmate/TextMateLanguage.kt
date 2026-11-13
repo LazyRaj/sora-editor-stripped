@@ -169,7 +169,7 @@ open class TextMateLanguage protected constructor(
     private fun createAnalyzerAndNewlineHandler(grammar: IGrammar, languageConfiguration: LanguageConfiguration?) {
         val old = textMateAnalyzer
         if (old != null) {
-            old.receiver = null
+            old.setReceiver(null)
             old.destroy()
         }
         try {

@@ -46,10 +46,10 @@ class AsyncIncrementalAnalyzeManagerTest {
 
         override fun stateEquals(state: Int?, another: Int?) = state == another
 
-        override fun tokenizeLine(line: CharSequence, state: Int, lineIndex: Int) =
+        override fun tokenizeLine(line: CharSequence, state: Int?, lineIndex: Int) =
             IncrementalAnalyzeManager.LineTokenizeResult<Int, Span>(0, null, mutableListOf(SpanFactory.obtain(0, 0L)))
 
-        override fun generateSpansForLine(tokens: IncrementalAnalyzeManager.LineTokenizeResult<Int, Span>): List<Span> =
+        override fun generateSpansForLine(tokens: IncrementalAnalyzeManager.LineTokenizeResult<Int, Span>): List<Span>? =
             tokens.spans
 
         override fun computeBlocks(text: Content, delegate: CodeBlockAnalyzeDelegate): List<CodeBlock> = emptyList()

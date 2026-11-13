@@ -1,7 +1,8 @@
 /*
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
- *    Copyright (C) 2020-2024  Rosemoe
+ *    Copyright (C) 2020-2025  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,28 +22,25 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.lang.analysis;
+package io.github.rosemoe.sora.lang.analysis
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import io.github.rosemoe.sora.lang.brackets.BracketsProvider;
-import io.github.rosemoe.sora.lang.diagnostic.DiagnosticsContainer;
-import io.github.rosemoe.sora.lang.styling.Styles;
-import io.github.rosemoe.sora.lang.styling.inlayHint.InlayHintsContainer;
+import io.github.rosemoe.sora.lang.brackets.BracketsProvider
+import io.github.rosemoe.sora.lang.diagnostic.DiagnosticsContainer
+import io.github.rosemoe.sora.lang.styling.Styles
+import io.github.rosemoe.sora.lang.styling.inlayHint.InlayHintsContainer
 
 /**
- * A {@link StyleReceiver} receives spans and other styles from analyzers.
- * <p>
+ * A [StyleReceiver] receives spans and other styles from analyzers.
+ *
  * The implementations of the class must make sure its code can be safely run. For example, update
  * UI by posting its actions to UI thread, but not here.
- * <p>
+ *
  * Also, the implementations of the class should pay attention to concurrent invocations due not to
  * corrupt the information it maintains.
  *
  * @author Rosemoe
  */
-public interface StyleReceiver {
+interface StyleReceiver {
 
     /**
      * Send the styles to the receiver. You can call it in any thread.
@@ -51,7 +49,7 @@ public interface StyleReceiver {
      * @param sourceManager Source AnalyzeManager. The receiver may ignore the request if some checks on
      *                      the sourceManager fail
      */
-    void setStyles(@NonNull AnalyzeManager sourceManager, @Nullable Styles styles);
+    fun setStyles(sourceManager: AnalyzeManager, styles: Styles?)
 
     /**
      * Send the styles to the receiver. You can call it in any thread.
@@ -62,35 +60,34 @@ public interface StyleReceiver {
      * @param action Sometimes you may need to synchronize your action in main thread. This ensures the given action is executed
      *               on main thread before the style updates.
      */
-    void setStyles(@NonNull AnalyzeManager sourceManager, @Nullable Styles styles, @Nullable Runnable action);
+    fun setStyles(sourceManager: AnalyzeManager, styles: Styles?, action: Runnable?)
 
     /**
-     * Notify the receiver the given styles object is updated, and line range is given by {@code range}
+     * Notify the receiver the given styles object is updated, and line range is given by [range]
      *
      * @param sourceManager Source AnalyzeManager. The receiver may ignore the request if some checks on
      *                      the sourceManager fail
-     * @param styles        The Styles object previously set by {@link #setStyles(AnalyzeManager, Styles)}
-     * @param range         The line range of this update
+     * @param styles The Styles object previously set by [setStyles]
+     * @param range The line range of this update
      */
-    default void updateStyles(@NonNull AnalyzeManager sourceManager, @NonNull Styles styles, @NonNull StyleUpdateRange range) {
-        setStyles(sourceManager, styles);
+    fun updateStyles(sourceManager: AnalyzeManager, styles: Styles, range: StyleUpdateRange) {
+        setStyles(sourceManager, styles)
     }
 
     /**
      * Set new diagnostics. You can call it in any thread.
      * The implementation of this method should make sure that concurrent invocations to it are safe.
      */
-    void setDiagnostics(@NonNull AnalyzeManager sourceManager, @Nullable DiagnosticsContainer diagnostics);
+    fun setDiagnostics(sourceManager: AnalyzeManager, diagnostics: DiagnosticsContainer?)
 
     /**
      * Set new inlay hints. You can call it in any thread.
      * The implementation of this method should make sure that concurrent invocations to it are safe.
      */
-    void setInlayHints(@NonNull AnalyzeManager sourceManager, @Nullable InlayHintsContainer inlayHints);
+    fun setInlayHints(sourceManager: AnalyzeManager, inlayHints: InlayHintsContainer?)
 
     /**
      * Set new provider for brackets highlighting
      */
-    void updateBracketProvider(@NonNull AnalyzeManager sourceManager, @Nullable BracketsProvider provider);
-
+    fun updateBracketProvider(sourceManager: AnalyzeManager, provider: BracketsProvider?)
 }

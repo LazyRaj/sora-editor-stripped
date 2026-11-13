@@ -1,7 +1,8 @@
 /*
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
- *    Copyright (C) 2020-2024  Rosemoe
+ *    Copyright (C) 2020-2025  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,44 +22,37 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.lang.util;
+package io.github.rosemoe.sora.lang.util
 
-import androidx.annotation.NonNull;
-
-import io.github.rosemoe.sora.lang.styling.Styles;
-import io.github.rosemoe.sora.text.CharPosition;
+import io.github.rosemoe.sora.lang.styling.Styles
+import io.github.rosemoe.sora.text.CharPosition
 
 /**
- * This class generate plain spans for content, in case when
+ * This class generates plain spans for content, in case when
  * using a language without analysis you can still provide context-free completions.
  * By default, editor does not show completions when no span is set
  * on the text. This would be helpful for enabling completion for pure texts.
  *
  * @author Rosemoe
  */
-public final class PlainTextAnalyzeManager extends BaseAnalyzeManager {
+class PlainTextAnalyzeManager : BaseAnalyzeManager() {
 
-    @Override
-    public void insert(@NonNull CharPosition start, @NonNull CharPosition end, @NonNull CharSequence insertedContent) {
-
+    override fun insert(start: CharPosition, end: CharPosition, insertedContent: CharSequence) {
     }
 
-    @Override
-    public void delete(@NonNull CharPosition start, @NonNull CharPosition end, @NonNull CharSequence deletedContent) {
-
+    override fun delete(start: CharPosition, end: CharPosition, deletedContent: CharSequence) {
     }
 
-    @Override
-    public void rerun() {
-        final var receiver = getReceiver();
-        final var ref = getContentRef();
+    override fun rerun() {
+        val receiver = receiver
+        val ref = contentRef
         if (receiver != null && ref != null) {
-            var style = new Styles();
-            style.spans = new PlainTextSpans(ref.getLineCount());
-            receiver.setStyles(this, style);
+            val style = Styles().apply {
+                spans = PlainTextSpans(ref.lineCount)
+            }
+            receiver.setStyles(this, style)
         } else if (receiver != null) {
-            receiver.setStyles(this, null);
+            receiver.setStyles(this, null)
         }
     }
-
 }

@@ -1,7 +1,8 @@
 /*
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
- *    Copyright (C) 2020-2024  Rosemoe
+ *    Copyright (C) 2020-2025  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,14 +22,9 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.lang.analysis;
+package io.github.rosemoe.sora.lang.analysis
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import java.util.List;
-
-import io.github.rosemoe.sora.lang.styling.Span;
+import io.github.rosemoe.sora.lang.styling.Span
 
 /**
  * Interface for line based analyze managers
@@ -36,84 +32,57 @@ import io.github.rosemoe.sora.lang.styling.Span;
  * @param <S> State type at line endings
  * @param <T> Token type
  */
-public interface IncrementalAnalyzeManager<S, T> extends AnalyzeManager {
+interface IncrementalAnalyzeManager<S, T> : AnalyzeManager {
 
     /**
-     * Get the initial at document start
+     * Get the initial state at document start
      */
-    S getInitialState();
+    fun getInitialState(): S?
 
     /**
      * Get recorded state for subclass
      */
-    LineTokenizeResult<S, T> getState(int line);
+    fun getState(line: Int): LineTokenizeResult<S, T>?
 
     /**
      * Compare the two states.
      * Return true if they equal
      */
-    boolean stateEquals(S state, S another);
+    fun stateEquals(state: S?, another: S?): Boolean
 
     /**
      * Tokenize for the given line
      *
      * @param lineIndex -1 for unknown
      */
-    LineTokenizeResult<S, T> tokenizeLine(CharSequence line, S state, int lineIndex);
+    fun tokenizeLine(line: CharSequence, state: S?, lineIndex: Int): LineTokenizeResult<S, T>
 
     /**
      * Generate spans for the line
      */
-    List<Span> generateSpansForLine(LineTokenizeResult<S, T> tokens);
+    fun generateSpansForLine(tokens: LineTokenizeResult<S, T>): List<Span>?
 
     /**
      * Called when a State object is to be abandoned
      */
-    void onAbandonState(S state);
+    fun onAbandonState(state: S) {}
 
     /**
      * Called when a State object is to be added
      */
-    void onAddState(S state);
+    fun onAddState(state: S) {}
 
     /**
      * Saved state
      */
-    class LineTokenizeResult<S_, T_> {
-
-        /**
-         * State at line end
-         */
-        public S_ state;
-
-        /**
-         * Tokens on this line
-         */
-        public List<T_> tokens;
-
-        /**
-         * Spans. If spans are generated as well you can directly return them here to avoid
-         * {@link #generateSpansForLine(LineTokenizeResult)} calls.
-         */
-        public List<Span> spans;
-
-        public LineTokenizeResult(@NonNull S_ state, @Nullable List<T_> tokens) {
-            this.state = state;
-            this.tokens = tokens;
+    class LineTokenizeResult<S_, T_> @JvmOverloads constructor(
+        @JvmField var state: S_,
+        @JvmField var tokens: List<T_>? = null,
+        @JvmField var spans: List<Span>? = null
+    ) {
+        fun clearSpans(): LineTokenizeResult<S_, T_> {
+            spans = null
+            return this
         }
-
-        public LineTokenizeResult(@NonNull S_ state, @Nullable List<T_> tokens, @Nullable List<Span> spans) {
-            this.state = state;
-            this.tokens = tokens;
-            this.spans = spans;
-        }
-
-        protected LineTokenizeResult<S_, T_> clearSpans() {
-            spans = null;
-            return this;
-        }
-
     }
-
-
 }

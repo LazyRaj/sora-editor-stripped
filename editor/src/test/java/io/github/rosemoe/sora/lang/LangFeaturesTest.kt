@@ -24,9 +24,14 @@
  */
 package io.github.rosemoe.sora.lang
 
+import io.github.rosemoe.sora.lang.analysis.AnalyzeManager
+import io.github.rosemoe.sora.lang.analysis.SimpleAnalyzeManager
+import io.github.rosemoe.sora.lang.analysis.StyleReceiver
 import io.github.rosemoe.sora.lang.brackets.OnlineBracketsMatcher
 import io.github.rosemoe.sora.lang.brackets.PairedBracket
 import io.github.rosemoe.sora.lang.brackets.SimpleBracketsCollector
+import io.github.rosemoe.sora.lang.diagnostic.DiagnosticRegion
+import io.github.rosemoe.sora.lang.diagnostic.DiagnosticsContainer
 import io.github.rosemoe.sora.lang.folding.FoldingRegion
 import io.github.rosemoe.sora.lang.format.AsyncFormatter
 import io.github.rosemoe.sora.lang.format.Formatter
@@ -34,6 +39,8 @@ import io.github.rosemoe.sora.lang.format.FormatterProvider
 import io.github.rosemoe.sora.lang.smartEnter.NewlineHandleResult
 import io.github.rosemoe.sora.lang.smartEnter.NewlineHandler
 import io.github.rosemoe.sora.lang.styling.Styles
+import io.github.rosemoe.sora.lang.util.PlainTextAnalyzeManager
+import io.github.rosemoe.sora.lang.util.PlainTextSpans
 import io.github.rosemoe.sora.text.CharPosition
 import io.github.rosemoe.sora.text.Content
 import io.github.rosemoe.sora.text.TextRange
@@ -369,5 +376,155 @@ class LangFeaturesTest {
         formatter.cancel()
         formatter.destroy()
         assertFalse(formatter.isRunning())
+    }
+
+    // ==========================================
+    // 5. Diagnostics (DiagnosticRegion & DiagnosticsContainer)
+    // ==========================================
+
+    @Test
+    fun testDiagnosticRegionPropertiesAndComparison() {
+        val r1 = DiagnosticRegion(5, 10, DiagnosticRegion.SEVERITY_WARNING, 100L)
+        val r2 = DiagnosticRegion(5, 10, DiagnosticRegion.SEVERITY_ERROR, 101L)
+        val r3 = DiagnosticRegion(5, 12, DiagnosticRegion.SEVERITY_WARNING, 100L)
+        val r4 = DiagnosticRegion(0, 10, DiagnosticRegion.SEVERITY_WARNING, 100L)
+
+        assertEquals(5, r1.startIndex)
+        assertEquals(10, r1.endIndex)
+        assertEquals(DiagnosticRegion.SEVERITY_WARNING, r1.severity)
+        assertEquals(100L, r1.id)
+        assertNull(r1.detail)
+
+        assertTrue(r4 < r1) // startIndex 0 < 5
+        assertTrue(r1 < r3) // endIndex 10 < 12
+        assertTrue(r1 < r2) // severity WARNING < ERROR
+    }
+
+    @Test
+    fun testDiagnosticsContainerOperationsAndShifting() {
+        val container = DiagnosticsContainer(shiftEnabled = true)
+        val r1 = DiagnosticRegion(10, 20, DiagnosticRegion.SEVERITY_ERROR, 1L)
+        val r2 = DiagnosticRegion(30, 40, DiagnosticRegion.SEVERITY_WARNING, 2L)
+
+        container.addDiagnostics(listOf(r1, r2))
+        assertEquals(2, container.getRegions().size)
+
+        // Query in region [5, 15] should find r1
+        val queried = ArrayList<DiagnosticRegion>()
+        container.queryInRegion(queried, 5, 15)
+        assertEquals(1, queried.size)
+        assertEquals(r1, queried[0])
+
+        // shiftOnInsert inside r1 (insert 5 chars at index 12)
+        container.shiftOnInsert(12, 17) // length = 5
+        // r1 was [10, 20], text inserted inside at 12 -> r1 becomes [10, 25]
+        assertEquals(10, r1.startIndex)
+        assertEquals(25, r1.endIndex)
+        // r2 was [30, 40], text inserted before at 12 -> r2 becomes [35, 45]
+        assertEquals(35, r2.startIndex)
+        assertEquals(45, r2.endIndex)
+
+        // shiftOnDelete across r1 (delete [5, 15] length 10)
+        container.shiftOnDelete(5, 15)
+        // r1 shared region [10, 15] (len 5). r1 was [10, 25] -> endIndex becomes 20, startIndex shifted left by 5 -> [5, 15]
+        assertEquals(5, r1.startIndex)
+        assertEquals(15, r1.endIndex)
+
+        // Reset
+        container.reset()
+        assertTrue(container.getRegions().isEmpty())
+    }
+
+    // ==========================================
+    // 6. Analysis (PlainTextSpans, PlainTextAnalyzeManager, SimpleAnalyzeManager)
+    // ==========================================
+
+    @Test
+    fun testPlainTextSpans() {
+        val spans = PlainTextSpans(10)
+        assertEquals(10, spans.getLineCount())
+        assertFalse(spans.supportsModify())
+
+        spans.adjustOnInsert(CharPosition(0, 0, 0), CharPosition(2, 0, 10))
+        assertEquals(12, spans.getLineCount())
+
+        spans.adjustOnDelete(CharPosition(0, 0, 0), CharPosition(1, 0, 5))
+        assertEquals(11, spans.getLineCount())
+
+        spans.setLineCount(5)
+        assertEquals(5, spans.getLineCount())
+        assertNotNull(spans.read())
+
+        try {
+            spans.modify()
+            fail("Expected UnsupportedOperationException")
+        } catch (_: UnsupportedOperationException) {
+        }
+    }
+
+    @Test
+    fun testPlainTextAnalyzeManager() {
+        val manager = PlainTextAnalyzeManager()
+        val content = Content("line 1\nline 2\nline 3")
+        val latch = CountDownLatch(1)
+        val stylesHolder = AtomicReference<Styles>()
+
+        val receiver = object : StyleReceiver {
+            override fun setStyles(sourceManager: AnalyzeManager, styles: Styles?) {
+                stylesHolder.set(styles)
+                latch.countDown()
+            }
+
+            override fun setStyles(sourceManager: AnalyzeManager, styles: Styles?, action: Runnable?) {
+                setStyles(sourceManager, styles)
+            }
+
+            override fun setDiagnostics(sourceManager: AnalyzeManager, diagnostics: DiagnosticsContainer?) {}
+            override fun setInlayHints(sourceManager: AnalyzeManager, inlayHints: io.github.rosemoe.sora.lang.styling.inlayHint.InlayHintsContainer?) {}
+            override fun updateBracketProvider(sourceManager: AnalyzeManager, provider: io.github.rosemoe.sora.lang.brackets.BracketsProvider?) {}
+        }
+        manager.setReceiver(receiver)
+
+        manager.reset(io.github.rosemoe.sora.text.ContentReference(content), android.os.Bundle())
+        assertTrue(latch.await(5, TimeUnit.SECONDS))
+        assertNotNull(stylesHolder.get())
+        assertEquals(3, stylesHolder.get()?.spans?.getLineCount())
+        manager.destroy()
+    }
+
+    private class TestSimpleAnalyzeManager : SimpleAnalyzeManager<String>() {
+        override fun analyze(text: StringBuilder, delegate: Delegate<String>): Styles? {
+            delegate.data = "analyzed: ${text.length}"
+            return Styles().apply {
+                spans = PlainTextSpans(1)
+            }
+        }
+    }
+
+    @Test
+    fun testSimpleAnalyzeManagerExecution() {
+        val manager = TestSimpleAnalyzeManager()
+        val content = Content("hello world")
+        val latch = CountDownLatch(1)
+
+        val receiver = object : StyleReceiver {
+            override fun setStyles(sourceManager: AnalyzeManager, styles: Styles?) {
+                latch.countDown()
+            }
+
+            override fun setStyles(sourceManager: AnalyzeManager, styles: Styles?, action: Runnable?) {
+                setStyles(sourceManager, styles)
+            }
+
+            override fun setDiagnostics(sourceManager: AnalyzeManager, diagnostics: DiagnosticsContainer?) {}
+            override fun setInlayHints(sourceManager: AnalyzeManager, inlayHints: io.github.rosemoe.sora.lang.styling.inlayHint.InlayHintsContainer?) {}
+            override fun updateBracketProvider(sourceManager: AnalyzeManager, provider: io.github.rosemoe.sora.lang.brackets.BracketsProvider?) {}
+        }
+        manager.setReceiver(receiver)
+
+        manager.reset(io.github.rosemoe.sora.text.ContentReference(content), android.os.Bundle())
+        assertTrue(latch.await(5, TimeUnit.SECONDS))
+        assertEquals("analyzed: 11", manager.data)
+        manager.destroy()
     }
 }

@@ -121,11 +121,11 @@ class TextMateAnalyzer(
     }
 
     override fun getIndentFor(line: Int): Int {
-        return getState(line).state.indent
+        return getState(line)?.state?.indent ?: 0
     }
 
     override fun getResultFor(line: Int): OnigResult? {
-        return getState(line).state.foldingCache
+        return getState(line)?.state?.foldingCache
     }
 
     override fun computeBlocks(text: Content, delegate: CodeBlockAnalyzeDelegate): List<CodeBlock> {
