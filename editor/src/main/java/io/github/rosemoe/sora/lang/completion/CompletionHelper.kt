@@ -21,51 +21,48 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.lang.completion;
+// Modified by Raj Dave (aka LazyRaj)
+package io.github.rosemoe.sora.lang.completion
 
-import io.github.rosemoe.sora.text.CharPosition;
-import io.github.rosemoe.sora.text.ContentReference;
-import io.github.rosemoe.sora.widget.component.EditorAutoCompletion;
+import io.github.rosemoe.sora.text.CharPosition
+import io.github.rosemoe.sora.text.ContentReference
+import io.github.rosemoe.sora.widget.component.EditorAutoCompletion
 
 /**
  * Helper class for completion
  *
  * @author Rosemoe
  */
-public class CompletionHelper {
+object CompletionHelper {
 
     /**
      * Searches backward on the line, with the given checker to check chars.
      * Returns the longest text that matches the requirement
      */
-    public static String computePrefix(ContentReference ref, CharPosition pos, PrefixChecker checker) {
-        int begin = pos.column;
-        var line = ref.getLine(pos.line);
-        for (; begin > 0; begin--) {
-            if (!checker.check(line.charAt(begin - 1))) {
-                break;
+    @JvmStatic
+    fun computePrefix(ref: ContentReference, pos: CharPosition, checker: PrefixChecker): String {
+        var begin = pos.column
+        val line = ref.getLine(pos.line)
+        while (begin > 0) {
+            if (!checker.check(line[begin - 1])) {
+                break
             }
+            begin--
         }
-        return line.substring(begin, pos.column);
+        return line.substring(begin, pos.column)
     }
 
     /**
      * Check whether the thread is abandoned by editor.
      * Return true if it is cancelled by editor.
      */
-    public static boolean checkCancelled() {
-        var thread = Thread.currentThread();
-        if (thread instanceof EditorAutoCompletion.CompletionThread) {
-            return ((EditorAutoCompletion.CompletionThread) thread).isCancelled();
-        } else {
-            return false;
-        }
+    @JvmStatic
+    fun checkCancelled(): Boolean {
+        val thread = Thread.currentThread()
+        return thread is EditorAutoCompletion.CompletionThread && thread.isCancelled
     }
 
-    public interface PrefixChecker {
-
-        boolean check(char ch);
-
+    fun interface PrefixChecker {
+        fun check(ch: Char): Boolean
     }
-
 }

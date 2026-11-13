@@ -21,23 +21,18 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.lang.completion;
+// Modified by Raj Dave (aka LazyRaj)
+package io.github.rosemoe.sora.lang.completion
 
 /**
- * Thrown when the thread is abandoned by the editor framework because the editor do not need its
+ * Thrown when the thread is abandoned by the editor framework because the editor does not need its
  * new items anymore.
- * <p>
- * This can be thrown by {@link io.github.rosemoe.sora.text.ContentReference} and
- * {@link CompletionPublisher}.
+ *
+ * This can be thrown by [io.github.rosemoe.sora.text.ContentReference] and
+ * [CompletionPublisher].
  *
  * @author Rosemoe
  */
-public class CompletionCancelledException extends RuntimeException {
-
-    public CompletionCancelledException() {
-    }
-
-    public CompletionCancelledException(String message) {
-        super(message);
-    }
-}
+class CompletionCancelledException @JvmOverloads constructor(
+    message: String? = null
+) : RuntimeException(message)

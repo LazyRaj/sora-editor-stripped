@@ -77,7 +77,7 @@ class LspCompletionItem(
         val isFolder = kind == CompletionItemKind.Folder
         val fileIcon = when {
             isFile || isFolder -> {
-                label?.let { drawFileFolder(it.toString(), isFolder) }
+                label.let { drawFileFolder(it.toString(), isFolder) }
                     ?: desc?.let { drawFileFolder(it.toString(), isFolder) }
             }
 
@@ -95,7 +95,7 @@ class LspCompletionItem(
     }
 
     fun extractColor(): Int? {
-        val labelColor = label?.let { ColorUtils.parseColor(it.toString()) }
+        val labelColor = label.let { ColorUtils.parseColor(it.toString()) }
         val detailColor = desc?.let { ColorUtils.parseColor(it.toString()) }
 
         val documentation = completionItem.documentation?.let {
