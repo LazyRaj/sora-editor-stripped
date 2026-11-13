@@ -21,45 +21,44 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.widget;
+/*
+ * Modified by Raj Dave (aka LazyRaj)
+ */
+package io.github.rosemoe.sora.widget
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import io.github.rosemoe.sora.lang.Language;
-import io.github.rosemoe.sora.lang.QuickQuoteHandler;
-import io.github.rosemoe.sora.text.ContentReference;
+import io.github.rosemoe.sora.lang.Language
+import io.github.rosemoe.sora.lang.QuickQuoteHandler
+import io.github.rosemoe.sora.text.ContentReference
 
 /**
  * Helper class for better Android API compatibility
  *
  * @author Rosemoe
  */
-class LanguageHelper {
+internal object LanguageHelper {
 
-    @Nullable
-    public static QuickQuoteHandler getQuickQuoteHandler(@NonNull Language language) {
-        try {
-            return language.getQuickQuoteHandler();
-        } catch (AbstractMethodError e) {
-            return null;
+    @JvmStatic
+    fun getQuickQuoteHandler(language: Language): QuickQuoteHandler? {
+        return try {
+            language.quickQuoteHandler
+        } catch (e: AbstractMethodError) {
+            null
         }
     }
 
-    public static int getIndentAdvance(
-            @NonNull Language language,
-            @NonNull ContentReference content,
-            int line,
-            int column,
-            int spaceCountOnLine,
-            int tabCountOnLine
-    ) {
-        try {
-            return language.getIndentAdvance(content, line, column, spaceCountOnLine, tabCountOnLine);
-        } catch (AbstractMethodError e) {
-            return language.getIndentAdvance(content, line, column);
+    @JvmStatic
+    fun getIndentAdvance(
+        language: Language,
+        content: ContentReference,
+        line: Int,
+        column: Int,
+        spaceCountOnLine: Int,
+        tabCountOnLine: Int
+    ): Int {
+        return try {
+            language.getIndentAdvance(content, line, column, spaceCountOnLine, tabCountOnLine)
+        } catch (e: AbstractMethodError) {
+            language.getIndentAdvance(content, line, column)
         }
     }
-
-
 }
