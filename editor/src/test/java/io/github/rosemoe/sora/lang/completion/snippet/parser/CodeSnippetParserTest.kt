@@ -206,4 +206,25 @@ class CodeSnippetParserTest {
       }
     }
   }
+
+  @Test
+  fun `test tokenizer and tokens`() {
+    val tokenizer = CodeSnippetTokenizer("\$1:foo\${BAR}")
+    val t1 = tokenizer.nextToken()
+    assertThat(t1.type).isEqualTo(TokenType.Dollar)
+    assertThat(tokenizer.tokenText).isEqualTo("$")
+
+    val t2 = tokenizer.nextToken()
+    assertThat(t2.type).isEqualTo(TokenType.Int)
+    assertThat(tokenizer.tokenText).isEqualTo("1")
+
+    val t3 = tokenizer.nextToken()
+    assertThat(t3.type).isEqualTo(TokenType.Colon)
+
+    val t4 = tokenizer.nextToken()
+    assertThat(t4.type).isEqualTo(TokenType.VariableName)
+    assertThat(tokenizer.tokenText).isEqualTo("foo")
+
+    assertThat(t1.toString()).contains("Dollar")
+  }
 }

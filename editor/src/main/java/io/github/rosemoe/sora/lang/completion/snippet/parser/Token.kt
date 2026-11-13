@@ -21,38 +21,20 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.lang.completion.snippet.parser;
+// Modified by Raj Dave (aka LazyRaj)
+package io.github.rosemoe.sora.lang.completion.snippet.parser
 
-public enum TokenType {
+open class Token(
+    @JvmField var index: Int,
+    @JvmField var length: Int,
+    @JvmField var type: TokenType
+) {
 
-    Dollar('$'),
-    Colon(':'),
-    Comma(','),
-    CurlyOpen('{'),
-    CurlyClose('}'),
-    Backslash('\\'),
-    Forwardslash('/'),
-    Pipe('|'),
-    Int,
-    VariableName,
-    Format,
-    Plus('+'),
-    Dash('-'),
-    QuestionMark('?'),
-    Backtick('`'),
-    EOF;
-
-    private final char target;
-
-    TokenType() {
-        this('\0');
-    }
-
-    TokenType(char targetChar) {
-        target = targetChar;
-    }
-
-    public char getTargetCharacter() {
-        return target;
+    override fun toString(): String {
+        return "Token{" +
+                "index=" + index +
+                ", length=" + length +
+                ", type=" + type +
+                '}'
     }
 }

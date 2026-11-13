@@ -21,26 +21,24 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.lang.completion.snippet.parser;
+// Modified by Raj Dave (aka LazyRaj)
+package io.github.rosemoe.sora.lang.completion.snippet.parser
 
-public class Token {
-
-    public Token(int index, int length, TokenType type) {
-        this.index = index;
-        this.length = length;
-        this.type = type;
-    }
-
-    public int index;
-    public int length;
-    public TokenType type;
-
-    @Override
-    public String toString() {
-        return "Token{" +
-                "index=" + index +
-                ", length=" + length +
-                ", type=" + type +
-                '}';
-    }
+enum class TokenType(val targetCharacter: Char = '\u0000') {
+    Dollar('$'),
+    Colon(':'),
+    Comma(','),
+    CurlyOpen('{'),
+    CurlyClose('}'),
+    Backslash('\\'),
+    Forwardslash('/'),
+    Pipe('|'),
+    Int,
+    VariableName,
+    Format,
+    Plus('+'),
+    Dash('-'),
+    QuestionMark('?'),
+    Backtick('`'),
+    EOF
 }
