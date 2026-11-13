@@ -802,4 +802,95 @@ class TextSubpackagesTest {
             undoManager.maxUndoStackSize = 0
         }
     }
+
+    @Test
+    fun testContentLifecycleAndDocumentOperations() {
+        // Construction & Properties
+        val content = Content("Hello\nWorld\nKotlin")
+        assertEquals(3, content.lineCount)
+        assertEquals(18, content.length)
+        assertEquals('H', content[0])
+        assertEquals('o', content.charAt(0, 4))
+        assertTrue(content.isThreadSafe)
+        assertTrue(content.isUndoEnabled)
+
+        // Substring and subSequence
+        assertEquals("Hello\n", content.substring(0, 6))
+        val subSeq = content.subSequence(6, 11)
+        assertEquals("World", subSeq.toString())
+
+        // SubContent
+        val sub = content.subContent(0, 0, 1, 5)
+        assertEquals("Hello\nWorld", sub.toString())
+
+        // Batch edit
+        val versionBefore = content.documentVersion
+        content.batchEdit {
+            it.insert(0, 5, " Beautiful")
+            it.insert(1, 5, "!")
+        }
+        assertTrue(content.documentVersion > versionBefore)
+        assertEquals("Hello Beautiful\nWorld!\nKotlin", content.toString())
+
+        // Line inspection
+        assertEquals("Hello Beautiful", content.getLineString(0))
+        assertEquals(15, content.getColumnCount(0))
+
+        // Position validation
+        val validPos = CharPosition(0, 5, 5)
+        assertTrue(content.isValidPosition(validPos))
+        val invalidPos = CharPosition(10, 0, 100)
+        assertFalse(content.isValidPosition(invalidPos))
+
+        // Replace
+        content.replace(0, 6, 0, 15, "Magnificent")
+        assertEquals("Hello Magnificent\nWorld!\nKotlin", content.toString())
+
+        // Delete across lines
+        content.delete(0, 5, 2, 0)
+        assertEquals("HelloKotlin", content.toString())
+        assertEquals(1, content.lineCount)
+
+        // Undo & Redo through Content
+        assertTrue(content.canUndo())
+        content.undo()
+        assertEquals("Hello Magnificent\nWorld!\nKotlin", content.toString())
+        assertTrue(content.canRedo())
+        content.redo()
+        assertEquals("HelloKotlin", content.toString())
+
+        // runReadActionsOnLines with Consumer
+        var readLines = 0
+        content.runReadActionsOnLines(0, content.lineCount - 1, Content.ContentLineConsumer { lineIdx, line, dirs ->
+            readLines++
+            assertNotNull(line)
+            assertNotNull(dirs)
+        })
+        assertEquals(content.lineCount, readLines)
+
+        // runReadActionsOnLines with Consumer2 and AbortFlag
+        var abortCount = 0
+        content.runReadActionsOnLines(0, content.lineCount - 1, Content.ContentLineConsumer2 { _, _, flag ->
+            abortCount++
+            flag.set = true
+        })
+        assertEquals(1, abortCount)
+
+        // Shallow & Deep Copy
+        val shallowCopy = content.copyTextShallow()
+        assertEquals(content.toString(), shallowCopy.toString())
+        assertFalse(shallowCopy.getLine(0).isMutable())
+        shallowCopy.release()
+        assertEquals(0, shallowCopy.lineCount)
+
+        val deepCopy = content.copyText()
+        assertEquals(content.toString(), deepCopy.toString())
+        assertTrue(deepCopy.getLine(0).isMutable())
+
+        // Indexer & Cursor
+        assertNotNull(content.cursor)
+        assertTrue(content.isCursorCreated)
+        assertNotNull(content.indexer)
+        assertEquals(5, content.getCharIndex(0, 5))
+    }
 }

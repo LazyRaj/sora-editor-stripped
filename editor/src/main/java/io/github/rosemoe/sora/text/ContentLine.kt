@@ -351,7 +351,7 @@ class ContentLine : CharSequence, GetChars, BidiRequirementChecker, ShareableDat
 
     override fun isMutable(): Boolean {
         val rc = refCount
-        return rc == null || rc.get() <= 1
+        return rc == null || rc.get() == 1
     }
 
     @Synchronized

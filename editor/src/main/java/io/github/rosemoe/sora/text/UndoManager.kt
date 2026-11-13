@@ -61,12 +61,16 @@ class UndoManager : ContentListener, Parcelable {
                 o.isUndoEnabled = parcel.readInt() > 0
                 var count = parcel.readInt()
                 while (count > 0) {
-                    val action: ContentAction? = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-                        parcel.readParcelable(UndoManager::class.java.classLoader, ContentAction::class.java)
-                    } else {
-                        @Suppress("DEPRECATION")
-                        parcel.readParcelable(UndoManager::class.java.classLoader)
-                    }
+                    val action: ContentAction? =
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                            parcel.readParcelable(
+                                UndoManager::class.java.classLoader,
+                                ContentAction::class.java
+                            )
+                        } else {
+                            @Suppress("DEPRECATION")
+                            parcel.readParcelable(UndoManager::class.java.classLoader)
+                        }
                     if (action != null) {
                         o.actionStack.add(action)
                     }
@@ -236,7 +240,7 @@ class UndoManager : ContentListener, Parcelable {
             return
         }
         cleanBeforePush()
-        if (content.isInBatchEdit()) {
+        if (content.isInBatchEdit) {
             if (actionStack.isEmpty()) {
                 val a = MultiAction()
                 a.addAction(action)
@@ -353,7 +357,7 @@ class UndoManager : ContentListener, Parcelable {
             return
         }
         val cursor = content.cursor
-        memorizedCursorRange = cursor?.range
+        memorizedCursorRange = cursor.range
     }
 
     /**
@@ -406,34 +410,40 @@ class UndoManager : ContentListener, Parcelable {
 
         companion object {
             @JvmField
-            val CREATOR: Parcelable.Creator<InsertAction> = object : Parcelable.Creator<InsertAction> {
-                override fun createFromParcel(parcel: Parcel): InsertAction {
-                    val o = InsertAction()
-                    o.startLine = parcel.readInt()
-                    o.startColumn = parcel.readInt()
-                    o.endLine = parcel.readInt()
-                    o.endColumn = parcel.readInt()
-                    o.text = parcel.readString()
-                    return o
-                }
+            val CREATOR: Parcelable.Creator<InsertAction> =
+                object : Parcelable.Creator<InsertAction> {
+                    override fun createFromParcel(parcel: Parcel): InsertAction {
+                        val o = InsertAction()
+                        o.startLine = parcel.readInt()
+                        o.startColumn = parcel.readInt()
+                        o.endLine = parcel.readInt()
+                        o.endColumn = parcel.readInt()
+                        o.text = parcel.readString()
+                        return o
+                    }
 
-                override fun newArray(size: Int): Array<InsertAction?> {
-                    return arrayOfNulls(size)
+                    override fun newArray(size: Int): Array<InsertAction?> {
+                        return arrayOfNulls(size)
+                    }
                 }
-            }
         }
 
         @JvmField
         var startLine: Int = 0
+
         @JvmField
         var endLine: Int = 0
+
         @JvmField
         var startColumn: Int = 0
+
         @JvmField
         var endColumn: Int = 0
+
         @Transient
         @JvmField
         var createTime: Long = System.currentTimeMillis()
+
         @JvmField
         var text: CharSequence? = null
 
@@ -499,29 +509,34 @@ class UndoManager : ContentListener, Parcelable {
 
         companion object {
             @JvmField
-            val CREATOR: Parcelable.Creator<MultiAction> = object : Parcelable.Creator<MultiAction> {
-                override fun createFromParcel(parcel: Parcel): MultiAction {
-                    val o = MultiAction()
-                    var count = parcel.readInt()
-                    while (count > 0) {
-                        val action: ContentAction? = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-                            parcel.readParcelable(MultiAction::class.java.classLoader, ContentAction::class.java)
-                        } else {
-                            @Suppress("DEPRECATION")
-                            parcel.readParcelable(MultiAction::class.java.classLoader)
+            val CREATOR: Parcelable.Creator<MultiAction> =
+                object : Parcelable.Creator<MultiAction> {
+                    override fun createFromParcel(parcel: Parcel): MultiAction {
+                        val o = MultiAction()
+                        var count = parcel.readInt()
+                        while (count > 0) {
+                            val action: ContentAction? =
+                                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                                    parcel.readParcelable(
+                                        MultiAction::class.java.classLoader,
+                                        ContentAction::class.java
+                                    )
+                                } else {
+                                    @Suppress("DEPRECATION")
+                                    parcel.readParcelable(MultiAction::class.java.classLoader)
+                                }
+                            if (action != null) {
+                                o._actions.add(action)
+                            }
+                            count--
                         }
-                        if (action != null) {
-                            o._actions.add(action)
-                        }
-                        count--
+                        return o
                     }
-                    return o
-                }
 
-                override fun newArray(size: Int): Array<MultiAction?> {
-                    return arrayOfNulls(size)
+                    override fun newArray(size: Int): Array<MultiAction?> {
+                        return arrayOfNulls(size)
+                    }
                 }
-            }
         }
 
         private val _actions: MutableList<ContentAction> = ArrayList()
@@ -579,34 +594,40 @@ class UndoManager : ContentListener, Parcelable {
 
         companion object {
             @JvmField
-            val CREATOR: Parcelable.Creator<DeleteAction> = object : Parcelable.Creator<DeleteAction> {
-                override fun createFromParcel(parcel: Parcel): DeleteAction {
-                    val o = DeleteAction()
-                    o.startLine = parcel.readInt()
-                    o.startColumn = parcel.readInt()
-                    o.endLine = parcel.readInt()
-                    o.endColumn = parcel.readInt()
-                    o.text = parcel.readString()
-                    return o
-                }
+            val CREATOR: Parcelable.Creator<DeleteAction> =
+                object : Parcelable.Creator<DeleteAction> {
+                    override fun createFromParcel(parcel: Parcel): DeleteAction {
+                        val o = DeleteAction()
+                        o.startLine = parcel.readInt()
+                        o.startColumn = parcel.readInt()
+                        o.endLine = parcel.readInt()
+                        o.endColumn = parcel.readInt()
+                        o.text = parcel.readString()
+                        return o
+                    }
 
-                override fun newArray(size: Int): Array<DeleteAction?> {
-                    return arrayOfNulls(size)
+                    override fun newArray(size: Int): Array<DeleteAction?> {
+                        return arrayOfNulls(size)
+                    }
                 }
-            }
         }
 
         @JvmField
         var startLine: Int = 0
+
         @JvmField
         var endLine: Int = 0
+
         @JvmField
         var startColumn: Int = 0
+
         @JvmField
         var endColumn: Int = 0
+
         @Transient
         @JvmField
         var createTime: Long = System.currentTimeMillis()
+
         @JvmField
         var text: CharSequence? = null
 
@@ -672,32 +693,42 @@ class UndoManager : ContentListener, Parcelable {
 
         companion object {
             @JvmField
-            val CREATOR: Parcelable.Creator<ReplaceAction> = object : Parcelable.Creator<ReplaceAction> {
-                override fun createFromParcel(parcel: Parcel): ReplaceAction {
-                    val o = ReplaceAction()
-                    o.insert = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-                        parcel.readParcelable(ReplaceAction::class.java.classLoader, InsertAction::class.java)
-                    } else {
-                        @Suppress("DEPRECATION")
-                        parcel.readParcelable(ReplaceAction::class.java.classLoader)
+            val CREATOR: Parcelable.Creator<ReplaceAction> =
+                object : Parcelable.Creator<ReplaceAction> {
+                    override fun createFromParcel(parcel: Parcel): ReplaceAction {
+                        val o = ReplaceAction()
+                        o.insert =
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                                parcel.readParcelable(
+                                    ReplaceAction::class.java.classLoader,
+                                    InsertAction::class.java
+                                )
+                            } else {
+                                @Suppress("DEPRECATION")
+                                parcel.readParcelable(ReplaceAction::class.java.classLoader)
+                            }
+                        o.delete =
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                                parcel.readParcelable(
+                                    ReplaceAction::class.java.classLoader,
+                                    DeleteAction::class.java
+                                )
+                            } else {
+                                @Suppress("DEPRECATION")
+                                parcel.readParcelable(ReplaceAction::class.java.classLoader)
+                            }
+                        return o
                     }
-                    o.delete = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-                        parcel.readParcelable(ReplaceAction::class.java.classLoader, DeleteAction::class.java)
-                    } else {
-                        @Suppress("DEPRECATION")
-                        parcel.readParcelable(ReplaceAction::class.java.classLoader)
-                    }
-                    return o
-                }
 
-                override fun newArray(size: Int): Array<ReplaceAction?> {
-                    return arrayOfNulls(size)
+                    override fun newArray(size: Int): Array<ReplaceAction?> {
+                        return arrayOfNulls(size)
+                    }
                 }
-            }
         }
 
         @JvmField
         var insert: InsertAction? = null
+
         @JvmField
         var delete: DeleteAction? = null
 

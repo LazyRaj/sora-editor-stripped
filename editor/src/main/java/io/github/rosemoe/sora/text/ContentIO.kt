@@ -78,7 +78,7 @@ object ContentIO {
     @Throws(IOException::class)
     fun createFrom(reader: Reader): Content {
         val content = Content()
-        content.setUndoEnabled(false)
+        content.isUndoEnabled = false
         val buffer = CharArray(BUFFER_SIZE)
         val wrapper = CharArrayWrapper(buffer, 0)
         var count: Int
@@ -108,7 +108,7 @@ object ContentIO {
             }
         }
         reader.close()
-        content.setUndoEnabled(true)
+        content.isUndoEnabled = true
         return content
     }
 

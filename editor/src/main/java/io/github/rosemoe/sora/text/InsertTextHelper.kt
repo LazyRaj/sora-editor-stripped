@@ -36,7 +36,7 @@ open class InsertTextHelper private constructor() {
     private var length: Int = 0
 
     open fun recycle() {
-        synchronized(InsertTextHelper::class.java) {
+        synchronized(sCached) {
             for (i in sCached.indices) {
                 if (sCached[i] == null) {
                     sCached[i] = this
@@ -102,13 +102,14 @@ open class InsertTextHelper private constructor() {
 
         private val sCached = arrayOfNulls<InsertTextHelper>(8)
 
-        @Synchronized
         private fun obtain(): InsertTextHelper {
-            for (i in sCached.indices) {
-                val cache = sCached[i]
-                if (cache != null) {
-                    sCached[i] = null
-                    return cache
+            synchronized(sCached) {
+                for (i in sCached.indices) {
+                    val cache = sCached[i]
+                    if (cache != null) {
+                        sCached[i] = null
+                        return cache
+                    }
                 }
             }
             return InsertTextHelper()
