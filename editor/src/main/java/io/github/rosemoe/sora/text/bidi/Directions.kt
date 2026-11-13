@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2024  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,58 +22,42 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.text.bidi;
 
-import androidx.annotation.NonNull;
+package io.github.rosemoe.sora.text.bidi
 
-import io.github.rosemoe.sora.util.IntPair;
+import io.github.rosemoe.sora.util.IntPair
 
 /**
  * Manages directions in a text segment
  *
  * @author Rosemoe
  */
-public class Directions implements IDirections {
+open class Directions(
+    private var runs: LongArray,
+    var length: Int
+) : IDirections {
 
-    private long[] runs;
-    private int length;
-
-    public Directions(@NonNull long[] runs, int length) {
-        this.runs = runs;
-        this.length = length;
+    open fun setData(runs: LongArray, length: Int) {
+        this.runs = runs
+        this.length = length
     }
 
-    public void setData(@NonNull long[] runs, int length) {
-        this.runs = runs;
-        this.length = length;
+    override val runCount: Int
+        get() = runs.size
+
+    override fun getRunStart(i: Int): Int {
+        return IntPair.getFirst(runs[i])
     }
 
-    public void setLength(int length) {
-        this.length = length;
+    override fun getRunEnd(i: Int): Int {
+        return if (i == runs.size - 1) length else getRunStart(i + 1)
     }
 
-    public int getLength() {
-        return length;
+    override fun getRunLevel(i: Int): Int {
+        return IntPair.getSecond(runs[i])
     }
 
-    public int getRunCount() {
-        return runs.length;
+    override fun isRunRtl(i: Int): Boolean {
+        return (getRunLevel(i) and 1) == 1
     }
-
-    public int getRunStart(int i) {
-        return IntPair.getFirst(runs[i]);
-    }
-
-    public int getRunEnd(int i) {
-        return i == runs.length - 1 ? length : getRunStart(i + 1);
-    }
-
-    public int getRunLevel(int i) {
-        return IntPair.getSecond(runs[i]);
-    }
-
-    public boolean isRunRtl(int i) {
-        return (getRunLevel(i) & 1) == 1;
-    }
-
 }

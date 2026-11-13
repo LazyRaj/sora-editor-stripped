@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2025  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -11,7 +12,7 @@
  *     This library is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *     Lesser General License for more details.
+ *     Lesser General Public License for more details.
  *
  *     You should have received a copy of the GNU Lesser General Public
  *     License along with this library; if not, write to the Free Software
@@ -21,18 +22,17 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.text.bidi;
 
-public interface IDirections {
+package io.github.rosemoe.sora.text.breaker
 
-    int getRunCount();
+class WordBreakerEmpty private constructor() : WordBreaker {
 
-    int getRunStart(int i);
+    override fun getOptimizedBreakPoint(start: Int, end: Int): Int {
+        return end
+    }
 
-    int getRunEnd(int i);
-
-    int getRunLevel(int i);
-
-    boolean isRunRtl(int i);
-
+    companion object {
+        @JvmField
+        val INSTANCE: WordBreaker = WordBreakerEmpty()
+    }
 }

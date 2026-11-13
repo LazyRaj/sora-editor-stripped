@@ -1,7 +1,8 @@
 /*
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
- *    Copyright (C) 2020-2024  Rosemoe
+ *    Copyright (C) 2020-2025  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,10 +22,22 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.text.bidi;
 
-public interface BidiRequirementChecker {
+package io.github.rosemoe.sora.text.breaker
 
-    boolean mayNeedBidi();
+import io.github.rosemoe.sora.text.ContentLine
 
+/**
+ * Breakpoint optimizer used when breaking text to visual rows
+ */
+fun interface WordBreaker {
+
+    fun getOptimizedBreakPoint(start: Int, end: Int): Int
+
+    object Factory {
+        @JvmStatic
+        fun newInstance(text: ContentLine): WordBreaker {
+            return WordBreakerProgram(text)
+        }
+    }
 }

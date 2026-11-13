@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2025  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,41 +22,37 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.text.breaker;
 
-import androidx.annotation.NonNull;
+package io.github.rosemoe.sora.text.breaker
 
-import java.text.BreakIterator;
+import io.github.rosemoe.sora.text.CharSequenceIterator
+import io.github.rosemoe.sora.text.ContentLine
+import java.text.BreakIterator
+import java.text.CharacterIterator
 
-import io.github.rosemoe.sora.text.CharSequenceIterator;
-import io.github.rosemoe.sora.text.ContentLine;
+open class WordBreakerIcu(protected val text: ContentLine) : WordBreaker {
 
-public class WordBreakerIcu implements WordBreaker {
+    protected val wrappingIterator: BreakIterator
 
-    protected final BreakIterator wrappingIterator;
-
-    protected final ContentLine text;
-
-    public WordBreakerIcu(@NonNull ContentLine text) {
-        this.text = text;
-        var textIterator = new CharSequenceIterator(text);
-        wrappingIterator = BreakIterator.getLineInstance();
-        wrappingIterator.setText(textIterator);
+    init {
+        val textIterator: CharacterIterator = CharSequenceIterator(text)
+        wrappingIterator = BreakIterator.getLineInstance()
+        wrappingIterator.setText(textIterator)
     }
 
-    public int getOptimizedBreakPoint(int start, int end) {
+    override fun getOptimizedBreakPoint(start: Int, end: Int): Int {
+        var resultEnd = end
         // Merging trailing whitespaces is not supported by editor, so force to break here
-        if (end > 0 && !Character.isWhitespace(text.charAt(end - 1)) && !wrappingIterator.isBoundary(end)) {
+        if (resultEnd > 0 && !Character.isWhitespace(text[resultEnd - 1]) && !wrappingIterator.isBoundary(resultEnd)) {
             // Break text at last boundary
-            int lastBoundary = wrappingIterator.preceding(end);
+            val lastBoundary = wrappingIterator.preceding(resultEnd)
             if (lastBoundary != BreakIterator.DONE) {
-                int suggestedNext = Math.max(start, Math.min(end, lastBoundary));
+                val suggestedNext = maxOf(start, minOf(resultEnd, lastBoundary))
                 if (suggestedNext > start) {
-                    end = suggestedNext;
+                    resultEnd = suggestedNext
                 }
             }
         }
-        return end;
+        return resultEnd
     }
-
 }
