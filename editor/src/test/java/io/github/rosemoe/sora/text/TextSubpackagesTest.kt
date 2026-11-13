@@ -579,4 +579,149 @@ class TextSubpackagesTest {
             ref.length
         }
     }
+
+    @Test
+    fun testCharPositionLifecycle() {
+        val pos = CharPosition()
+        assertEquals(0, pos.line)
+        assertEquals(0, pos.column)
+        assertEquals(0, pos.index)
+
+        val pos2 = CharPosition(3, 7)
+        assertEquals(3, pos2.getLine())
+        assertEquals(7, pos2.getColumn())
+        assertEquals(-1, pos2.getIndex())
+
+        val pos3 = CharPosition(2, 4, 15)
+        assertEquals(2, pos3.line)
+        assertEquals(4, pos3.column)
+        assertEquals(15, pos3.index)
+
+        val packed = pos3.toIntPair()
+        assertEquals(2, IntPair.getFirst(packed))
+        assertEquals(4, IntPair.getSecond(packed))
+
+        val copy = pos3.fromThis()
+        assertEquals(pos3, copy)
+        assertEquals(pos3.hashCode(), copy.hashCode())
+        assertTrue(copy.toString().contains("line = 2"))
+
+        copy.toBOF()
+        assertEquals(0, copy.line)
+        assertEquals(0, copy.column)
+        assertEquals(0, copy.index)
+
+        copy.set(pos2)
+        assertEquals(3, copy.line)
+        assertEquals(7, copy.column)
+        assertEquals(-1, copy.index)
+    }
+
+    @Test
+    fun testCursorOperations() {
+        val content = Content("Hello\nWorld\nKotlin 2.0")
+        val cursor = Cursor(content)
+
+        assertEquals(0, cursor.leftLine)
+        assertEquals(0, cursor.leftColumn)
+        assertEquals(0, cursor.rightLine)
+        assertEquals(0, cursor.rightColumn)
+        assertEquals(0, cursor.left)
+        assertEquals(0, cursor.right)
+        assertFalse(cursor.isSelected)
+
+        cursor.set(1, 2)
+        assertEquals(1, cursor.leftLine)
+        assertEquals(2, cursor.leftColumn)
+        assertEquals(1, cursor.rightLine)
+        assertEquals(2, cursor.rightColumn)
+
+        cursor.setLeft(0, 3)
+        cursor.setRight(1, 4)
+        assertTrue(cursor.isSelected)
+        assertTrue(cursor.isInSelectedRegion(0, 3))
+        assertTrue(cursor.isInSelectedRegion(0, 4))
+        assertTrue(cursor.isInSelectedRegion(1, 2))
+        assertFalse(cursor.isInSelectedRegion(0, 2))
+        assertFalse(cursor.isInSelectedRegion(1, 4))
+
+        val range = cursor.range
+        assertEquals(cursor.left, range.startIndex)
+        assertEquals(cursor.right, range.endIndex)
+
+        cursor.selectionDirection = Cursor.DIRECTION_LTR
+        assertEquals(Cursor.DIRECTION_LTR, cursor.selectionDirection)
+
+        // In Robolectric environment without native font metrics, cursor positions
+        // from TextLayoutHelper are bound to line bounds. We verify boundary navigation:
+        val origin = IntPair.pack(0, 0)
+        assertEquals(0L, cursor.getLeftOf(origin))
+
+        // Navigation across line breaks
+        val lineStart = IntPair.pack(1, 0)
+        val beforeLineStart = cursor.getLeftOf(lineStart)
+        assertEquals(0, IntPair.getFirst(beforeLineStart))
+        assertEquals(5, IntPair.getSecond(beforeLineStart))
+
+        val lineEnd = IntPair.pack(0, 5)
+        val afterLineEnd = cursor.getRightOf(lineEnd)
+        assertEquals(1, IntPair.getFirst(afterLineEnd))
+        assertEquals(0, IntPair.getSecond(afterLineEnd))
+    }
+
+    @Test
+    fun testCachedIndexerLookups() {
+        val content = Content("Line 1\r\nLine 2\nLine 3")
+        val indexer = CachedIndexer(content)
+        indexer.thresholdIndex = 10
+
+        val pos0 = indexer.getCharPosition(0)
+        assertEquals(0, pos0.line)
+        assertEquals(0, pos0.column)
+
+        // "Line 1\r\n" -> length is 8 (6 + 2)
+        val posLine2 = indexer.getCharPosition(8)
+        assertEquals(1, posLine2.line)
+        assertEquals(0, posLine2.column)
+
+        assertEquals(8, indexer.getCharIndex(1, 0))
+        assertEquals(1, indexer.getCharLine(8))
+        assertEquals(0, indexer.getCharColumn(8))
+
+        // Bi-directional lookups
+        val dest = CharPosition()
+        indexer.findIndexForward(pos0, 10, dest)
+        assertEquals(10, dest.index)
+        assertEquals(1, dest.line)
+        assertEquals(2, dest.column)
+
+        indexer.findIndexBackward(dest, 3, dest)
+        assertEquals(3, dest.index)
+        assertEquals(0, dest.line)
+        assertEquals(3, dest.column)
+
+        indexer.findLiCoForward(pos0, 2, 3, dest)
+        assertEquals(2, dest.line)
+        assertEquals(3, dest.column)
+
+        indexer.findLiCoBackward(dest, 0, 4, dest)
+        assertEquals(0, dest.line)
+        assertEquals(4, dest.column)
+    }
+
+    @Test
+    fun testContentIOStreams() {
+        val originalText = "Line A\r\nLine B\nLine C\rLine D"
+        val inStream = java.io.ByteArrayInputStream(originalText.toByteArray(Charsets.UTF_8))
+        val content = ContentIO.createFrom(inStream, Charsets.UTF_8)
+
+        val outStream = java.io.ByteArrayOutputStream()
+        ContentIO.writeTo(content, outStream, Charsets.UTF_8, true)
+        val writtenText = outStream.toString(Charsets.UTF_8.name())
+        assertEquals(originalText, writtenText)
+
+        val reader = java.io.StringReader("First\r\nSecond\rThird")
+        val contentFromReader = ContentIO.createFrom(reader)
+        assertEquals("First\r\nSecond\rThird", contentFromReader.toString())
+    }
 }
