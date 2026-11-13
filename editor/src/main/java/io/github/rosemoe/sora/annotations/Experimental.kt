@@ -21,19 +21,22 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.annotations;
-
-import android.view.View;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+// Modified by Raj Dave (aka LazyRaj)
+package io.github.rosemoe.sora.annotations
 
 /**
- * Marks you must call {@link View#invalidate()} after changing this property
+ * This annotation marks those fields, methods and constructors experimentally created.
+ *
+ * Methods, fields and constructors with this annotation is very subject to keep or delete.
+ * For that reason, they are not stable for production use.
  */
-@Retention(RetentionPolicy.CLASS)
-@Target({ElementType.FIELD})
-public @interface InvalidateRequired {
-}
+@Target(
+    AnnotationTarget.FIELD,
+    AnnotationTarget.CONSTRUCTOR,
+    AnnotationTarget.FUNCTION,
+    AnnotationTarget.PROPERTY_GETTER,
+    AnnotationTarget.PROPERTY_SETTER,
+    AnnotationTarget.CLASS
+)
+@Retention(AnnotationRetention.SOURCE)
+annotation class Experimental

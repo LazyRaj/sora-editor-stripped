@@ -21,20 +21,20 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.annotations;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+// Modified by Raj Dave (aka LazyRaj)
+package io.github.rosemoe.sora.annotations
 
 /**
- * This annotation marks those fields, methods and constructors experimentally created.
- * <p>
- * Methods, fields and constructors with this annotation is very subject to keep or delete.
- * For that reason, they are not stable for production use.
+ * Marks that this member is internally used and that it is not recommended using this
+ * member at your side.
  */
-@Target({ElementType.FIELD, ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.TYPE})
-@Retention(RetentionPolicy.SOURCE)
-public @interface Experimental {
-}
+@Retention(AnnotationRetention.BINARY)
+@Target(
+    AnnotationTarget.FUNCTION,
+    AnnotationTarget.PROPERTY_GETTER,
+    AnnotationTarget.PROPERTY_SETTER,
+    AnnotationTarget.FIELD,
+    AnnotationTarget.CONSTRUCTOR,
+    AnnotationTarget.CLASS
+)
+annotation class UnsupportedUserUsage
