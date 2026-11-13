@@ -724,4 +724,82 @@ class TextSubpackagesTest {
         val contentFromReader = ContentIO.createFrom(reader)
         assertEquals("First\r\nSecond\rThird", contentFromReader.toString())
     }
+
+    @Test
+    fun testContentLineLifecycleAndOperations() {
+        val line = ContentLine("Initial Text")
+        assertEquals(12, line.length)
+        assertEquals('I', line[0])
+        assertEquals("Initial Text", line.toString())
+
+        // Insert Latin1
+        line.insert(8, "Modified ")
+        assertEquals("Initial Modified Text", line.toString())
+
+        // Insert UTF-16 character (triggers coder inflation)
+        line.insert(line.length, '中')
+        assertTrue(line.toString().endsWith("中"))
+
+        // Append
+        line.append(" End")
+        assertTrue(line.toString().endsWith("中 End"))
+
+        // Line separator handling
+        line.lineSeparator = LineSeparator.CRLF
+        assertEquals(LineSeparator.CRLF, line.lineSeparator)
+
+        // SubSequence
+        val sub = line.subSequence(0, 7)
+        assertEquals("Initial", sub.toString())
+
+        // Copy and mutation
+        val cloned = line.copy()
+        assertEquals(line.toString(), cloned.toString())
+        cloned.delete(0, 8)
+        assertTrue(line.toString() != cloned.toString())
+
+        // ShareableData ref counting
+        assertTrue(line.isMutable())
+        line.retain()
+        assertFalse(line.isMutable())
+        val mut = line.toMutable()
+        assertNotNull(mut)
+        line.release()
+        assertTrue(line.isMutable())
+    }
+
+    @Test
+    fun testUndoManagerOperations() {
+        val content = Content("Initial Content")
+        val undoManager = UndoManager()
+        undoManager.isUndoEnabled = true
+        undoManager.maxUndoStackSize = 50
+
+        assertFalse(undoManager.canUndo())
+        assertFalse(undoManager.canRedo())
+
+        // Simulate insert
+        undoManager.beforeModification(content)
+        content.insert(0, 0, "Prefix: ")
+        undoManager.afterInsert(content, 0, 0, 0, 8, "Prefix: ")
+
+        assertTrue(undoManager.canUndo())
+        assertFalse(undoManager.canRedo())
+
+        // Undo
+        val range = undoManager.undo(content)
+        assertEquals("Initial Content", content.toString())
+        assertTrue(undoManager.canRedo())
+
+        // Redo
+        undoManager.redo(content)
+        assertEquals("Prefix: Initial Content", content.toString())
+
+        // Max stack size validation
+        undoManager.maxUndoStackSize = 10
+        assertEquals(10, undoManager.maxUndoStackSize)
+        assertThrows(IllegalArgumentException::class.java) {
+            undoManager.maxUndoStackSize = 0
+        }
+    }
 }

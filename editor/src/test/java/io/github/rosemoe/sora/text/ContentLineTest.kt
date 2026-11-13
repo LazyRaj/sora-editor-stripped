@@ -27,6 +27,7 @@ package io.github.rosemoe.sora.text
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
+@Suppress("DEPRECATION")
 class ContentLineTest {
 
     @Test
