@@ -1,7 +1,8 @@
 /*
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
- *    Copyright (C) 2020-2024  Rosemoe
+ *    Copyright (C) 2020-2025  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,39 +22,40 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.lang.smartEnter;
+package io.github.rosemoe.sora.lang.smartEnter
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import io.github.rosemoe.sora.lang.styling.Styles;
-import io.github.rosemoe.sora.text.CharPosition;
-import io.github.rosemoe.sora.text.Content;
+import io.github.rosemoe.sora.lang.styling.Styles
+import io.github.rosemoe.sora.text.CharPosition
+import io.github.rosemoe.sora.text.Content
 
 /**
  * Perform text processing when user enters '\n' and selection size is 0
  */
-public interface NewlineHandler {
+interface NewlineHandler {
 
     /**
      * Checks whether the given input matches the requirement to invoke this handler
      *
-     * @param text     Current text in editor
+     * @param text Current text in editor
      * @param position The position of cursor
-     * @param style    Current code styles
+     * @param style Current code styles
      * @return Whether this handler should be called
      */
-    boolean matchesRequirement(@NonNull Content text, @NonNull CharPosition position, @Nullable Styles style);
+    fun matchesRequirement(text: Content, position: CharPosition, style: Styles?): Boolean
 
     /**
      * Handle newline and return processed content to insert
      *
-     * @param text     Current text in editor
+     * @param text Current text in editor
      * @param position The position of cursor
-     * @param style    Current code styles
+     * @param style Current code styles
+     * @param tabSize The tab size in spaces
      * @return Actual content to insert
      */
-    @NonNull
-    NewlineHandleResult handleNewline(@NonNull Content text, @NonNull CharPosition position, @Nullable Styles style, int tabSize);
-
+    fun handleNewline(
+        text: Content,
+        position: CharPosition,
+        style: Styles?,
+        tabSize: Int
+    ): NewlineHandleResult
 }

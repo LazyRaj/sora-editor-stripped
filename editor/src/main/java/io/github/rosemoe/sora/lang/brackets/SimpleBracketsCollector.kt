@@ -1,7 +1,8 @@
 /*
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
- *    Copyright (C) 2020-2024  Rosemoe
+ *    Copyright (C) 2020-2025  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,62 +22,51 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.lang.brackets;
+package io.github.rosemoe.sora.lang.brackets
 
-import android.util.SparseIntArray;
-
-import androidx.annotation.NonNull;
-
-import io.github.rosemoe.sora.text.Content;
+import android.util.SparseIntArray
+import io.github.rosemoe.sora.text.Content
 
 /**
  * Collect brackets for simple languages. Not very effective. Not thread-safe.
  *
  * @author Rosemoe
  */
-public class SimpleBracketsCollector implements BracketsProvider {
+open class SimpleBracketsCollector : BracketsProvider {
 
-    private final SparseIntArray mapping;
-
-    public SimpleBracketsCollector() {
-        mapping = new SparseIntArray();
-    }
+    private val mapping: SparseIntArray = SparseIntArray()
 
     /**
      * Add new pair
      */
-    public void add(int start, int end) {
+    open fun add(start: Int, end: Int) {
         // add 1 to avoid zeros
-        mapping.put(start + 1, end + 1);
-        mapping.put(end + 1, start + 1);
+        mapping.put(start + 1, end + 1)
+        mapping.put(end + 1, start + 1)
     }
 
     /**
      * Remove all pairs
      */
-    public void clear() {
-        mapping.clear();
+    open fun clear() {
+        mapping.clear()
     }
 
-    private PairedBracket getForIndex(int index) {
-        int another = mapping.get(index + 1) - 1;
-        if (another > index) {
-            int tmp = index;
-            index = another;
-            another = tmp;
-        }
+    private fun getForIndex(index: Int): PairedBracket? {
+        val another = mapping.get(index + 1) - 1
         if (another != -1) {
-            return new PairedBracket(index, another);
+            val left = minOf(index, another)
+            val right = maxOf(index, another)
+            return PairedBracket(left, right)
         }
-        return null;
+        return null
     }
 
-    @Override
-    public PairedBracket getPairedBracketAt(@NonNull Content text, int index) {
-        var res = index - 1 >= 0 ? getForIndex(index - 1) : null;
+    override fun getPairedBracketAt(text: Content, index: Int): PairedBracket? {
+        var res = if (index - 1 >= 0) getForIndex(index - 1) else null
         if (res == null) {
-            res = getForIndex(index);
+            res = getForIndex(index)
         }
-        return res;
+        return res
     }
 }

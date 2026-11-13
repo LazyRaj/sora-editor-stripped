@@ -1,7 +1,8 @@
 /*
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
- *    Copyright (C) 2020-2024  Rosemoe
+ *    Copyright (C) 2020-2025  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,28 +22,19 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.lang.brackets;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import io.github.rosemoe.sora.text.Content;
+package io.github.rosemoe.sora.lang.smartEnter
 
 /**
- * Interface for providing paired brackets
+ * Result of handling a newline in smart enter.
  *
- * @author Rosemoe
+ * @param text Text to insert
+ * @param shiftLeft Count to shift left from the end of [text]
  */
-public interface BracketsProvider {
-
-    /**
-     * Get left and right brackets position in text
-     *
-     * @param text  The text in editor
-     * @param index Index of cursor in text
-     * @return Paired positions or null if not matched
-     */
-    @Nullable
-    PairedBracket getPairedBracketAt(@NonNull Content text, int index);
-
+data class NewlineHandleResult(
+    @JvmField val text: CharSequence,
+    @JvmField val shiftLeft: Int
+) {
+    init {
+        require(shiftLeft in 0..text.length) { "invalid shiftLeft" }
+    }
 }

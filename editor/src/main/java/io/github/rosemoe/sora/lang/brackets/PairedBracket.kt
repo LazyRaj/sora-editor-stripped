@@ -1,7 +1,8 @@
 /*
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
- *    Copyright (C) 2020-2024  Rosemoe
+ *    Copyright (C) 2020-2025  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,31 +22,27 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.lang.format;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import io.github.rosemoe.sora.widget.CodeEditor;
+package io.github.rosemoe.sora.lang.brackets
 
 /**
- * Provider for custom formatters.
+ * Describes paired brackets.
  *
- * @author KonerDev
+ * @param leftIndex Index of left bracket in text
+ * @param leftLength Text length of left bracket
+ * @param rightIndex Index of right bracket in text
+ * @param rightLength Text length of right bracket
+ * @author Rosemoe
  */
-@FunctionalInterface
-public interface FormatterProvider {
-
+data class PairedBracket(
+    @JvmField val leftIndex: Int,
+    @JvmField val leftLength: Int,
+    @JvmField val rightIndex: Int,
+    @JvmField val rightLength: Int
+) {
     /**
-     * Get a formatter for the specified editor.
+     * Currently length is always 1.
      *
-     * <p>If no custom formatter is available, this method should return
-     * {@code null} to allow the editor to fall back to the language formatter.</p>
-     *
-     * @param editor The current code editor.
-     * @return A custom formatter, or {@code null} to use the default formatter
+     * @see PairedBracket
      */
-    @Nullable
-    Formatter getFormatter(@NonNull CodeEditor editor);
-
+    constructor(leftIndex: Int, rightIndex: Int) : this(leftIndex, 1, rightIndex, 1)
 }

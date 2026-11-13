@@ -1,7 +1,8 @@
 /*
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
- *    Copyright (C) 2020-2024  Rosemoe
+ *    Copyright (C) 2020-2025  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -21,36 +22,25 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
-package io.github.rosemoe.sora.lang.brackets;
+package io.github.rosemoe.sora.lang.format
+
+import io.github.rosemoe.sora.widget.CodeEditor
 
 /**
- * Describes paired brackets
+ * Provider for custom formatters.
  *
- * @author Rosemoe
+ * @author KonerDev
  */
-public class PairedBracket {
-
-    public final int leftIndex, leftLength, rightIndex, rightLength;
+fun interface FormatterProvider {
 
     /**
-     * Currently length is always 1.
+     * Get a formatter for the specified editor.
      *
-     * @see #PairedBracket(int, int, int, int)
+     * If no custom formatter is available, this method should return
+     * `null` to allow the editor to fall back to the language formatter.
+     *
+     * @param editor The current code editor.
+     * @return A custom formatter, or null to use the default formatter
      */
-    public PairedBracket(int leftIndex, int rightIndex) {
-        this(leftIndex, 1, rightIndex, 1);
-    }
-
-    /**
-     * @param leftIndex   Index of left bracket in text
-     * @param leftLength  Text length of left bracket
-     * @param rightIndex  Index of right bracket in text
-     * @param rightLength Text length of right bracket
-     */
-    public PairedBracket(int leftIndex, int leftLength, int rightIndex, int rightLength) {
-        this.leftIndex = leftIndex;
-        this.leftLength = leftLength;
-        this.rightIndex = rightIndex;
-        this.rightLength = rightLength;
-    }
+    fun getFormatter(editor: CodeEditor): Formatter?
 }
