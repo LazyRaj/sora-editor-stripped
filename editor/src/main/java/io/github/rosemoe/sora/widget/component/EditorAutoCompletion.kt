@@ -90,36 +90,33 @@ open class EditorAutoCompletion(
         private const val SHOW_PROGRESS_BAR_DELAY = 50L
     }
 
-    @JvmField
     protected var cancelShowUp: Boolean = false
 
-    @JvmField
     protected var requestTime: Long = 0L
 
-    @JvmField
-    protected var maxHeight: Int = 0
+    open var maxHeight: Int = 0
 
-    @JvmField
     protected var completionThread: CompletionThread? = null
 
-    @JvmField
     protected var publisher: CompletionPublisher? = null
 
-    @JvmField
     protected var lastAttachedItems: WeakReference<List<CompletionItem>>? = null
 
-    @JvmField
     protected var currentSelection: Int = -1
 
-    @JvmField
-    protected var adapter: EditorCompletionAdapter
+    open var adapter: EditorCompletionAdapter = DefaultCompletionItemAdapter()
+        set(value) {
+            field = value
+            if (::_layout.isInitialized) {
+                layout.getCompletionList().adapter = value
+            }
+        }
 
     protected lateinit var _layout: CompletionLayout
 
     val layout: CompletionLayout
         get() = _layout
 
-    @JvmField
     protected var eventManager: EventManager
 
     var completionWndPositionMode: Int = WINDOW_POS_MODE_AUTO
@@ -357,11 +354,6 @@ open class EditorAutoCompletion(
         layout.setEnabledAnimation(enabledAnimation)
     }
 
-    open fun setAdapter(adapter: EditorCompletionAdapter?) {
-        this.adapter = adapter ?: DefaultCompletionItemAdapter()
-        layout.getCompletionList().adapter = this.adapter
-    }
-
     override fun show() {
         if (cancelShowUp || !isEnabled()) {
             return
@@ -521,10 +513,6 @@ open class EditorAutoCompletion(
         completionThread = thread
         setLoading(true)
         thread.start()
-    }
-
-    open fun setMaxHeight(height: Int) {
-        maxHeight = height
     }
 
     /**

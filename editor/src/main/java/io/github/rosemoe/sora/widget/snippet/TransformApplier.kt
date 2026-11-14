@@ -49,7 +49,6 @@ object TransformApplier {
      * @param transform the [Transform] object describing how to transform the text, maybe null
      * @return the transformed text
      */
-    @JvmStatic
     fun doTransform(text: String, transform: Transform?): String {
         val regexp = transform?.regexp ?: return text
         val format = transform.format ?: return text
@@ -138,3 +137,6 @@ object TransformApplier {
         return text
     }
 }
+
+fun String.applyTransform(transform: Transform?): String = TransformApplier.doTransform(this, transform)
+

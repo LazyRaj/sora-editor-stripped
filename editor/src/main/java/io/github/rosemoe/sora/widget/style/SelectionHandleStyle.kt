@@ -62,19 +62,19 @@ interface SelectionHandleStyle {
     /**
      * The descriptor of a drawn handle on canvas
      */
-    class HandleDescriptor {
-
+    class HandleDescriptor(
         /**
          * The position of handle
          */
-        @JvmField
-        val position: RectF = RectF()
+        val position: RectF = RectF(),
 
         /**
          * The alignment of the handle (of the x coordinate)
          */
-        @JvmField
         var alignment: Int = ALIGN_CENTER
+    ) {
+        operator fun component1(): RectF = position
+        operator fun component2(): Int = alignment
 
         fun set(left: Float, top: Float, right: Float, bottom: Float, alignment: Int) {
             this.alignment = alignment

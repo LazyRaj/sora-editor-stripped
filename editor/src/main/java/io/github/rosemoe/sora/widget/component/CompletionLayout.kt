@@ -55,7 +55,7 @@ interface CompletionLayout {
     /**
      * Get the [AdapterView] to display completion items
      */
-    fun getCompletionList(): @JvmSuppressWildcards AdapterView<Adapter>
+    fun getCompletionList(): AdapterView<Adapter>
 
     /**
      * Set loading state.

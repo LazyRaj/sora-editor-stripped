@@ -63,7 +63,7 @@ import java.lang.ref.WeakReference
  *
  * @author Rose
  */
-open class EditorColorScheme @JvmOverloads constructor(
+open class EditorColorScheme(
     isDark: Boolean = false
 ) {
 
@@ -72,7 +72,6 @@ open class EditorColorScheme @JvmOverloads constructor(
     /**
      * Real color saver
      */
-    @JvmField
     protected val colors: SparseIntArray = SparseIntArray()
 
     /**
@@ -408,18 +407,7 @@ open class EditorColorScheme @JvmOverloads constructor(
         /**
          * Get global default color scheme.
          */
-        @JvmStatic
         fun getDefault(): EditorColorScheme = globalDefault
-
-        /**
-         * Set global default color scheme. Newly created editor will use the new default color scheme.
-         *
-         * @param colorScheme new global color scheme, or null for restoring to built-in default
-         */
-        @JvmStatic
-        fun setDefault(colorScheme: EditorColorScheme?) {
-            setDefault(colorScheme, false)
-        }
 
         /**
          * Set global default color scheme and optionally update existing editors that are using default
@@ -428,8 +416,7 @@ open class EditorColorScheme @JvmOverloads constructor(
          * @param colorScheme   new global color scheme, or null for restoring to built-in default
          * @param updateEditors update existing editors that are using default color scheme
          */
-        @JvmStatic
-        fun setDefault(colorScheme: EditorColorScheme?, updateEditors: Boolean) {
+        fun setDefault(colorScheme: EditorColorScheme?, updateEditors: Boolean = false) {
             val scheme = colorScheme ?: EditorColorScheme()
             if (updateEditors) {
                 val editorsCopy = globalDefault.editors.toTypedArray()

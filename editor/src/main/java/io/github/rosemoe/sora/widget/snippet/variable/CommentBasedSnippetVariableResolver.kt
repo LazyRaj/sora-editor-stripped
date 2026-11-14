@@ -26,7 +26,7 @@
  */
 package io.github.rosemoe.sora.widget.snippet.variable
 
-open class CommentBasedSnippetVariableResolver @JvmOverloads constructor(
+open class CommentBasedSnippetVariableResolver(
     /**
      * For example, Java language comment tokens: `arrayOf("//", "/*", "*/")`
      */
