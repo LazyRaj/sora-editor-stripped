@@ -479,7 +479,8 @@ open class EditorAutoCompletion(
         cancelCompletion()
         requestTime = System.nanoTime()
         currentSelection = -1
-        publisher = CompletionPublisher(editor.handler, {
+        val handler = editor.handler ?: android.os.Handler(android.os.Looper.getMainLooper())
+        publisher = CompletionPublisher(handler, {
             val pub = publisher ?: return@CompletionPublisher
             val items = pub.items
             if (highlightMatchedLabel) {

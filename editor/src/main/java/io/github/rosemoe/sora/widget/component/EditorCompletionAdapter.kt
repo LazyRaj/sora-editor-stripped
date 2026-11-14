@@ -39,8 +39,14 @@ import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
  */
 abstract class EditorCompletionAdapter : BaseAdapter(), Adapter {
 
-    private var window: EditorAutoCompletion? = null
-    private var items: List<CompletionItem>? = null
+    protected var window: EditorAutoCompletion? = null
+    protected var items: List<CompletionItem>? = null
+
+    val completionWindow: EditorAutoCompletion?
+        get() = window
+
+    val currentItems: List<CompletionItem>?
+        get() = items
 
     /**
      * Called by [EditorAutoCompletion] to attach some arguments

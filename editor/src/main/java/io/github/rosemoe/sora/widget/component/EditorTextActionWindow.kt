@@ -74,9 +74,9 @@ open class EditorTextActionWindow(
     private val copyBtn: ImageButton
     private val cutBtn: ImageButton
     private val longSelectBtn: ImageButton
-    private val rootView: View
-    private val handler: EditorTouchEventHandler = editor.eventHandler
-    private val eventManager: EventManager = editor.createSubEventManager()
+    protected var rootView: View
+    protected val handler: EditorTouchEventHandler = editor.eventHandler
+    protected val eventManager: EventManager = editor.createSubEventManager()
     private var lastScroll: Long = 0L
     private var lastPosition: Int = 0
     private var lastCause: Int = 0
@@ -263,7 +263,7 @@ open class EditorTextActionWindow(
         }, DELAY)
     }
 
-    private fun selectTop(rect: RectF): Int {
+    protected open fun selectTop(rect: RectF): Int {
         val rowHeight = editor.rowHeight
         return if (rect.top - rowHeight * 3 / 2f > height) {
             (rect.top - rowHeight * 3 / 2f - height).toInt()

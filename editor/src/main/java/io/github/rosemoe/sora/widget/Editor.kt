@@ -65,3 +65,10 @@ inline fun <reified T : EditorBuiltinComponent> CodeEditor.getComponent(): T {
 inline fun <reified T : EditorBuiltinComponent> CodeEditor.replaceComponent(component: T) {
     replaceComponent(T::class.java, component)
 }
+
+/**
+ * Convenient property to get or set editor text as a plain Kotlin [String].
+ */
+var CodeEditor.textString: String
+    get() = text.toString()
+    set(value) = setText(value)

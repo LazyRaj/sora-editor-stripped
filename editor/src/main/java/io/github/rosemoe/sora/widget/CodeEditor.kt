@@ -360,8 +360,15 @@ open class CodeEditor(
     private var editable = false
     private var wordwrap = false
 
-    val isEditable: Boolean
+    var isEditable: Boolean
         get() = editable && !layoutBusy && !this.isFormatting
+        set(value) {
+            this.editable = value
+            if (!value) {
+                hideSoftInput()
+                snippetController.stopSnippet()
+            }
+        }
 
     var isWordwrap: Boolean
         get() = wordwrap
@@ -478,10 +485,15 @@ open class CodeEditor(
     private var cursorAnimation = false
 
     /**
-     * @see setPinLineNumber
+     * Whether line number region will scroll together with code region.
      */
     var isLineNumberPinned: Boolean = false
-        private set
+        set(value) {
+            field = value
+            if (this.isLineNumberEnabled) {
+                invalidate()
+            }
+        }
 
     /**
      * This only makes sense when wordwrap is enabled.
@@ -742,18 +754,18 @@ open class CodeEditor(
      */
     fun <T : EditorBuiltinComponent> getComponent(clazz: Class<T>): T {
         @Suppress("UNCHECKED_CAST")
-        if (clazz == EditorAutoCompletion::class.java) {
+        if (EditorAutoCompletion::class.java.isAssignableFrom(clazz)) {
             return completionWindow as T
-        } else if (clazz == Magnifier::class.java) {
+        } else if (Magnifier::class.java.isAssignableFrom(clazz)) {
             return eventHandler.magnifier as T
-        } else if (clazz == EditorTextActionWindow::class.java) {
+        } else if (EditorTextActionWindow::class.java.isAssignableFrom(clazz)) {
             return textActionWindow as T
-        } else if (clazz == EditorDiagnosticTooltipWindow::class.java) {
+        } else if (EditorDiagnosticTooltipWindow::class.java.isAssignableFrom(clazz)) {
             return diagnosticTooltip as T
-        } else if (clazz == EditorContextMenuCreator::class.java) {
+        } else if (EditorContextMenuCreator::class.java.isAssignableFrom(clazz)) {
             return contextMenuCreator as T
         } else {
-            throw IllegalArgumentException("Unknown component type")
+            throw IllegalArgumentException("Unknown component type: ${clazz.name}")
         }
     }
 
@@ -769,18 +781,18 @@ open class CodeEditor(
         val old: T = getComponent(clazz)
         val isEnabled = old.isEnabled()
         old.setEnabled(false)
-        if (clazz == EditorAutoCompletion::class.java) {
+        if (EditorAutoCompletion::class.java.isAssignableFrom(clazz)) {
             completionWindow = replacement as EditorAutoCompletion
-        } else if (clazz == Magnifier::class.java) {
+        } else if (Magnifier::class.java.isAssignableFrom(clazz)) {
             eventHandler.magnifier = replacement as Magnifier
-        } else if (clazz == EditorTextActionWindow::class.java) {
+        } else if (EditorTextActionWindow::class.java.isAssignableFrom(clazz)) {
             textActionWindow = replacement as EditorTextActionWindow
-        } else if (clazz == EditorDiagnosticTooltipWindow::class.java) {
+        } else if (EditorDiagnosticTooltipWindow::class.java.isAssignableFrom(clazz)) {
             diagnosticTooltip = replacement as EditorDiagnosticTooltipWindow
-        } else if (clazz == EditorContextMenuCreator::class.java) {
+        } else if (EditorContextMenuCreator::class.java.isAssignableFrom(clazz)) {
             contextMenuCreator = replacement as EditorContextMenuCreator
         } else {
-            throw IllegalArgumentException("Unknown component type")
+            throw IllegalArgumentException("Unknown component type: ${clazz.name}")
         }
         replacement.setEnabled(isEnabled)
     }
@@ -930,7 +942,7 @@ open class CodeEditor(
         this.rightHandleDescriptor = HandleDescriptor()
 
         startedActionMode = ACTION_MODE_NONE
-        setTextSize(DEFAULT_TEXT_SIZE.toFloat())
+        this.textSize = DEFAULT_TEXT_SIZE.toFloat()
         this.lineInfoTextSize = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_SP,
             DEFAULT_LINE_INFO_TEXT_SIZE.toFloat(),
@@ -944,7 +956,7 @@ open class CodeEditor(
             context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
         clipboardManager =
             context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        setUndoEnabled(true)
+        this.isUndoEnabled = true
         this.blockIndex = -1
         this.isScalable = true
         setFocusable(true)
@@ -967,7 +979,7 @@ open class CodeEditor(
         isHorizontalScrollBarEnabled = true
         this.isFirstLineNumberAlwaysVisible = true
         this.isCursorAnimationEnabled = true
-        setEditable(true)
+        this.isEditable = true
         this.isLineNumberEnabled = true
         this.isHardwareAcceleratedDrawAllowed = true
         setInterceptParentHorizontalScrollIfNeeded(false)
@@ -1027,7 +1039,7 @@ open class CodeEditor(
                 R.styleable.CodeEditor_dividerMargin, this.dividerMarginRight
             )
         )
-        setPinLineNumber(array.getBoolean(R.styleable.CodeEditor_pinLineNumber, false))
+        this.isLineNumberPinned = array.getBoolean(R.styleable.CodeEditor_pinLineNumber, false)
 
         setHighlightCurrentBlock(
             array.getBoolean(
@@ -1085,17 +1097,7 @@ open class CodeEditor(
         array.recycle()
     }
 
-    /**
-     * Set whether line number region will scroll together with code region
-     * 
-     * @see isLineNumberPinned
-     */
-    fun setPinLineNumber(pinLineNumber: Boolean) {
-        this.isLineNumberPinned = pinLineNumber
-        if (this.isLineNumberEnabled) {
-            invalidate()
-        }
-    }
+
 
     /**
      * Inserts the given text in the editor.
@@ -2796,22 +2798,23 @@ open class CodeEditor(
     }
 
     /**
-     * @return Enabled/Disabled
-     * @see setUndoEnabled
+     * Enable or disable the undo manager.
      */
-    fun isUndoEnabled(): Boolean {
-        return undoEnabled
-    }
+    var isUndoEnabled: Boolean
+        get() = undoEnabled
+        set(value) {
+            undoEnabled = value
+            text.isUndoEnabled = value
+        }
 
     /**
-     * Enable / disabled undo manager
-     * 
-     * @param enabled Enable/Disable
+     * Enable or disable the dividing line between text and gutter.
      */
-    fun setUndoEnabled(enabled: Boolean) {
-        undoEnabled = enabled
-        text.isUndoEnabled = enabled
-    }
+    var isDividerEnabled: Boolean
+        get() = dividerWidth > 0f
+        set(value) {
+            dividerWidth = if (value) dpUnit else 0f
+        }
 
     var diagnosticIndicatorStyle: DiagnosticIndicatorStyle
         get() = diagnosticStyle
@@ -3273,25 +3276,7 @@ open class CodeEditor(
         dispatchEvent(LayoutStateChangeEvent(this, busy))
     }
 
-    /**
-     * @see .setEditable
-     */
-    fun getEditable(): Boolean {
-        return editable
-    }
 
-    /**
-     * Set whether text can be edited
-     * 
-     * @param editable Editable
-     */
-    fun setEditable(editable: Boolean) {
-        this.editable = editable
-        if (!editable) {
-            hideSoftInput()
-            snippetController.stopSnippet()
-        }
-    }
 
     var isBlockLineEnabled: Boolean
         get() = blockLineEnabled
@@ -4029,26 +4014,19 @@ open class CodeEditor(
     }
 
     /**
-     * Set the editor's text size in sp unit. This value must be greater than 0
-     * 
-     * @param textSize the editor's text size in **Sp** units.
+     * Editor text size in **SP** units.
      */
-    fun setTextSize(textSize: Float) {
-        val context = getContext()
-        val res: Resources
-
-        if (context == null) {
-            res = Resources.getSystem()
-        } else {
-            res = context.resources
+    var textSize: Float
+        get() = textSizePx
+        set(textSize) {
+            val context = getContext()
+            val res = context?.resources ?: Resources.getSystem()
+            this.textSizePx = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_SP,
+                textSize,
+                res.displayMetrics
+            )
         }
-
-        this.textSizePx = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_SP,
-            textSize,
-            res.displayMetrics
-        )
-    }
 
     /**
      * Render ASCII Function characters
