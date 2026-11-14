@@ -1,85 +1,26 @@
-<div align="center">
+**Open Source Submodule Fork Information**
 
-
-> [!IMPORTANT]
-> **Open Source Submodule Fork Information**
->
-> This repository is an open-source fork of [sora-editor](https://github.com/Rosemoe/sora-editor)
+This repository is an open-source fork of [sora-editor](https://github.com/Rosemoe/sora-editor)
 maintained as a submodule for my personal project.
->
-> - **Target Platform:** Android API 30+ (Android 11 and above) for `editor`, `editor-lsp`, and
+- **Target Platform:** Android API 30+ (Android 11 and above) for `editor`, `editor-lsp`, and
     `language-textmate`.
-> - **Purpose:** Dedicated to experimental features, custom optimizations, and breaking API changes
+- **Purpose:** Dedicated to experimental features, custom optimizations, and breaking API changes
     tailored for my personal project.
-> - WILL NEVER MERGE TO UPSTREAM.
+- WILL NEVER MERGE TO UPSTREAM.
 
-----
-[![CI](https://github.com/Rosemoe/sora-editor/actions/workflows/gradle.yml/badge.svg?event=push)](https://github.com/Rosemoe/sora-editor/actions/workflows/gradle.yml)
-![GitHub License](https://img.shields.io/github/license/Rosemoe/sora-editor?link=https%3A%2F%2Fgithub.com%2FRosemoe%2Fsora-editor%2Fblob%2Fmain%2FLICENSE&link=https%3A%2F%2Fgithub.com%2FRosemoe%2Fsora-editor%2Fblob%2Fmain%2FLICENSE)
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.rosemoe/editor.svg?label=Maven%20Central)]((https://search.maven.org/search?q=io.github.rosemoe%20editor))   
-[![Telegram](https://img.shields.io/badge/Join-Telegram-blue)](https://t.me/rosemoe_code_editor)
-[![QQ](https://img.shields.io/badge/Join-QQ_Group-ff69b4)](https://jq.qq.com/?_wv=1027&k=n68uxQws)
+Implements Many features and Bugs Fixes from issues and PRs in the [Upstream](https://github.com/Rosemoe/sora-editor) 
 
-sora-editor is a cool and optimized code editor on Android platform
+This Fork: 
+1. Kotlin First.
+2. Android API 30 or Up.
+3. Uses New RenderNode and Newer Android APIs
+4. Compose First Implementation of Popups however the CodeEditor is not Converted to Compose first because Compose lacks some IME handling. so it has wrapper for compose. 
+5. Has Inline Completions. (aka GhostText)
+6. Some Bugs and Performance Fixes.
+7. Hand Written Code (AI Written Docs and KDoc)
+8. Most of the Architecture is intact only Removed Legacy Code, Checks, and Moved to Kotlin Pure/Native mutableList, state flows.
 
-</div>
-
-Read this in other
-languages: [English](README.md), [简体中文](README.zh-cn.md), [Español](README.es.md), [日本語](README.jp.md).
-
-Note that statements in other languages may not be up-to-date.
-
-***Work In Progress*** This project is still developing slowly.
-
-**Issues and pull requests are welcome.**
-
-## Features
-
-- [x] Incremental syntax highlight
-- [x] Auto-completion (with [code snippets](https://macromates.com/manual/en/snippets))
-- [x] Auto indent
-- [x] Code block lines
-- [x] Scale text
-- [x] Undo/redo
-- [x] Search and replace
-- [x] Auto wordwrap
-- [x] Show non-printable characters
-- [x] Diagnostic markers
-- [x] Text magnifier
-- [x] Sticky Scroll
-- [x] Highlight bracket pairs
-- [x] Event System
-- [x] TextMate and TreeSitter support
-
-## Documentation
-
-To quickly get started, please view
-this [Quickstart Guide](https://project-sora.github.io/sora-editor-docs/guide/getting-started).
-
-To check out all docs, please
-visit [Documentation Site](https://project-sora.github.io/sora-editor-docs/).
-
-* [Editor Overview](https://project-sora.github.io/sora-editor-docs/guide/editor-overview)
-* [Reference](https://project-sora.github.io/sora-editor-docs/reference/xml-attributes)
-* [Documentation Repository](https://github.com/project-sora/sora-editor-docs)
-
-## Screenshots
-
-<div style="overflow: hidden">
-<img src="/images/general.jpg" alt="GeneralAppearance" width="40%" align="bottom" />
-<img src="/images/auto_completion.jpg" alt="AutoCompletion" width="40%" align="bottom" />
-</div>
-
-## Discuss
-
-* Official QQ Group:[734652304](https://qm.qq.com/q/kKBqRsVrQ4)
-* Official [Telegram Group](https://t.me/rosemoe_code_editor)
-
-## Contributors
-
-<a href="https://github.com/Rosemoe/sora-editor/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=Rosemoe/sora-editor" />
-</a>
+Check the Original [Sora Editor](https://github.com/Rosemoe/sora-editor) 
 
 ## License
 
@@ -109,6 +50,4 @@ additional information or have any questions
 
 ## Acknowledgements
 
-Thanks to [JetBrains](https://www.jetbrains.com/?from=CodeEditor) for allocating free open-source
-licences for IDEs such as [IntelliJ IDEA](https://www.jetbrains.com/idea/?from=CodeEditor).   
-[<img src=".github/jetbrains-variant-3.png" width="200"/>](https://www.jetbrains.com/?from=CodeEditor)
+Thanks to Rosemoe for such a great Code Editor. 
