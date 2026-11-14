@@ -26,8 +26,6 @@
  */
 package io.github.rosemoe.sora.widget.compose
 
-import android.content.ContextWrapper
-import android.graphics.RectF
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -38,13 +36,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
-import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.findViewTreeSavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import io.github.rosemoe.sora.lang.completion.CompletionItem
@@ -203,6 +198,9 @@ interface TextActionScope {
     /** Select all content in the editor. */
     fun selectAll()
 
+    /** Cancel text selection and collapse cursor to current position. */
+    fun cancelSelection()
+
     /** Dismiss the selection action window. */
     fun dismiss()
 }
@@ -304,6 +302,11 @@ class ComposeTextActionWindow(
         override fun selectAll() {
             editor.selectAll()
             scopeState = createScope()
+        }
+
+        override fun cancelSelection() {
+            editor.cancelSelection()
+            dismiss()
         }
 
         override fun dismiss() {

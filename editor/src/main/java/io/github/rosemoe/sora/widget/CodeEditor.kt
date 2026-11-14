@@ -35,6 +35,7 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Canvas
 import android.graphics.Matrix
+import android.graphics.Paint
 import android.graphics.Paint.Align
 import android.graphics.Paint.FontMetricsInt
 import android.graphics.Rect
@@ -3512,6 +3513,15 @@ open class CodeEditor(
     }
 
     /**
+     * Cancel the active text selection and collapse cursor to the current position.
+     */
+    fun cancelSelection() {
+        if (cursor.isSelected) {
+            setSelection(cursor.rightLine, cursor.rightColumn)
+        }
+    }
+
+    /**
      * Move selection to given position
      * 
      * @param line   The line to move
@@ -3520,6 +3530,7 @@ open class CodeEditor(
     fun setSelection(line: Int, column: Int) {
         setSelection(line, column, SelectionChangeEvent.CAUSE_UNKNOWN)
     }
+
 
     /**
      * Move selection to given position
@@ -5203,13 +5214,11 @@ open class CodeEditor(
         }
     }
 
-    private var inScrollTo = false
+    internal fun setSuperScroll(x: Int, y: Int) {
+        super.scrollTo(x, y)
+    }
 
     override fun scrollTo(x: Int, y: Int) {
-        if (inScrollTo) {
-            super.scrollTo(x, y)
-            return
-        }
         val maxX = scrollMaxX
         val maxY = scrollMaxY
         val targetX = if (maxX > 0) x.coerceIn(0, maxX) else max(0, x)
@@ -5218,17 +5227,13 @@ open class CodeEditor(
         val startX = scroller.currX
         val startY = scroller.currY
         if (startX == targetX && startY == targetY) {
-            super.scrollTo(x, y)
+            super.scrollTo(targetX, targetY)
             return
         }
-        inScrollTo = true
-        try {
-            scroller.startScroll(startX, startY, targetX - startX, targetY - startY, 0)
-            scroller.abortAnimation()
-            super.scrollTo(targetX, targetY)
-        } finally {
-            inScrollTo = false
-        }
+        scroller.forceFinished(true)
+        scroller.startScroll(targetX, targetY, 0, 0, 0)
+        scroller.abortAnimation()
+        super.scrollTo(targetX, targetY)
         dispatchEvent(
             ScrollEvent(
                 this,

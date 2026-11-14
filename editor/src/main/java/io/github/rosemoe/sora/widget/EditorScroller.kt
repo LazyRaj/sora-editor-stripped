@@ -65,8 +65,7 @@ open class EditorScroller(
         get() = scroller
 
     open fun setEditorOffsets() {
-        editor.scrollX = scroller.currX
-        editor.scrollY = scroller.currY
+        editor.setSuperScroll(scroller.currX, scroller.currY)
     }
 
     open fun startScroll(startX: Int, startY: Int, dx: Int, dy: Int) {

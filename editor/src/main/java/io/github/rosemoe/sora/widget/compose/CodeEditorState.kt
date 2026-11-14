@@ -504,6 +504,17 @@ class CodeEditorState(
         }
     }
 
+    /** Cancels any active selection and collapses the cursor to the selection end, dismissing action popups. */
+    fun cancelSelection() {
+        _editor?.let { ed ->
+            ed.cancelSelection()
+            _selection = TextRange(ed.cursor.left, ed.cursor.right)
+            cursorPosition = CharPosition(ed.cursor.leftLine, ed.cursor.leftColumn)
+        } ?: run {
+            selection = TextRange(selection.end, selection.end)
+        }
+    }
+
     /** Inserts text at the current cursor position or replaces active selection. */
     fun insertText(textToInsert: String, selectionOffset: Int = textToInsert.length) {
         _editor?.let { ed ->

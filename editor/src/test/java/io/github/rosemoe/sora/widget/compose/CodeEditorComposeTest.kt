@@ -31,12 +31,10 @@ import androidx.compose.runtime.saveable.SaverScope
 import androidx.compose.ui.text.TextRange
 import com.google.common.truth.Truth.assertThat
 import io.github.rosemoe.sora.event.ContentChangeEvent
-import io.github.rosemoe.sora.lang.completion.CompletionItem
 import io.github.rosemoe.sora.lang.diagnostic.DiagnosticDetail
 import io.github.rosemoe.sora.lang.diagnostic.DiagnosticRegion
 import io.github.rosemoe.sora.widget.CodeEditor
 import io.github.rosemoe.sora.widget.component.EditorAutoCompletion
-import io.github.rosemoe.sora.widget.component.EditorDiagnosticTooltipWindow
 import io.github.rosemoe.sora.widget.component.EditorTextActionWindow
 import io.github.rosemoe.sora.widget.getComponent
 import io.github.rosemoe.sora.widget.replaceComponent
@@ -124,9 +122,10 @@ class CodeEditorComposeTest {
 
     @Test
     fun testComposeCompletionItemAdapter() {
-        val adapter = ComposeCompletionItemAdapter(itemHeightDp = 40f) { item, isSelected, onClick ->
-            // Composable slot
-        }
+        val adapter =
+            ComposeCompletionItemAdapter(itemHeightDp = 40f) { item, isSelected, onClick ->
+                // Composable slot
+            }
 
         assertThat(adapter.count).isEqualTo(0)
     }
@@ -386,9 +385,10 @@ class CodeEditorComposeTest {
         state.attachEditor(editor)
 
         val autoComp = editor.getComponent(EditorAutoCompletion::class.java)
-        val adapter = ComposeCompletionItemAdapter(itemHeightDp = 40f) { item, isSelected, onClick ->
-            // item composable
-        }
+        val adapter =
+            ComposeCompletionItemAdapter(itemHeightDp = 40f) { item, isSelected, onClick ->
+                // item composable
+            }
         val items = listOf<io.github.rosemoe.sora.lang.completion.CompletionItem>(
             io.github.rosemoe.sora.lang.completion.SimpleCompletionItem("label", "desc")
         )
@@ -396,6 +396,83 @@ class CodeEditorComposeTest {
         autoComp.adapter = adapter
         val view = adapter.getView(0, null, null)
         assertThat(view).isNotNull()
+
+        state.detachEditor(editor)
+    }
+
+    @Test
+    fun testVerticalScrollingAndAutoScroll() {
+        val editor = CodeEditor(context)
+        val textBuilder = StringBuilder()
+        for (i in 1..100) {
+            textBuilder.append("Line $i\n")
+        }
+        editor.setText(textBuilder.toString())
+        editor.layout(0, 0, 1080, 1920)
+
+        val state = CodeEditorState()
+        state.attachEditor(editor)
+
+        editor.eventHandler.scrollBy(0f, 500f)
+        assertThat(editor.offsetY).isEqualTo(500)
+        assertThat(state.scrollY).isEqualTo(500)
+        assertThat(editor.eventHandler.scroller.currY).isEqualTo(500)
+
+        editor.setSelectionRegion(99, 0, 99, 0)
+        editor.ensureSelectionVisible()
+        assertThat(editor.offsetY).isGreaterThan(1000)
+        assertThat(editor.firstVisibleLine).isGreaterThan(30)
+
+        state.detachEditor(editor)
+    }
+
+    @Test
+    fun testEditorResizingOnImeShrink() {
+        val editor = CodeEditor(context)
+        val textBuilder = StringBuilder()
+        for (i in 1..100) {
+            textBuilder.append("Line $i\n")
+        }
+        editor.setText(textBuilder.toString())
+        editor.layout(0, 0, 1080, 1920)
+
+        // Put cursor on line 80
+        editor.setSelectionRegion(80, 0, 80, 0)
+        editor.ensureSelectionVisible()
+        val initialOffsetY = editor.offsetY
+
+        // Now simulate keyboard opening: height drops from 1920 to 1000
+        editor.layout(0, 0, 1080, 1000)
+
+        assertThat(editor.height).isEqualTo(1000)
+        assertThat(editor.offsetY).isAtLeast(initialOffsetY)
+    }
+
+    @Test
+    fun testCancelSelection() {
+        val editor = CodeEditor(context)
+        editor.setText("Hello Compose World")
+        val state = CodeEditorState()
+        state.attachEditor(editor)
+
+        // Select "Compose"
+        state.setSelection(6, 13)
+        assertThat(editor.cursor.isSelected).isTrue()
+        assertThat(state.selection).isEqualTo(TextRange(6, 13))
+
+        // Call cancelSelection on state
+        state.cancelSelection()
+        assertThat(editor.cursor.isSelected).isFalse()
+        assertThat(editor.cursor.left).isEqualTo(13)
+        assertThat(editor.cursor.right).isEqualTo(13)
+        assertThat(state.selection).isEqualTo(TextRange(13, 13))
+
+        // Select again and call cancelSelection on editor directly
+        editor.setSelectionRegion(0, 0, 0, 5)
+        assertThat(editor.cursor.isSelected).isTrue()
+        editor.cancelSelection()
+        assertThat(editor.cursor.isSelected).isFalse()
+        assertThat(editor.cursor.left).isEqualTo(5)
 
         state.detachEditor(editor)
     }
