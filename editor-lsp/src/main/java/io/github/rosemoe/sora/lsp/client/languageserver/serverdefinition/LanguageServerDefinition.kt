@@ -20,6 +20,8 @@
  *
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
+ *
+ *     Modified by Raj Dave (aka LazyRaj)
  ******************************************************************************/
 
 package io.github.rosemoe.sora.lsp.client.languageserver.serverdefinition
@@ -65,9 +67,7 @@ abstract class LanguageServerDefinition {
      *
      * @param workingDir The root directory
      * @return The input and output streams of the server
-     * @throws IOException if the stream connection provider is crashed
      */
-    @Throws(IOException::class)
     fun start(workingDir: String): Pair<InputStream, OutputStream> {
         var streamConnectionProvider = streamConnectionProviders[workingDir]
         return if (streamConnectionProvider != null && !streamConnectionProvider.isClosed) {

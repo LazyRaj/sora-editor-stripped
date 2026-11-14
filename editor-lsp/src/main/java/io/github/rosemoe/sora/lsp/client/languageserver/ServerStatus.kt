@@ -20,6 +20,8 @@
  *
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
+ *
+ *     Modified by Raj Dave (aka LazyRaj)
  ******************************************************************************/
 
 package io.github.rosemoe.sora.lsp.client.languageserver
@@ -28,10 +30,10 @@ package io.github.rosemoe.sora.lsp.client.languageserver
  * An enum representing a server status
  */
 sealed interface ServerStatus {
-    object IDLE: ServerStatus
-    object STARTING : ServerStatus
-    object STARTED : ServerStatus
-    object INITIALIZED : ServerStatus
+    data object IDLE : ServerStatus
+    data object STARTING : ServerStatus
+    data object STARTED : ServerStatus
+    data object INITIALIZED : ServerStatus
     data class STOPPING(val reason: ShutdownReason) : ServerStatus
     data class STOPPED(val reason: ShutdownReason) : ServerStatus
 }

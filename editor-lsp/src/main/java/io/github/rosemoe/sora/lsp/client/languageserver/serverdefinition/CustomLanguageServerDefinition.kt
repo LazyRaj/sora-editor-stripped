@@ -20,6 +20,8 @@
  *
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
+ *
+ *     Modified by Raj Dave (aka LazyRaj)
  */
 package io.github.rosemoe.sora.lsp.client.languageserver.serverdefinition
 
@@ -30,24 +32,20 @@ import org.eclipse.lsp4j.ServerCapabilities
  * Creates new instance with the given language id which is different from the file extension.
  *
  * @param ext             The extension.
- * @param languageIds     The language server ids mapping to extension(s).
- * @param connectProvider The connect provider.
+ * @param languageId      The language server id mapping to extension(s).
+ * @param serverConnectProvider The connect provider.
  */
-
-open class CustomLanguageServerDefinition @JvmOverloads constructor(
+open class CustomLanguageServerDefinition(
     ext: String,
-    serverConnectProvider: ServerConnectProvider,
+    protected var serverConnectProvider: ServerConnectProvider,
     override val name: String = ext,
     private val expectedCapabilitiesOverride: ServerCapabilities? = null,
     private val extensionsOverride: List<String>? = null,
     override val languageId: String? = null
 ) : LanguageServerDefinition() {
 
-    protected var serverConnectProvider: ServerConnectProvider
-
     init {
         this.ext = ext
-        this.serverConnectProvider = serverConnectProvider
     }
 
     override val exts: List<String>

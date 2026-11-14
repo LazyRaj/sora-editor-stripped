@@ -20,6 +20,8 @@
  *
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
+ *
+ *     Modified by Raj Dave (aka LazyRaj)
  ******************************************************************************/
 
 package io.github.rosemoe.sora.lsp.client.languageserver.wrapper
@@ -134,9 +136,8 @@ class LanguageServerWrapper(
         eventHandler?.listener?.onEventException(eventListener, exception)
     }
 
-    fun getCachedServerCapabilities(): ServerCapabilities? {
-        return effectiveCapabilities ?: initializeResult?.capabilities
-    }
+    val cachedServerCapabilities: ServerCapabilities?
+        get() = effectiveCapabilities ?: initializeResult?.capabilities
 
     /**
      * Warning: this is a long-running operation
@@ -190,9 +191,8 @@ class LanguageServerWrapper(
         return effectiveCapabilities ?: initializeResult?.capabilities
     }
 
-    private fun isOffline(): Boolean {
-        return status is ServerStatus.STOPPED || status is ServerStatus.IDLE
-    }
+    private val isOffline: Boolean
+        get() = status is ServerStatus.STOPPED || status is ServerStatus.IDLE
 
     /**
      * Starts the LanguageServer
@@ -202,7 +202,7 @@ class LanguageServerWrapper(
     @WorkerThread
     fun start(throwException: Boolean = false) {
         synchronized(this) {
-            if (!isOffline()) return
+            if (!isOffline) return
 
             val projectRootPath = project.projectUri.path
             status = ServerStatus.STARTING
@@ -220,7 +220,7 @@ class LanguageServerWrapper(
                 val wrapperRef = WeakReference(this@LanguageServerWrapper)
                 eventHandler = EventHandler(
                     serverDefinition.eventListener
-                ) { wrapperRef.get()?.isOffline()?.not() == true }
+                ) { wrapperRef.get()?.isOffline?.not() == true }
 
                 client =
                     DefaultLanguageClient(ServerWrapperBaseClientContext(this@LanguageServerWrapper))
@@ -295,7 +295,7 @@ class LanguageServerWrapper(
      */
     fun stop(exit: Boolean, reason: ShutdownReason = ShutdownReason.MANUAL) {
         synchronized(this) {
-            if (isOffline() || status is ServerStatus.STOPPING) {
+            if (isOffline || status is ServerStatus.STOPPING) {
                 return
             }
             status = ServerStatus.STOPPING(reason)
@@ -507,17 +507,18 @@ class LanguageServerWrapper(
     }
 
     /**
-     * @return the LanguageServer
+     * The LanguageServer instance, initialized if needed.
      */
-    fun getServer(): LanguageServer? {
-        start()
+    val server: LanguageServer?
+        get() {
+            start()
 
-        if (initializeFuture?.isDone == false) {
-            initializeFuture?.join()
+            if (initializeFuture?.isDone == false) {
+                initializeFuture?.join()
+            }
+
+            return languageServer
         }
-
-        return languageServer
-    }
 
     /**
      * Reset language server wrapper state so it can be started again if it was failed earlier.

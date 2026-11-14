@@ -20,6 +20,8 @@
  *
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
+ *
+ *     Modified by Raj Dave (aka LazyRaj)
  ******************************************************************************/
 
 package io.github.rosemoe.sora.lsp.client.languageserver.wrapper
@@ -37,7 +39,6 @@ import org.eclipse.lsp4j.jsonrpc.MessageConsumer
 import org.eclipse.lsp4j.jsonrpc.messages.Message
 import org.eclipse.lsp4j.services.LanguageServer
 import java.util.concurrent.CompletableFuture
-import java.util.function.BooleanSupplier
 import java.util.function.Function
 
 /**
@@ -45,14 +46,14 @@ import java.util.function.Function
  */
 class EventHandler internal constructor(
     internal val listener: EventListener,
-    private val isRunning: BooleanSupplier
+    private val isRunning: () -> Boolean
 ) : Function<MessageConsumer, MessageConsumer> {
 
     private var languageServer: LanguageServer? = null
 
     override fun apply(messageConsumer: MessageConsumer): MessageConsumer {
         return MessageConsumer { message: Message ->
-            if (isRunning.asBoolean) {
+            if (isRunning()) {
                 messageConsumer.consume(message)
             }
         }
