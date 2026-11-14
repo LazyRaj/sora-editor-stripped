@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2024  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -197,13 +198,18 @@ import kotlin.math.min
  * @author Rosemoe
  */
 @Suppress("unused")
-open class CodeEditor @JvmOverloads constructor(
+open class CodeEditor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = R.attr.codeEditorStyle,
     defStyleRes: Int = 0
 ) : View(context, attrs, defStyleAttr, defStyleRes), ContentListener, FormatResultReceiver,
     InlayHintRendererProvider {
+
+    constructor(context: Context) : this(context, null)
+    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, R.attr.codeEditorStyle)
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(context, attrs, defStyleAttr, 0)
+
     val keyEventHandler: EditorKeyEventHandler = EditorKeyEventHandler(this)
     var languageSymbolPairs: SymbolPairMatch? = null
     var textActionWindow: EditorTextActionWindow? = null
@@ -908,7 +914,7 @@ open class CodeEditor @JvmOverloads constructor(
         handleStyle = HandleStyleSideDrop(context)
         editorSearcher = EditorSearcher(this)
         cursorAnimator = MoveCursorAnimator(this)
-        setCursorBlinkPeriod(DEFAULT_CURSOR_BLINK_PERIOD)
+        cursorBlinkPeriod = DEFAULT_CURSOR_BLINK_PERIOD
         anchorInfoBuilder = CursorAnchorInfo.Builder()
 
         colorScheme = getDefault()
@@ -1061,11 +1067,9 @@ open class CodeEditor @JvmOverloads constructor(
             R.styleable.CodeEditor_textSize,
             this.textSizePx
         )
-        setCursorBlinkPeriod(
-            array.getInt(
-                R.styleable.CodeEditor_cursorBlinkPeriod,
-                this.cursorBlink.period
-            )
+        cursorBlinkPeriod = array.getInt(
+            R.styleable.CodeEditor_cursorBlinkPeriod,
+            this.cursorBlink.period
         )
         this.tabWidth = array.getInt(R.styleable.CodeEditor_tabWidth, this.tabWidth)
 
@@ -1126,22 +1130,22 @@ open class CodeEditor @JvmOverloads constructor(
     }
 
     /**
-     * Set cursor blinking period
+     * Cursor blinking period in milliseconds.
      * If zero or negative period is passed, the cursor will always be shown.
-     * 
-     * @param period The period time of cursor blinking
      */
-    fun setCursorBlinkPeriod(period: Int) {
-        if (_cursorBlink == null) {
-            _cursorBlink = CursorBlink(this, period)
-        } else {
-            val before = cursorBlink.period
-            cursorBlink.setPeriod(period)
-            if (before <= 0 && cursorBlink.valid && isAttachedToWindow) {
-                postInLifecycle(cursorBlink)
+    var cursorBlinkPeriod: Int
+        get() = _cursorBlink?.period ?: DEFAULT_CURSOR_BLINK_PERIOD
+        set(period) {
+            if (_cursorBlink == null) {
+                _cursorBlink = CursorBlink(this, period)
+            } else {
+                val before = cursorBlink.period
+                cursorBlink.period = period
+                if (before <= 0 && cursorBlink.valid && isAttachedToWindow) {
+                    postInLifecycle(cursorBlink)
+                }
             }
         }
-    }
 
     /**
      * Set font feature settings for all paints used by editor
@@ -2123,7 +2127,6 @@ open class CodeEditor @JvmOverloads constructor(
     /**
      * Commit text to the content from IME
      */
-    @JvmOverloads
     fun commitText(
         text: CharSequence,
         applyAutoIndent: Boolean = true,
@@ -2342,7 +2345,6 @@ open class CodeEditor @JvmOverloads constructor(
      * @param line   Line in text
      * @param column Column in text
      */
-    @JvmOverloads
     fun ensurePositionVisible(line: Int, column: Int, noAnimation: Boolean = false) {
         val scroller = this.scroller
         val layoutOffset = layout.getCharLayoutOffset(line, column)
@@ -3734,7 +3736,6 @@ open class CodeEditor @JvmOverloads constructor(
     /**
      * Copy text to clipboard.
      */
-    @JvmOverloads
     fun copyText(shouldCopyLine: Boolean = true) {
         if (cursor.isSelected) {
             copyTextToClipboard(text, cursor.left, cursor.right)
@@ -3865,7 +3866,6 @@ open class CodeEditor @JvmOverloads constructor(
      * Copies the current selection and pastes it at the right selection handle,
      * then selects the duplicated content.
      */
-    @JvmOverloads
     fun duplicateSelection(selectDuplicate: Boolean = true) {
         duplicateSelection("", selectDuplicate)
     }

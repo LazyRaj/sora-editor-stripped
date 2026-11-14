@@ -36,40 +36,36 @@ import io.github.rosemoe.sora.event.Unsubscribe
  * @author Rose
  */
 class CursorBlink(
-    @JvmField val editor: CodeEditor,
+    val editor: CodeEditor,
     period: Int
 ) : Runnable, EventReceiver<SelectionChangeEvent> {
 
-    @JvmField
     var visibility: Boolean = true
 
-    @JvmField
     var valid: Boolean = false
 
-    @JvmField
     var lastSelectionModificationTime: Long = 0L
 
-    @JvmField
     var period: Int = period
+        set(value) {
+            field = value
+            if (value <= 0) {
+                visibility = true
+                valid = false
+            } else {
+                valid = true
+            }
+        }
 
     private var buffer: FloatArray? = null
 
     init {
+        this.period = period
         editor.subscribeEvent(SelectionChangeEvent::class.java, this)
     }
 
     override fun onReceive(event: SelectionChangeEvent, unsubscribe: Unsubscribe) {
         onSelectionChanged()
-    }
-
-    fun setPeriod(period: Int) {
-        this.period = period
-        if (period <= 0) {
-            visibility = true
-            valid = false
-        } else {
-            valid = true
-        }
     }
 
     fun onSelectionChanged() {

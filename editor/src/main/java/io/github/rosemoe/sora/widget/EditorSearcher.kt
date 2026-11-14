@@ -64,22 +64,18 @@ open class EditorSearcher(
     private val editor: CodeEditor
 ) {
 
-    @JvmField
     var currentPattern: String? = null
 
-    @JvmField
     var searchOptions: SearchOptions? = null
 
     var replaceOptions: ReplaceOptions = ReplaceOptions.DEFAULT
 
-    @JvmField
     var currentThread: Thread? = null
 
     /**
      * Search results. Note that it is naturally sorted by start index (and also end index).
      * No overlapping region is permitted.
      */
-    @JvmField
     var lastResults: LongArrayList? = null
 
     var isCyclicJumping: Boolean = true
@@ -274,7 +270,6 @@ open class EditorSearcher(
         }
     }
 
-    @JvmOverloads
     @Suppress("DEPRECATION")
     open fun replaceAll(replacement: String, whenSucceeded: Runnable? = null) {
         if (!editor.isEditable) {
@@ -393,12 +388,16 @@ open class EditorSearcher(
     /**
      * Search options for [EditorSearcher.search]
      */
-    open class SearchOptions @JvmOverloads constructor(
+    open class SearchOptions(
         @IntRange(from = 1, to = 3)
-        @JvmField val type: Int,
-        @JvmField val caseInsensitive: Boolean,
-        @JvmField val regexBackrefGrammar: RegexBackrefGrammar? = null
+        val type: Int,
+        val caseInsensitive: Boolean,
+        val regexBackrefGrammar: RegexBackrefGrammar? = null
     ) {
+        operator fun component1(): Int = type
+        operator fun component2(): Boolean = caseInsensitive
+        operator fun component3(): RegexBackrefGrammar? = regexBackrefGrammar
+
         companion object {
             const val TYPE_NORMAL = 1
             const val TYPE_WHOLE_WORD = 2
@@ -420,10 +419,11 @@ open class EditorSearcher(
      * Replace options for [EditorSearcher.replaceCurrentMatch] and [EditorSearcher.replaceAll]
      */
     open class ReplaceOptions(
-        @JvmField val preserveCase: Boolean
+        val preserveCase: Boolean
     ) {
+        operator fun component1(): Boolean = preserveCase
+
         companion object {
-            @JvmField
             val DEFAULT: ReplaceOptions = ReplaceOptions(false)
         }
     }

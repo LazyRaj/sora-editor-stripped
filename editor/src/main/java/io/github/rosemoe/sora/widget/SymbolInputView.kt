@@ -42,12 +42,16 @@ import io.github.rosemoe.sora.R
  *
  * @author Rosemoe
  */
-open class SymbolInputView @JvmOverloads constructor(
+open class SymbolInputView(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
     defStyleRes: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr, defStyleRes) {
+
+    constructor(context: Context) : this(context, null)
+    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(context, attrs, defStyleAttr, 0)
 
     private var _textColor: Int = 0
 

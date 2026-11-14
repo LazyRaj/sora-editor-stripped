@@ -91,6 +91,8 @@ open class SymbolPairMatch(parent: SymbolPairMatch? = null) {
         return pair
     }
 
+    operator fun get(singleCharacter: Char): SymbolPair? = matchBestPairBySingleChar(singleCharacter)
+
     fun matchBestPairList(editChar: Char): List<SymbolPair> {
         var result = multipleCharByEndPairMaps[editChar]
         if (result == null && parent != null) {
@@ -201,16 +203,18 @@ open class SymbolPairMatch(parent: SymbolPairMatch? = null) {
     /**
      * Defines a replacement of input
      */
-    open class SymbolPair @JvmOverloads constructor(
-        @JvmField val open: String,
-        @JvmField val close: String,
+    open class SymbolPair(
+        val open: String,
+        val close: String,
         var symbolPairEx: SymbolPairEx? = null
     ) {
+        operator fun component1(): String = open
+        operator fun component2(): String = close
+
         companion object {
             /**
              * Defines that this character does not have to be replaced
              */
-            @JvmField
             val EMPTY_SYMBOL_PAIR: SymbolPair = SymbolPair("", "")
         }
 

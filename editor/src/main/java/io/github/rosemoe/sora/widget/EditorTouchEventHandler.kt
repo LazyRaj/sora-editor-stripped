@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2024  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -94,34 +95,24 @@ class EditorTouchEventHandler(private val editor: CodeEditor) :
     val scroller: EditorScroller = EditorScroller(editor)
     private val insertHandle: SelectionHandle
 
-    @JvmField
     var magnifier: Magnifier
 
-    @JvmField
     var selHandleType: Int = -1
 
-    @JvmField
     var selHandleMoving: Boolean = false
 
-    @JvmField
     var motionX: Float = 0f
 
-    @JvmField
     var motionY: Float = 0f
 
-    @JvmField
     var glowTopOrBottom: Boolean = false // true for bottom
 
-    @JvmField
     var glowLeftOrRight: Boolean = false // true for right
 
-    @JvmField
     var isScaling: Boolean = false
 
-    @JvmField
     var scaleMaxSize: Float
 
-    @JvmField
     var scaleMinSize: Float
 
     private var textSizeStart: Float = 0f
@@ -146,13 +137,10 @@ class EditorTouchEventHandler(private val editor: CodeEditor) :
     var lastContextClickPosition: PointF? = null
         private set
 
-    @JvmField
     var mouseClick: Boolean = false
 
-    @JvmField
     var mouseCanMoveText: Boolean = false
 
-    @JvmField
     var draggingSelection: CharPosition? = null
 
     /* dragging selection fields */
@@ -163,13 +151,10 @@ class EditorTouchEventHandler(private val editor: CodeEditor) :
     private var dragSelectInitialRightIndex: Int = -1
     private var dragSelectLastDragIndex: Int = -1
 
-    @JvmField
     var memoryPosition: Long = 0L
 
-    @JvmField
     var positionNotApplied: Boolean = false
 
-    @JvmField
     var focusY: Float = 0f
 
     init {
@@ -910,7 +895,6 @@ class EditorTouchEventHandler(private val editor: CodeEditor) :
         edgeFlags = 0
     }
 
-    @JvmOverloads
     fun scrollBy(distanceX: Float, distanceY: Float, smooth: Boolean = false) {
         var endX = scroller.currX + distanceX.toInt()
         var endY = scroller.currY + distanceY.toInt()

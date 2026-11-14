@@ -65,14 +65,11 @@ open class EditorInputConnection(
         private val logger = Logger.instance("EditorInputConnection")
         private const val MEMORY_EFFICIENT_TEXT_LENGTH = 2048
 
-        @JvmField
         var DEBUG = false
     }
 
-    @JvmField
     var composingText: ComposingText = ComposingText()
 
-    @JvmField
     var imeConsumingInput: Boolean = false
 
     private var connectionInvalid: Boolean = false

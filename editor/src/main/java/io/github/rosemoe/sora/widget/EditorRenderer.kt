@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2024  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -108,15 +109,12 @@ open class EditorRenderer(protected val editor: CodeEditor) {
         private val TMP_DESC = SelectionHandleStyle.HandleDescriptor()
     }
 
-    @JvmField
     protected val bufferedDrawPoints: BufferedDrawPoints = BufferedDrawPoints()
 
-    @JvmField
     val paintGeneral: Paint = Paint(editor.isRenderFunctionCharacters).apply {
         isAntiAlias = true
     }
 
-    @JvmField
     val paintOther: Paint = Paint(false).apply {
         strokeWidth = editor.dpUnit * 1.8f
         strokeCap = AndroidPaint.Cap.ROUND
@@ -124,21 +122,17 @@ open class EditorRenderer(protected val editor: CodeEditor) {
         isAntiAlias = true
     }
 
-    @JvmField
     val paintGraph: Paint = Paint(false).apply {
         isAntiAlias = true
     }
 
-    @JvmField
     val viewRect: Rect = Rect()
 
     private val tmpRect: RectF = RectF()
     private val tmpPath: Path = Path()
 
-    @JvmField
     val verticalScrollBarRect: RectF = RectF()
 
-    @JvmField
     val horizontalScrollBarRect: RectF = RectF()
 
     private val postDrawLineNumbers = LongArrayList()
@@ -149,10 +143,8 @@ open class EditorRenderer(protected val editor: CodeEditor) {
     private val preloadedDirections = SparseArray<Directions>()
     private val collectedDiagnostics = ArrayList<DiagnosticRegion>()
 
-    @JvmField
     var lastStuckLines: List<CodeBlock>? = null
 
-    @JvmField
     var metricsText: AndroidPaint.FontMetricsInt
 
     var horizontalScrollbarThumbDrawable: Drawable? = null
@@ -175,7 +167,6 @@ open class EditorRenderer(protected val editor: CodeEditor) {
     protected val cursor: Cursor
         get() = _cursor ?: editor.cursor
 
-    @JvmField
     var lineBuf: ContentLine? = null
 
     private var _content: Content? = null
@@ -188,7 +179,6 @@ open class EditorRenderer(protected val editor: CodeEditor) {
     @Volatile
     private var renderingFlag: Boolean = false
 
-    @JvmField
     var forcedRecreateLayout: Boolean = false
 
     private val minimapRenderer: MinimapRenderer
@@ -234,8 +224,6 @@ open class EditorRenderer(protected val editor: CodeEditor) {
     open val paint: Paint get() = paintGeneral
     open val otherPaint: Paint get() = paintOther
     open val graphPaint: Paint get() = paintGraph
-    fun getPaintOther(): Paint = paintOther
-    fun getPaintGraph(): Paint = paintGraph
 
     fun setCachedLineNumberWidth(width: Int) {
         cachedGutterWidth = width
@@ -2062,8 +2050,8 @@ open class EditorRenderer(protected val editor: CodeEditor) {
 
     private fun applyBidiIndicatorAttrs(task: DrawCursorTask, line: Int, column: Int) {
         val bidiAttrs = getBidiIndicatorAttrs(line, column)
-        task.setBidiIndicatorRequired(IntPair.getFirst(bidiAttrs) == 1)
-        task.setRightToLeft(IntPair.getSecond(bidiAttrs) == 1)
+        task.isBidiIndicatorRequired = IntPair.getFirst(bidiAttrs) == 1
+        task.isRightToLeft = IntPair.getSecond(bidiAttrs) == 1
     }
 
     private fun drawBidiSelectionIndicator(
@@ -3261,24 +3249,18 @@ open class EditorRenderer(protected val editor: CodeEditor) {
     // END Measure---------------------------------------
 
     protected inner class DrawCursorTask(
-        @JvmField var x: Float,
-        @JvmField var y: Float,
-        @JvmField var handleType: Int,
-        @JvmField var descriptor: SelectionHandleStyle.HandleDescriptor?
+        var x: Float,
+        var y: Float,
+        var handleType: Int,
+        var descriptor: SelectionHandleStyle.HandleDescriptor?
     ) {
-        @JvmField
         var isBidiIndicatorRequired: Boolean = false
-
-        @JvmField
         var isRightToLeft: Boolean = false
 
-        fun setBidiIndicatorRequired(bidiIndicatorRequired: Boolean) {
-            isBidiIndicatorRequired = bidiIndicatorRequired
-        }
-
-        fun setRightToLeft(rightToLeft: Boolean) {
-            isRightToLeft = rightToLeft
-        }
+        operator fun component1(): Float = x
+        operator fun component2(): Float = y
+        operator fun component3(): Int = handleType
+        operator fun component4(): SelectionHandleStyle.HandleDescriptor? = descriptor
 
         private fun getActualHandleType(): Int {
             if (isRightToLeft && handleType == SelectionHandleStyle.HANDLE_TYPE_LEFT) {

@@ -43,7 +43,6 @@ object I18nConfig {
     /**
      * Map the given editor resId to new one
      */
-    @JvmStatic
     fun mapTo(originalResId: Int, newResId: Int) {
         mapping.put(originalResId, newResId)
     }
@@ -51,7 +50,6 @@ object I18nConfig {
     /**
      * Get mapped resource id or itself
      */
-    @JvmStatic
     fun getResourceId(resId: Int): Int {
         val newResource = mapping.get(resId)
         return if (newResource == 0) resId else newResource
@@ -60,7 +58,6 @@ object I18nConfig {
     /**
      * Get mapped resource string
      */
-    @JvmStatic
     fun getString(context: Context, resId: Int): String {
         return context.getString(getResourceId(resId))
     }

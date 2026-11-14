@@ -36,11 +36,9 @@ object SpansUtils {
 
     private const val LOG_TAG = "EditorSpanUtils"
 
-    @JvmStatic
     val defaultLineSpans: List<Span> =
         listOf(SpanFactory.obtainNoExt(0, EditorColorScheme.TEXT_NORMAL.toLong()))
 
-    @JvmStatic
     fun getSpansOnLine(reader: Spans.Reader, line: Int): List<Span> {
         return try {
             val spans = reader.getSpansOnLine(line)

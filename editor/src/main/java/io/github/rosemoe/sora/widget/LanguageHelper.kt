@@ -37,7 +37,6 @@ import io.github.rosemoe.sora.text.ContentReference
  */
 internal object LanguageHelper {
 
-    @JvmStatic
     fun getQuickQuoteHandler(language: Language): QuickQuoteHandler? {
         return try {
             language.quickQuoteHandler
@@ -46,7 +45,6 @@ internal object LanguageHelper {
         }
     }
 
-    @JvmStatic
     fun getIndentAdvance(
         language: Language,
         content: ContentReference,
