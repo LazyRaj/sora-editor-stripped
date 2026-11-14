@@ -29,23 +29,18 @@ import java.nio.charset.StandardCharsets
 
 object StringLatin1 {
 
-    @JvmStatic
     fun canEncode(c: Char): Boolean = c.code <= 0x00FF
 
-    @JvmStatic
     fun getChar(value: ByteArray, index: Int): Char = (value[index].toInt() and 0xFF).toChar()
 
-    @JvmStatic
     fun putChar(value: ByteArray, index: Int, c: Char) {
         value[index] = c.code.toByte()
     }
 
-    @JvmStatic
     fun copyChars(src: ByteArray, srcBegin: Int, dst: ByteArray, dstBegin: Int, len: Int) {
         System.arraycopy(src, srcBegin, dst, dstBegin, len)
     }
 
-    @JvmStatic
     fun getChars(value: ByteArray, srcBegin: Int, srcEnd: Int, dst: CharArray, dstBegin: Int) {
         var d = dstBegin
         for (i in srcBegin until srcEnd) {
@@ -53,19 +48,16 @@ object StringLatin1 {
         }
     }
 
-    @JvmStatic
     fun appendTo(value: ByteArray, length: Int, sb: StringBuilder) {
         for (i in 0 until length) {
             sb.append(getChar(value, i))
         }
     }
 
-    @JvmStatic
     fun newString(value: ByteArray, length: Int): String {
         return String(value, 0, length, StandardCharsets.ISO_8859_1)
     }
 
-    @JvmStatic
     fun inflateToUTF16(value: ByteArray, length: Int, newCapacity: Int): ByteArray {
         val utf16 = ByteArray(StringUTF16.bytesForChars(newCapacity))
         for (i in 0 until length) {
@@ -74,3 +66,10 @@ object StringLatin1 {
         return utf16
     }
 }
+
+/**
+ * Extension property to check if a character can be encoded in Latin1 (ISO-8859-1).
+ */
+inline val Char.canEncodeLatin1: Boolean
+    get() = StringLatin1.canEncode(this)
+

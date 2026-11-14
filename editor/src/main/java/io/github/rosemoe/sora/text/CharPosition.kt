@@ -34,47 +34,20 @@ import java.util.Objects
  *
  * @author Rosemoe
  */
-class CharPosition {
-
-    @JvmField
-    var index: Int
-
-    @JvmField
-    var line: Int
-
-    @JvmField
-    var column: Int
-
-    constructor() : this(0, 0, 0)
+class CharPosition(
+    var line: Int = 0,
+    var column: Int = 0,
+    var index: Int = 0
+) {
 
     constructor(line: Int, column: Int) : this(line, column, -1)
 
-    constructor(line: Int, column: Int, index: Int) {
-        this.index = index
-        this.line = line
-        this.column = column
-    }
+    operator fun component1(): Int = line
+    operator fun component2(): Int = column
+    operator fun component3(): Int = index
 
-    /**
-     * Get the index
-     *
-     * @return index
-     */
-    fun getIndex(): Int = index
-
-    /**
-     * Get column
-     *
-     * @return column
-     */
-    fun getColumn(): Int = column
-
-    /**
-     * Get line
-     *
-     * @return line
-     */
-    fun getLine(): Int = line
+    fun copy(line: Int = this.line, column: Int = this.column, index: Int = this.index): CharPosition =
+        CharPosition(line, column, index)
 
     /**
      * Make this CharPosition zero and return self

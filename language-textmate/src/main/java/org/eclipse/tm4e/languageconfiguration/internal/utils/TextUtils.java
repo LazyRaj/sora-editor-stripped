@@ -118,7 +118,7 @@ public final class TextUtils {
     public static String getIndentationAtPosition(final Content doc, final int offset) {
         try {
             // find start offset of current line
-            final int lineStartOffset = doc.getIndexer().getCharPosition(offset).index;
+            final int lineStartOffset = doc.getIndexer().getCharPosition(offset).getIndex();
 
             // find white spaces
             final int indentationEndOffset = findEndOfWhiteSpace(doc, lineStartOffset, offset);
@@ -191,9 +191,9 @@ public final class TextUtils {
 
     public static String getLinePrefixingWhitespaceAtPosition(final Content d, final CharPosition position) {
 
-        var line = d.getLine(position.line);
+        var line = d.getLine(position.getLine());
 
-        var startIndex = IntPair.INSTANCE.getFirst(io.github.rosemoe.sora.text.TextUtils.findLeadingAndTrailingWhitespacePos(
+        var startIndex = IntPair.INSTANCE.getFirst(io.github.rosemoe.sora.text.TextUtils.INSTANCE.findLeadingAndTrailingWhitespacePos(
                 line
         ));
 

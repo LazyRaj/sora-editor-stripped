@@ -184,13 +184,11 @@ open class ContentReference(ref: Content) : TextReference(ref) {
 
         override fun markSupported(): Boolean = true
 
-        @Throws(IOException::class)
         override fun mark(readAheadLimit: Int) {
             markedLine = line
             markedColumn = column
         }
 
-        @Throws(IOException::class)
         override fun reset() {
             line = markedLine
             column = markedColumn

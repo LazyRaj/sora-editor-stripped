@@ -89,7 +89,6 @@ open class TextLayoutHelper private constructor() {
         /**
          * Get TextLayoutHelper for current thread
          */
-        @JvmStatic
         fun get(): TextLayoutHelper = sLocal.get()!!
     }
 }

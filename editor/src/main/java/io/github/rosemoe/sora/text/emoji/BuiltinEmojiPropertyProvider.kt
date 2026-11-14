@@ -44,7 +44,6 @@ internal class BuiltinEmojiPropertyProvider private constructor() : EmojiPropert
     }
 
     companion object {
-        @JvmField
         val INSTANCE: BuiltinEmojiPropertyProvider = BuiltinEmojiPropertyProvider()
     }
 }

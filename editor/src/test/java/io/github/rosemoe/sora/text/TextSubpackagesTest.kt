@@ -30,6 +30,8 @@ import io.github.rosemoe.sora.text.bidi.ContentBidi
 import io.github.rosemoe.sora.text.bidi.Directions
 import io.github.rosemoe.sora.text.bidi.TextBidi
 import io.github.rosemoe.sora.text.bidi.VisualDirections
+import io.github.rosemoe.sora.text.bidi.couldAffectRtl
+import io.github.rosemoe.sora.text.bidi.toDirections
 import io.github.rosemoe.sora.text.breaker.WordBreaker
 import io.github.rosemoe.sora.text.breaker.WordBreakerEmpty
 import io.github.rosemoe.sora.text.breaker.WordBreakerProgram
@@ -40,6 +42,7 @@ import io.github.rosemoe.sora.text.emoji.UnicodeEmojiData
 import io.github.rosemoe.sora.text.method.KeyMetaStates
 import io.github.rosemoe.sora.text.string.StringLatin1
 import io.github.rosemoe.sora.text.string.StringUTF16
+import io.github.rosemoe.sora.text.string.canEncodeLatin1
 import io.github.rosemoe.sora.util.IntPair
 import io.github.rosemoe.sora.widget.CodeEditor
 import org.junit.Assert.assertEquals
@@ -588,14 +591,26 @@ class TextSubpackagesTest {
         assertEquals(0, pos.index)
 
         val pos2 = CharPosition(3, 7)
-        assertEquals(3, pos2.getLine())
-        assertEquals(7, pos2.getColumn())
-        assertEquals(-1, pos2.getIndex())
+        assertEquals(3, pos2.line)
+        assertEquals(7, pos2.column)
+        assertEquals(-1, pos2.index)
 
         val pos3 = CharPosition(2, 4, 15)
         assertEquals(2, pos3.line)
         assertEquals(4, pos3.column)
         assertEquals(15, pos3.index)
+        val (l3, c3, i3) = pos3
+        assertEquals(2, l3)
+        assertEquals(4, c3)
+        assertEquals(15, i3)
+
+        val range = TextRange(pos3, CharPosition(2, 8, 19))
+        val (rStart, rEnd) = range
+        assertEquals(pos3, rStart)
+        assertTrue(CharPosition(2, 5, 16) in range)
+        assertTrue(17 in range)
+        assertFalse(CharPosition(2, 9, 20) in range)
+        assertFalse(25 in range)
 
         val packed = pos3.toIntPair()
         assertEquals(2, IntPair.getFirst(packed))
@@ -892,5 +907,27 @@ class TextSubpackagesTest {
         assertTrue(content.isCursorCreated)
         assertNotNull(content.indexer)
         assertEquals(5, content.getCharIndex(0, 5))
+    }
+
+    @Test
+    fun testSubpackageExtensions() {
+        assertTrue('\n'.isFunctionCharacter)
+        assertFalse('A'.isFunctionCharacter)
+        assertFalse('\t'.isEditorFunctionChar)
+        assertTrue('\n'.isEditorFunctionChar)
+        assertEquals("LF", '\n'.functionCharacterName)
+
+        assertTrue('A'.canEncodeLatin1)
+        assertTrue('\u0590'.couldAffectRtl)
+        assertFalse('a'.couldAffectRtl)
+
+        val dirs = "Hello World".toDirections()
+        assertEquals(1, dirs.runCount)
+
+        assertTrue(0x1F1E6.isRegionalIndicatorSymbol)
+        assertFalse(0x1000.isRegionalIndicatorSymbol)
+
+        assertEquals(LineSeparator.LF, "\n".lineSeparator)
+        assertEquals(LineSeparator.CRLF, "\r\n".lineSeparator)
     }
 }

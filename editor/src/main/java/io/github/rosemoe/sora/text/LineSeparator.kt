@@ -52,7 +52,6 @@ enum class LineSeparator(val content: String) {
          * @param str line separator string
          * @throws IllegalArgumentException if the given str is not a line separator
          */
-        @JvmStatic
         fun fromSeparatorString(str: String): LineSeparator {
             return when (str) {
                 "\r" -> CR
@@ -71,7 +70,6 @@ enum class LineSeparator(val content: String) {
          * @param end end index of the line separator
          * @throws IllegalArgumentException if the given str is not a line separator
          */
-        @JvmStatic
         fun fromSeparatorString(text: CharSequence, start: Int, end: Int): LineSeparator {
             if (end == start) {
                 return NONE
@@ -88,3 +86,10 @@ enum class LineSeparator(val content: String) {
         }
     }
 }
+
+/**
+ * Extension property to resolve [LineSeparator] from a [CharSequence].
+ */
+inline val CharSequence.lineSeparator: LineSeparator
+    get() = LineSeparator.fromSeparatorString(this.toString())
+

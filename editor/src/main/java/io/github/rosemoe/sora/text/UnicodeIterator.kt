@@ -85,7 +85,6 @@ open class UnicodeIterator private constructor() {
             }
         }
 
-        @JvmStatic
         fun obtain(text: CharSequence, start: Int, end: Int): UnicodeIterator {
             val r = sPool.obtain()
             r.set(text, start, end)

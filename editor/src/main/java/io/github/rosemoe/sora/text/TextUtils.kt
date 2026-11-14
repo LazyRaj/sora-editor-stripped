@@ -47,7 +47,6 @@ object TextUtils {
      * Use [IntPair.getFirst] to get the number of spaces and [IntPair.getSecond]
      * for the number of tabs.
      */
-    @JvmStatic
     fun countLeadingSpacesAndTabs(text: CharSequence): Long {
         var p = 0
         var spaces = 0
@@ -69,7 +68,6 @@ object TextUtils {
      *
      * @param tabWidth Tab is considered in `tabWidth` spaces
      */
-    @JvmStatic
     fun countLeadingSpaceCount(text: CharSequence, tabWidth: Int): Int {
         val result = countLeadingSpacesAndTabs(text)
         return IntPair.getFirst(result) + (tabWidth * IntPair.getSecond(result))
@@ -80,7 +78,6 @@ object TextUtils {
      *
      * @return Generated space string
      */
-    @JvmStatic
     fun createIndent(indentSize: Int, tabWidth: Int, useTab: Boolean): String {
         val size = max(0, indentSize)
         val tab: Int
@@ -102,7 +99,6 @@ object TextUtils {
         return s.toString()
     }
 
-    @JvmStatic
     fun indexOf(
         text: CharSequence,
         pattern: CharSequence,
@@ -128,7 +124,6 @@ object TextUtils {
         return -1
     }
 
-    @JvmStatic
     fun lastIndexOf(
         text: CharSequence,
         pattern: CharSequence,
@@ -154,7 +149,6 @@ object TextUtils {
         return -1
     }
 
-    @JvmStatic
     fun startsWith(text: CharSequence, pattern: CharSequence, ignoreCase: Boolean): Boolean {
         if (text.length < pattern.length) {
             return false
@@ -170,12 +164,10 @@ object TextUtils {
         return true
     }
 
-    @JvmStatic
     fun isWhitespace(ch: Char): Boolean {
         return ch == '\t' || ch == ' '
     }
 
-    @JvmStatic
     fun padStart(src: String, padChar: Char, length: Int): String {
         if (src.length >= length) {
             return src
@@ -193,7 +185,6 @@ object TextUtils {
      *
      * @param line The line to search
      */
-    @JvmStatic
     fun findLeadingAndTrailingWhitespacePos(line: CharSequence): Long {
         return findLeadingAndTrailingWhitespacePos(line, 0, line.length)
     }
@@ -205,7 +196,6 @@ object TextUtils {
      * @param start Range start (inclusive)
      * @param end Range end (exclusive)
      */
-    @JvmStatic
     fun findLeadingAndTrailingWhitespacePos(line: CharSequence, start: Int, end: Int): Long {
         var leading = start
         var trailing = end
@@ -220,7 +210,6 @@ object TextUtils {
         return IntPair.pack(leading, trailing)
     }
 
-    @JvmStatic
     fun trimToSize(text: CharSequence?, @IntRange(from = 1) size: Int): CharSequence? {
         require(size > 0) { "size must be bigger than 0" }
         if (text == null || text.length <= size) return text
@@ -236,7 +225,6 @@ object TextUtils {
     /**
      * Returns the start offset to be deleted by a backspace key from the given offset.
      */
-    @JvmStatic
     fun getOffsetForBackspaceKey(text: CharSequence, offset: Int): Int {
         if (offset <= 1) {
             return 0
@@ -413,3 +401,20 @@ object TextUtils {
         return offset - deleteCharCount
     }
 }
+
+/**
+ * Check if character is a whitespace character (' ' or '\t').
+ */
+inline val Char.isWhitespaceChar: Boolean
+    get() = TextUtils.isWhitespace(this)
+
+/**
+ * Extension on [CharSequence] to count leading spaces and tabs.
+ */
+fun CharSequence.countLeadingSpacesAndTabs(): Long = TextUtils.countLeadingSpacesAndTabs(this)
+
+/**
+ * Extension on [CharSequence] to count leading spaces with given [tabWidth].
+ */
+fun CharSequence.countLeadingSpaceCount(tabWidth: Int): Int = TextUtils.countLeadingSpaceCount(this, tabWidth)
+

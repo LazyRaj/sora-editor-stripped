@@ -27,7 +27,6 @@ package io.github.rosemoe.sora.text
 
 object PreserveCaseReplace {
 
-    @JvmStatic
     fun getReplacementSimple(oldStr: String, newStr: String): String {
         if (oldStr.isEmpty() || newStr.isEmpty()) return newStr
         // Analyze the case of old string

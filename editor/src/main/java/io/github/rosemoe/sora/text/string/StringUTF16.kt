@@ -27,28 +27,23 @@ package io.github.rosemoe.sora.text.string
 
 object StringUTF16 {
 
-    @JvmStatic
     fun bytesForChars(chars: Int): Int = chars shl 1
 
-    @JvmStatic
     fun getChar(value: ByteArray, index: Int): Char {
         val i = index shl 1
         return (((value[i].toInt() and 0xFF) shl 8) or (value[i + 1].toInt() and 0xFF)).toChar()
     }
 
-    @JvmStatic
     fun putChar(value: ByteArray, index: Int, c: Char) {
         val i = index shl 1
         value[i] = (c.code ushr 8).toByte()
         value[i + 1] = c.code.toByte()
     }
 
-    @JvmStatic
     fun copyChars(src: ByteArray, srcBegin: Int, dst: ByteArray, dstBegin: Int, len: Int) {
         System.arraycopy(src, srcBegin shl 1, dst, dstBegin shl 1, len shl 1)
     }
 
-    @JvmStatic
     fun getChars(value: ByteArray, srcBegin: Int, srcEnd: Int, dst: CharArray, dstBegin: Int) {
         var d = dstBegin
         for (i in srcBegin until srcEnd) {
@@ -56,14 +51,12 @@ object StringUTF16 {
         }
     }
 
-    @JvmStatic
     fun appendTo(value: ByteArray, length: Int, sb: StringBuilder) {
         for (i in 0 until length) {
             sb.append(getChar(value, i))
         }
     }
 
-    @JvmStatic
     fun newString(value: ByteArray, length: Int): String {
         val chars = CharArray(length)
         getChars(value, 0, length, chars, 0)

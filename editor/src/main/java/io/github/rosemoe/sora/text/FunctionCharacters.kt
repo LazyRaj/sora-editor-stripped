@@ -43,7 +43,6 @@ object FunctionCharacters {
     /**
      * Check if the letter is ASCII function character.
      */
-    @JvmStatic
     fun isFunctionCharacter(letter: Char): Boolean {
         val code = letter.code
         return code < 32 || code == 127
@@ -52,7 +51,6 @@ object FunctionCharacters {
     /**
      * Check if the letter is ASCII function character, '\t' excluded.
      */
-    @JvmStatic
     fun isEditorFunctionChar(letter: Char): Boolean {
         return letter != '\t' && isFunctionCharacter(letter)
     }
@@ -60,7 +58,6 @@ object FunctionCharacters {
     /**
      * Get the name of function character
      */
-    @JvmStatic
     fun getNameForFunctionCharacter(letter: Char): String {
         val code = letter.code
         return when {
@@ -70,3 +67,11 @@ object FunctionCharacters {
         }
     }
 }
+
+/**
+ * Extension properties for ASCII function character querying.
+ */
+inline val Char.isFunctionCharacter: Boolean get() = FunctionCharacters.isFunctionCharacter(this)
+inline val Char.isEditorFunctionChar: Boolean get() = FunctionCharacters.isEditorFunctionChar(this)
+inline val Char.functionCharacterName: String get() = FunctionCharacters.getNameForFunctionCharacter(this)
+

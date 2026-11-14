@@ -51,22 +51,10 @@ object ContentIO {
      * Create a [Content] from stream.
      * The stream will get closed if the operation is successfully done.
      *
-     * @param stream Source stream
-     */
-    @JvmStatic
-    @Throws(IOException::class)
-    fun createFrom(stream: InputStream): Content = createFrom(stream, Charset.defaultCharset())
-
-    /**
-     * Create a [Content] from stream.
-     * The stream will get closed if the operation is successfully done.
-     *
      * @param stream  Source stream
-     * @param charset Charset for decoding the content
+     * @param charset Charset for decoding the content (defaults to default charset)
      */
-    @JvmStatic
-    @Throws(IOException::class)
-    fun createFrom(stream: InputStream, charset: Charset): Content =
+    fun createFrom(stream: InputStream, charset: Charset = Charset.defaultCharset()): Content =
         createFrom(InputStreamReader(stream, charset))
 
     /**
@@ -74,8 +62,6 @@ object ContentIO {
      *
      * The reader will get closed if the operation is successfully done.
      */
-    @JvmStatic
-    @Throws(IOException::class)
     fun createFrom(reader: Reader): Content {
         val content = Content()
         content.isUndoEnabled = false
@@ -123,9 +109,7 @@ object ContentIO {
      * @param stream         Output stream
      * @param closeOnSucceed If true, the stream will be closed when operation is successfully
      */
-    @JvmStatic
-    @Throws(IOException::class)
-    fun writeTo(text: Content, stream: OutputStream, closeOnSucceed: Boolean) {
+    fun writeTo(text: Content, stream: OutputStream, closeOnSucceed: Boolean = true) {
         writeTo(text, stream, Charset.defaultCharset(), closeOnSucceed)
     }
 
@@ -137,9 +121,7 @@ object ContentIO {
      * @param charset        Charset of output bytes
      * @param closeOnSucceed If true, the stream will be closed when operation is successfully
      */
-    @JvmStatic
-    @Throws(IOException::class)
-    fun writeTo(text: Content, stream: OutputStream, charset: Charset, closeOnSucceed: Boolean) {
+    fun writeTo(text: Content, stream: OutputStream, charset: Charset, closeOnSucceed: Boolean = true) {
         writeTo(text, OutputStreamWriter(stream, charset), closeOnSucceed)
     }
 
@@ -152,10 +134,8 @@ object ContentIO {
      * @param writer         Output writer
      * @param closeOnSucceed If true, the stream will be closed when operation is successful
      */
-    @JvmStatic
-    @Throws(IOException::class)
     @Suppress("DEPRECATION")
-    fun writeTo(text: Content, writer: Writer, closeOnSucceed: Boolean) {
+    fun writeTo(text: Content, writer: Writer, closeOnSucceed: Boolean = true) {
         // Use buffered writer to avoid frequently IO when there are a lot of short lines
         val buffered = if (writer is BufferedWriter) writer else BufferedWriter(writer, BUFFER_SIZE)
         val buf = CharArray(CHAR_BUFFER_SIZE)
@@ -194,3 +174,22 @@ object ContentIO {
         }
     }
 }
+
+/**
+ * Extension function to write [Content] to an [OutputStream].
+ */
+fun Content.writeTo(stream: OutputStream, charset: Charset = Charset.defaultCharset(), closeOnSucceed: Boolean = true) =
+    ContentIO.writeTo(this, stream, charset, closeOnSucceed)
+
+/**
+ * Extension function to write [Content] to an [OutputStream] with default charset.
+ */
+fun Content.writeTo(stream: OutputStream, closeOnSucceed: Boolean) =
+    ContentIO.writeTo(this, stream, closeOnSucceed)
+
+/**
+ * Extension function to write [Content] to a [Writer].
+ */
+fun Content.writeTo(writer: Writer, closeOnSucceed: Boolean = true) =
+    ContentIO.writeTo(this, writer, closeOnSucceed)
+

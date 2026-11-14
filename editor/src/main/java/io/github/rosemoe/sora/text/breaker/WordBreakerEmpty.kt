@@ -32,7 +32,6 @@ class WordBreakerEmpty private constructor() : WordBreaker {
     }
 
     companion object {
-        @JvmField
         val INSTANCE: WordBreaker = WordBreakerEmpty()
     }
 }

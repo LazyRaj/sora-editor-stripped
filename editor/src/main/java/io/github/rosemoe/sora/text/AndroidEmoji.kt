@@ -35,7 +35,6 @@ object AndroidEmoji {
     /**
      * Returns true if the given code point is regional indicator symbol.
      */
-    @JvmStatic
     fun isRegionalIndicatorSymbol(codePoint: Int): Boolean {
         return codePoint in 0x1F1E6..0x1F1FF
     }
@@ -43,7 +42,6 @@ object AndroidEmoji {
     /**
      * Returns true if the given code point is emoji modifier.
      */
-    @JvmStatic
     fun isEmojiModifier(codePoint: Int): Boolean {
         return EmojiPropertyProvider.get().isEmojiModifier(codePoint)
     }
@@ -54,7 +52,6 @@ object AndroidEmoji {
      * @param c codepoint to check
      * @return true if is emoji modifier base
      */
-    @JvmStatic
     fun isEmojiModifierBase(c: Int): Boolean {
         // These two characters were removed from Emoji_Modifier_Base in Emoji 4.0, but we need to
         // keep them as emoji modifier bases since there are fonts and user-generated text out there
@@ -70,13 +67,11 @@ object AndroidEmoji {
     /**
      * Returns true if the character has Emoji property.
      */
-    @JvmStatic
     fun isEmoji(codePoint: Int): Boolean {
         return EmojiPropertyProvider.get().isEmoji(codePoint)
     }
 
     // Returns true if the character can be a base character of COMBINING ENCLOSING KEYCAP.
-    @JvmStatic
     fun isKeycapBase(codePoint: Int): Boolean {
         return (codePoint in '0'.code..'9'.code) || codePoint == '#'.code || codePoint == '*'.code
     }
@@ -86,14 +81,24 @@ object AndroidEmoji {
      *
      * Note that 0xE007F (CANCEL TAG) is not included.
      */
-    @JvmStatic
     fun isTagSpecChar(codePoint: Int): Boolean {
         return codePoint in 0xE0020..0xE007E
     }
 
     // Returns true if the given code point is a variation selector.
-    @JvmStatic
     fun isVariationSelector(codepoint: Int): Boolean {
         return EmojiPropertyProvider.get().isVariationSelector(codepoint)
     }
 }
+
+/**
+ * Extension properties for emoji checking on code points.
+ */
+inline val Int.isRegionalIndicatorSymbol: Boolean get() = AndroidEmoji.isRegionalIndicatorSymbol(this)
+inline val Int.isEmojiModifier: Boolean get() = AndroidEmoji.isEmojiModifier(this)
+inline val Int.isEmojiModifierBase: Boolean get() = AndroidEmoji.isEmojiModifierBase(this)
+inline val Int.isKeycapBase: Boolean get() = AndroidEmoji.isKeycapBase(this)
+inline val Int.isTagSpecChar: Boolean get() = AndroidEmoji.isTagSpecChar(this)
+inline val Int.isEmojiCodePoint: Boolean get() = AndroidEmoji.isEmoji(this)
+inline val Int.isVariationSelectorCodePoint: Boolean get() = AndroidEmoji.isVariationSelector(this)
+

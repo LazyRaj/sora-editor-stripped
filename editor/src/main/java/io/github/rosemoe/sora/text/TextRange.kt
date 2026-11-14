@@ -35,6 +35,9 @@ open class TextRange(
     var end: CharPosition
 ) {
 
+    operator fun component1(): CharPosition = start
+    operator fun component2(): CharPosition = end
+
     val startIndex: Int
         get() = start.index
 
@@ -47,6 +50,16 @@ open class TextRange(
     open fun isPositionInside(pos: CharPosition): Boolean {
         return pos.index >= start.index && pos.index < end.index
     }
+
+    /**
+     * Operator overload allowing `pos in range`
+     */
+    operator fun contains(pos: CharPosition): Boolean = isPositionInside(pos)
+
+    /**
+     * Operator overload allowing `charIndex in range`
+     */
+    operator fun contains(index: Int): Boolean = index >= start.index && index < end.index
 
     override fun toString(): String {
         return "TextRange{start=$start, end=$end}"

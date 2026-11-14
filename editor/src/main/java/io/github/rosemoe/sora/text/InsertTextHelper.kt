@@ -117,7 +117,6 @@ open class InsertTextHelper private constructor() {
             return InsertTextHelper()
         }
 
-        @JvmStatic
         fun forInsertion(text: CharSequence): InsertTextHelper {
             val o = obtain()
             o.init(text)

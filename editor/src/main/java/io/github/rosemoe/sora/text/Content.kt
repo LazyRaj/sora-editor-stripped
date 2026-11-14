@@ -41,7 +41,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock
  *
  * @author Rosemoe
  */
-open class Content @JvmOverloads constructor(
+open class Content(
     src: CharSequence? = null,
     threadSafe: Boolean = true
 ) : CharSequence {
@@ -672,7 +672,6 @@ open class Content @JvmOverloads constructor(
      * @param newContentThreadSafe Should the returned instance be thread-safe
      * @return sub-sequence of this Content
      */
-    @JvmOverloads
     open fun subContent(
         startLine: Int,
         startColumn: Int,
@@ -1028,7 +1027,6 @@ open class Content @JvmOverloads constructor(
      * Returns a new thread-safe Content object with the same text as this object. By default, the object is
      * thread-safe and access operations are locked when accessed by multiple threads.
      */
-    @JvmOverloads
     open fun copyText(newContentThreadSafe: Boolean = true, shallow: Boolean = false): Content {
         return withReadLock {
             val n = Content(null, newContentThreadSafe)
@@ -1054,7 +1052,6 @@ open class Content @JvmOverloads constructor(
      * Returns a new Content object with the same text as this object. By default, the object is not
      * thread-safe and should be accessed by a single thread.
      */
-    @JvmOverloads
     open fun copyTextShallow(newContentThreadSafe: Boolean = false): Content {
         return copyText(newContentThreadSafe, true)
     }
@@ -1126,7 +1123,6 @@ open class Content @JvmOverloads constructor(
         fun accept(lineIndex: Int, line: ContentLine, flag: AbortFlag)
 
         class AbortFlag {
-            @JvmField
             var set: Boolean = false
         }
     }
@@ -1139,7 +1135,6 @@ open class Content @JvmOverloads constructor(
         const val CHECK_TYPE_CURSOR: Int = 1
         const val CHECK_TYPE_INDEX: Int = 2
 
-        @JvmStatic
         var initialLineCapacity: Int = DEFAULT_LIST_CAPACITY
             set(capacity) {
                 require(capacity > 0) { "capacity can not be negative or zero" }
@@ -1153,7 +1148,6 @@ open class Content @JvmOverloads constructor(
          * @param b another ContentLine
          * @return Whether the text in the given two lines equal
          */
-        @JvmStatic
         private fun textEquals(a: ContentLine, b: ContentLine): Boolean {
             if (a.length != b.length) {
                 return false

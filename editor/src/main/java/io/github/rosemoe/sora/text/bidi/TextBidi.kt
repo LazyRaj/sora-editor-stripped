@@ -28,6 +28,7 @@ package io.github.rosemoe.sora.text.bidi
 import android.text.TextUtils
 import io.github.rosemoe.sora.util.IntPair
 import io.github.rosemoe.sora.util.TemporaryCharBuffer
+import io.github.rosemoe.sora.util.use
 import java.text.Bidi
 
 /**
@@ -40,24 +41,22 @@ object TextBidi {
     /**
      * Compute text directions for the given text
      */
-    @JvmStatic
     fun getDirections(text: CharSequence): Directions {
         val len = text.length
         if (doesNotNeedBidi(text)) {
             return Directions(longArrayOf(IntPair.pack(0, 0)), len)
         }
-        val chars = TemporaryCharBuffer.obtain(len)
-        TextUtils.getChars(text, 0, len, chars, 0)
-        val bidi = Bidi(chars, 0, null, 0, len, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT)
-        val runs = LongArray(bidi.runCount)
-        for (i in runs.indices) {
-            runs[i] = IntPair.pack(bidi.getRunStart(i), bidi.getRunLevel(i))
+        return TemporaryCharBuffer.use(len) { chars ->
+            TextUtils.getChars(text, 0, len, chars, 0)
+            val bidi = Bidi(chars, 0, null, 0, len, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT)
+            val runs = LongArray(bidi.runCount)
+            for (i in runs.indices) {
+                runs[i] = IntPair.pack(bidi.getRunStart(i), bidi.getRunLevel(i))
+            }
+            Directions(runs, len)
         }
-        TemporaryCharBuffer.recycle(chars)
-        return Directions(runs, len)
     }
 
-    @JvmStatic
     fun couldAffectRtl(c: Char): Boolean {
         val code = c.code
         return (0x0590 <= code && code <= 0x08FF) || // RTL scripts
@@ -76,7 +75,6 @@ object TextBidi {
      * it may return 'false' (needs bidi) although careful consideration may tell us it should
      * return 'true' (does not need bidi).
      */
-    @JvmStatic
     fun doesNotNeedBidi(text: CharSequence): Boolean {
         if (text is BidiRequirementChecker) {
             return !text.mayNeedBidi()
@@ -90,3 +88,15 @@ object TextBidi {
         return true
     }
 }
+
+/**
+ * Extension property to check if a character could affect RTL text layout.
+ */
+inline val Char.couldAffectRtl: Boolean
+    get() = TextBidi.couldAffectRtl(this)
+
+/**
+ * Extension function to compute [Directions] for a [CharSequence].
+ */
+fun CharSequence.toDirections(): Directions = TextBidi.getDirections(this)
+

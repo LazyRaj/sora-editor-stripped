@@ -28,6 +28,8 @@ package io.github.rosemoe.sora.text
 
 import io.github.rosemoe.sora.annotations.UnsupportedUserUsage
 import io.github.rosemoe.sora.util.IntPair
+import io.github.rosemoe.sora.util.first
+import io.github.rosemoe.sora.util.second
 
 /**
  * The cursor position will update automatically when the content has been changed by other ways.
@@ -178,8 +180,8 @@ class Cursor(private val content: Content) {
      * @return A packed pair (line, column) describing the result position
      */
     fun getLeftOf(position: Long): Long {
-        val line = IntPair.getFirst(position)
-        val column = IntPair.getSecond(position)
+        val line = position.first
+        val column = position.second
         val nColumn = TextLayoutHelper.get().getCurPosLeft(column, content.getLine(line))
         return if (nColumn == column && column == 0) {
             if (line == 0) {
@@ -200,8 +202,8 @@ class Cursor(private val content: Content) {
      * @return A packed pair (line, column) describing the result position
      */
     fun getRightOf(position: Long): Long {
-        val line = IntPair.getFirst(position)
-        val column = IntPair.getSecond(position)
+        val line = position.first
+        val column = position.second
         val cColumn = content.getColumnCount(line)
         val nColumn = TextLayoutHelper.get().getCurPosRight(column, content.getLine(line))
         return if (nColumn == cColumn && column == nColumn) {

@@ -30,19 +30,15 @@ import io.github.rosemoe.sora.annotations.UnsupportedUserUsage
 @UnsupportedUserUsage
 open class ComposingText {
 
-    @JvmField
     var startIndex: Int = -1
 
-    @JvmField
     var endIndex: Int = -1
 
-    @JvmField
     var preSetComposing: Boolean = false
 
     /**
      * The original composing text, including any IME decorations.
      */
-    @JvmField
     var text: CharSequence? = null
 
     open fun set(start: Int, end: Int) {

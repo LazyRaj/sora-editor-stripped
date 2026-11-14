@@ -45,7 +45,6 @@ class UndoManager : ContentListener, Parcelable {
         /**
          * The max time span limit for merging actions in milliseconds
          */
-        @JvmStatic
         var mergeTimeLimit: Long
             get() = sMergeTimeLimit
             set(value) {
@@ -368,7 +367,6 @@ class UndoManager : ContentListener, Parcelable {
     abstract class ContentAction : Parcelable {
 
         @Transient
-        @JvmField
         var cursor: TextRange? = null
 
         /**
@@ -428,23 +426,17 @@ class UndoManager : ContentListener, Parcelable {
                 }
         }
 
-        @JvmField
         var startLine: Int = 0
 
-        @JvmField
         var endLine: Int = 0
 
-        @JvmField
         var startColumn: Int = 0
 
-        @JvmField
         var endColumn: Int = 0
 
         @Transient
-        @JvmField
         var createTime: Long = System.currentTimeMillis()
 
-        @JvmField
         var text: CharSequence? = null
 
         override fun undo(content: Content) {
@@ -612,23 +604,17 @@ class UndoManager : ContentListener, Parcelable {
                 }
         }
 
-        @JvmField
         var startLine: Int = 0
 
-        @JvmField
         var endLine: Int = 0
 
-        @JvmField
         var startColumn: Int = 0
 
-        @JvmField
         var endColumn: Int = 0
 
         @Transient
-        @JvmField
         var createTime: Long = System.currentTimeMillis()
 
-        @JvmField
         var text: CharSequence? = null
 
         override fun undo(content: Content) {
@@ -726,10 +712,8 @@ class UndoManager : ContentListener, Parcelable {
                 }
         }
 
-        @JvmField
         var insert: InsertAction? = null
 
-        @JvmField
         var delete: DeleteAction? = null
 
         override fun undo(content: Content) {

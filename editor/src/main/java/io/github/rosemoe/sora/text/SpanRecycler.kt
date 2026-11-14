@@ -87,7 +87,6 @@ open class SpanRecycler private constructor() {
         @Volatile
         private var instance: SpanRecycler? = null
 
-        @JvmStatic
         @Synchronized
         fun getInstance(): SpanRecycler {
             return instance ?: SpanRecycler().also { instance = it }

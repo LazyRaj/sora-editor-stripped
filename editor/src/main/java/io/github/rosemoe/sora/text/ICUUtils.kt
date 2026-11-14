@@ -44,7 +44,6 @@ object ICUUtils {
      * @param useIcu Whether to use ICU BreakIterator
      * @return Packed integer pair (start, end). Always contains the position [offset]
      */
-    @JvmStatic
     fun getWordRange(text: CharSequence, offset: Int, useIcu: Boolean): Long {
         if (useIcu) {
             val itr = BreakIterator.getWordInstance()
@@ -63,7 +62,6 @@ object ICUUtils {
     /**
      * Primitive implementation of [getWordRange] when ICU is not enabled
      */
-    @JvmStatic
     fun getWordRangeFallback(text: CharSequence, offset: Int): Long {
         var start = offset
         var end = offset

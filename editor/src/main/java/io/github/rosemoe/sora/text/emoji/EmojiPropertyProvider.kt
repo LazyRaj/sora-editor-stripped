@@ -42,7 +42,6 @@ interface EmojiPropertyProvider {
         /**
          * Get instance for current platform (API 30+ baseline)
          */
-        @JvmStatic
         fun get(): EmojiPropertyProvider = PlatformEmojiPropertyProvider.INSTANCE
     }
 }

@@ -35,7 +35,6 @@ fun interface WordBreaker {
     fun getOptimizedBreakPoint(start: Int, end: Int): Int
 
     object Factory {
-        @JvmStatic
         fun newInstance(text: ContentLine): WordBreaker {
             return WordBreakerProgram(text)
         }
