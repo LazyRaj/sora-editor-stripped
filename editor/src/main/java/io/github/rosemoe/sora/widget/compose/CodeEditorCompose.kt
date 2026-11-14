@@ -75,32 +75,51 @@ import io.github.rosemoe.sora.widget.component.EditorTextActionWindow
  * }
  * ```
  *
- * ### 2. Custom Compose AutoCompletion Items
- * You can supply a custom `@Composable` item renderer for the code completion popup:
+ * ### 2. Custom Compose AutoCompletion
+ * You can supply a custom `@Composable` slot to render the complete suggestions popup:
  * ```kotlin
  * CodeEditorCompose(
  *     state = editorState,
  *     modifier = Modifier.fillMaxSize(),
- *     completionItemContent = { item, isSelected, onClick ->
- *         Row(
+ *     autoCompletion = { isAboveTheCursor, items, onItemClick, selectedItem ->
+ *         val listState = rememberLazyListState()
+ *         LaunchedEffect(selectedItem) {
+ *             if (selectedItem != null) {
+ *                 val idx = items.indexOf(selectedItem)
+ *                 if (idx in items.indices) listState.animateScrollToItem(idx)
+ *             }
+ *         }
+ *         Column(
  *             modifier = Modifier
- *                 .fillMaxWidth()
- *                 .clickable(onClick = onClick)
- *                 .background(if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
- *                 .padding(horizontal = 8.dp, vertical = 4.dp),
- *             verticalAlignment = Alignment.CenterVertically
+ *                 .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
+ *                 .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
+ *                 .padding(4.dp)
  *         ) {
- *             Text(
- *                 text = item.label,
- *                 fontWeight = FontWeight.Bold,
- *                 color = MaterialTheme.colorScheme.onSurface
- *             )
- *             Spacer(Modifier.width(8.dp))
- *             Text(
- *                 text = item.desc ?: "",
- *                 color = MaterialTheme.colorScheme.onSurfaceVariant,
- *                 style = MaterialTheme.typography.bodySmall
- *             )
+ *             if (isAboveTheCursor) {
+ *                 Text("Suggestions (Above Cursor)", style = MaterialTheme.typography.labelSmall)
+ *             }
+ *             LazyColumn(
+ *                 state = listState,
+ *                 modifier = Modifier.fillMaxWidth().heightIn(max = 200.dp)
+ *             ) {
+ *                 items(items, key = { "${it.label}_${it.desc ?: ""}" }) { item ->
+ *                     val isSelected = item == selectedItem
+ *                     Row(
+ *                         modifier = Modifier
+ *                             .fillMaxWidth()
+ *                             .background(if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
+ *                             .clickable { onItemClick(item) }
+ *                             .padding(horizontal = 8.dp, vertical = 4.dp),
+ *                         verticalAlignment = Alignment.CenterVertically
+ *                     ) {
+ *                         Text(text = item.label.toString(), fontWeight = FontWeight.Bold)
+ *                         item.desc?.let { Text(text = it.toString()) }
+ *                     }
+ *                 }
+ *             }
+ *             if (!isAboveTheCursor) {
+ *                 Text("Suggestions (Below Cursor)", style = MaterialTheme.typography.labelSmall)
+ *             }
  *         }
  *     }
  * )
@@ -185,7 +204,7 @@ import io.github.rosemoe.sora.widget.component.EditorTextActionWindow
  * @param state The [CodeEditorState] instance controlling and observing the editor.
  * @param modifier The Compose modifier applied to the parent container.
  * @param editorFactory Optional factory to construct a customized [CodeEditor] instance.
- * @param completionItemContent Composable slot customizing each item in the AutoCompletion popup.
+ * @param autoCompletion Composable slot customizing the auto-completion popup, receiving `isAboveTheCursor`, `items`, `onItemClick`, and `selectedItem`.
  * @param selectionActionContent Composable slot customizing the text selection floating action menu.
  * @param diagnosticTooltipContent Composable slot customizing the diagnostic tooltip popup.
  * @param overlayContent Composable slot rendered directly over the editor viewport inside a [BoxScope].
@@ -196,7 +215,7 @@ fun CodeEditorCompose(
     state: CodeEditorState,
     modifier: Modifier = Modifier,
     editorFactory: ((Context) -> CodeEditor)? = null,
-    completionItemContent: (@Composable (item: CompletionItem, isSelected: Boolean, onClick: () -> Unit) -> Unit)? = null,
+    autoCompletion: (@Composable (isAboveTheCursor: Boolean, items: List<CompletionItem>, onItemClick: (CompletionItem) -> Unit, selectedItem: CompletionItem?) -> Unit)? = null,
     selectionActionContent: (@Composable (TextActionScope) -> Unit)? = null,
     diagnosticTooltipContent: (@Composable (DiagnosticTooltipScope) -> Unit)? = null,
     overlayContent: (@Composable BoxScope.(state: CodeEditorState) -> Unit)? = null,
@@ -211,12 +230,13 @@ fun CodeEditorCompose(
             factory = { context ->
                 val editor = editorFactory?.invoke(context) ?: CodeEditor(context)
 
-                if (completionItemContent != null) {
-                    editor.getComponent(EditorAutoCompletion::class.java).adapter =
-                        ComposeCompletionItemAdapter(
-                            itemContent = completionItemContent,
-                            parentCompositionContext = compositionContext
+                if (autoCompletion != null) {
+                    editor.getComponent(EditorAutoCompletion::class.java).setLayout(
+                        ComposeCompletionLayout(
+                            parentCompositionContext = compositionContext,
+                            content = autoCompletion
                         )
+                    )
                 }
 
                 if (selectionActionContent != null) {
@@ -268,22 +288,23 @@ fun CodeEditorCompose(
                     }
                 }
 
-                if (completionItemContent != null) {
+                if (autoCompletion != null) {
                     val autoComp = editor.getComponent(EditorAutoCompletion::class.java)
-                    val adapter = autoComp.adapter
-                    if (adapter is ComposeCompletionItemAdapter) {
-                        adapter.itemContent = completionItemContent
+                    val currentLayout = autoComp.layout
+                    if (currentLayout is ComposeCompletionLayout) {
+                        currentLayout.content = autoCompletion
                     } else {
-                        autoComp.adapter =
-                            ComposeCompletionItemAdapter(
-                                itemContent = completionItemContent,
-                                parentCompositionContext = compositionContext
+                        autoComp.setLayout(
+                            ComposeCompletionLayout(
+                                parentCompositionContext = compositionContext,
+                                content = autoCompletion
                             )
+                        )
                     }
                 } else {
                     val autoComp = editor.getComponent(EditorAutoCompletion::class.java)
-                    if (autoComp.adapter is ComposeCompletionItemAdapter) {
-                        autoComp.adapter = DefaultCompletionItemAdapter()
+                    if (autoComp.layout is ComposeCompletionLayout) {
+                        autoComp.setLayout(io.github.rosemoe.sora.widget.component.DefaultCompletionLayout())
                     }
                 }
 

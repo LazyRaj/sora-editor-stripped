@@ -162,14 +162,33 @@ open class DefaultCompletionLayout : CompletionLayout {
     override fun onApplyColorScheme(colorScheme: EditorColorScheme) {
         val root = rootView ?: return
         val completion = editorAutoCompletion ?: return
+        val editor = completion.editor
         val dm = completion.context.resources.displayMetrics
+        val radius = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            editor.props.completionCornerRadiusDip,
+            dm
+        )
+        val strokeWidth = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            editor.props.completionBorderWidthDip,
+            dm
+        ).toInt()
+        val borderColor = if (editor.props.completionBorderColor != 0) {
+            editor.props.completionBorderColor
+        } else {
+            colorScheme.getColor(EditorColorScheme.COMPLETION_WND_CORNER)
+        }
+        val bgColor = if (editor.props.completionBackgroundColor != 0) {
+            editor.props.completionBackgroundColor
+        } else {
+            colorScheme.getColor(EditorColorScheme.COMPLETION_WND_BACKGROUND)
+        }
+
         val gd = GradientDrawable().apply {
-            cornerRadius = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8f, dm)
-            setStroke(
-                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1f, dm).toInt(),
-                colorScheme.getColor(EditorColorScheme.COMPLETION_WND_CORNER)
-            )
-            setColor(colorScheme.getColor(EditorColorScheme.COMPLETION_WND_BACKGROUND))
+            cornerRadius = radius
+            setStroke(strokeWidth, borderColor)
+            setColor(bgColor)
         }
         root.background = gd
         setRootViewOutlineProvider(root)
@@ -202,6 +221,8 @@ open class DefaultCompletionLayout : CompletionLayout {
     }
 
     private fun setRootViewOutlineProvider(root: View) {
+        val completion = editorAutoCompletion
+        val radiusDip = completion?.editor?.props?.completionCornerRadiusDip ?: 8f
         root.outlineProvider = object : ViewOutlineProvider() {
             override fun getOutline(view: View, outline: Outline) {
                 outline.setRoundRect(
@@ -211,7 +232,7 @@ open class DefaultCompletionLayout : CompletionLayout {
                     view.height,
                     TypedValue.applyDimension(
                         TypedValue.COMPLEX_UNIT_DIP,
-                        8f,
+                        radiusDip,
                         view.context.resources.displayMetrics
                     )
                 )

@@ -49,6 +49,7 @@ import io.github.rosemoe.sora.event.TextSizeChangeEvent
 import io.github.rosemoe.sora.lang.Language
 import io.github.rosemoe.sora.text.CharPosition
 import io.github.rosemoe.sora.widget.CodeEditor
+import io.github.rosemoe.sora.widget.component.DefaultCompletionLayout
 import io.github.rosemoe.sora.widget.component.EditorAutoCompletion
 import io.github.rosemoe.sora.widget.component.Magnifier
 import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
@@ -420,6 +421,133 @@ class CodeEditorState(
         }
 
     // -----------------------------------------------------------------------------------------
+    // Scrollbar Indication Customization
+    // -----------------------------------------------------------------------------------------
+
+    private var _scrollbarThumbColor by mutableIntStateOf(0)
+    /** Normal fill color for scrollbar indicator. 0 falls back to color scheme. */
+    var scrollbarThumbColor: Int
+        get() = _editor?.props?.scrollbarThumbColor ?: _scrollbarThumbColor
+        set(value) {
+            _scrollbarThumbColor = value
+            _editor?.let { ed ->
+                ed.props.scrollbarThumbColor = value
+                ed.postInvalidate()
+            }
+        }
+
+    private var _scrollbarThumbHoldColor by mutableIntStateOf(0)
+    /** Pressed / holding fill color for scrollbar indicator. 0 falls back to color scheme. */
+    var scrollbarThumbHoldColor: Int
+        get() = _editor?.props?.scrollbarThumbHoldColor ?: _scrollbarThumbHoldColor
+        set(value) {
+            _scrollbarThumbHoldColor = value
+            _editor?.let { ed ->
+                ed.props.scrollbarThumbHoldColor = value
+                ed.postInvalidate()
+            }
+        }
+
+    private var _scrollbarBorderEnabled by mutableStateOf(false)
+    /** Whether border rendering is enabled for scrollbar indicator. */
+    var scrollbarBorderEnabled: Boolean
+        get() = _editor?.props?.scrollbarBorderEnabled ?: _scrollbarBorderEnabled
+        set(value) {
+            _scrollbarBorderEnabled = value
+            _editor?.let { ed ->
+                ed.props.scrollbarBorderEnabled = value
+                ed.postInvalidate()
+            }
+        }
+
+    private var _scrollbarBorderColor by mutableIntStateOf(0)
+    /** Border color for scrollbar indicator. */
+    var scrollbarBorderColor: Int
+        get() = _editor?.props?.scrollbarBorderColor ?: _scrollbarBorderColor
+        set(value) {
+            _scrollbarBorderColor = value
+            _editor?.let { ed ->
+                ed.props.scrollbarBorderColor = value
+                ed.postInvalidate()
+            }
+        }
+
+    private var _scrollbarBorderRadiusDip by mutableFloatStateOf(0f)
+    /** Corner/border radius for scrollbar indicator in DIP. */
+    var scrollbarBorderRadiusDip: Float
+        get() = _editor?.props?.scrollbarBorderRadiusDip ?: _scrollbarBorderRadiusDip
+        set(value) {
+            _scrollbarBorderRadiusDip = value
+            _editor?.let { ed ->
+                ed.props.scrollbarBorderRadiusDip = value
+                ed.postInvalidate()
+            }
+        }
+
+    // -----------------------------------------------------------------------------------------
+    // AutoCompletion Background Box Customization
+    // -----------------------------------------------------------------------------------------
+
+    private var _completionCornerRadiusDip by mutableFloatStateOf(8f)
+    /** Corner radius of auto-completion box in DIP. */
+    var completionCornerRadiusDip: Float
+        get() = _editor?.props?.completionCornerRadiusDip ?: _completionCornerRadiusDip
+        set(value) {
+            _completionCornerRadiusDip = value
+            _editor?.let { ed ->
+                ed.props.completionCornerRadiusDip = value
+                (ed.getComponent(EditorAutoCompletion::class.java).layout as? DefaultCompletionLayout)?.onApplyColorScheme(ed.colorScheme)
+            }
+        }
+
+    private var _completionBorderWidthDip by mutableFloatStateOf(1f)
+    /** Border stroke width of auto-completion box in DIP. */
+    var completionBorderWidthDip: Float
+        get() = _editor?.props?.completionBorderWidthDip ?: _completionBorderWidthDip
+        set(value) {
+            _completionBorderWidthDip = value
+            _editor?.let { ed ->
+                ed.props.completionBorderWidthDip = value
+                (ed.getComponent(EditorAutoCompletion::class.java).layout as? DefaultCompletionLayout)?.onApplyColorScheme(ed.colorScheme)
+            }
+        }
+
+    private var _completionBorderColor by mutableIntStateOf(0)
+    /** Border stroke color of auto-completion box. */
+    var completionBorderColor: Int
+        get() = _editor?.props?.completionBorderColor ?: _completionBorderColor
+        set(value) {
+            _completionBorderColor = value
+            _editor?.let { ed ->
+                ed.props.completionBorderColor = value
+                (ed.getComponent(EditorAutoCompletion::class.java).layout as? DefaultCompletionLayout)?.onApplyColorScheme(ed.colorScheme)
+            }
+        }
+
+    private var _completionBackgroundColor by mutableIntStateOf(0)
+    /** Background color of auto-completion box. */
+    var completionBackgroundColor: Int
+        get() = _editor?.props?.completionBackgroundColor ?: _completionBackgroundColor
+        set(value) {
+            _completionBackgroundColor = value
+            _editor?.let { ed ->
+                ed.props.completionBackgroundColor = value
+                (ed.getComponent(EditorAutoCompletion::class.java).layout as? DefaultCompletionLayout)?.onApplyColorScheme(ed.colorScheme)
+            }
+        }
+
+    private var _reverseListWhenAbove by mutableStateOf(true)
+    /** Whether completion list items are reversed when displayed above the cursor line. */
+    var reverseListWhenAbove: Boolean
+        get() = _editor?.props?.reverseListWhenAbove ?: _reverseListWhenAbove
+        set(value) {
+            _reverseListWhenAbove = value
+            _editor?.let { ed ->
+                ed.props.reverseListWhenAbove = value
+            }
+        }
+
+    // -----------------------------------------------------------------------------------------
     // Read-Only Observable States
     // -----------------------------------------------------------------------------------------
 
@@ -583,6 +711,16 @@ class CodeEditorState(
         editor.cursorBlinkPeriod = if (cursorBlinkEnabled) 500 else 0
         editor.isHighlightCurrentLine = highlightCurrentLine
         editor.isDividerEnabled = dividerEnabled
+        editor.props.scrollbarThumbColor = _scrollbarThumbColor
+        editor.props.scrollbarThumbHoldColor = _scrollbarThumbHoldColor
+        editor.props.scrollbarBorderEnabled = _scrollbarBorderEnabled
+        editor.props.scrollbarBorderColor = _scrollbarBorderColor
+        editor.props.scrollbarBorderRadiusDip = _scrollbarBorderRadiusDip
+        editor.props.completionCornerRadiusDip = _completionCornerRadiusDip
+        editor.props.completionBorderWidthDip = _completionBorderWidthDip
+        editor.props.completionBorderColor = _completionBorderColor
+        editor.props.completionBackgroundColor = _completionBackgroundColor
+        editor.props.reverseListWhenAbove = _reverseListWhenAbove
         editor.getComponent(EditorAutoCompletion::class.java).setEnabled(autoCompletionEnabled)
         editor.getComponent(Magnifier::class.java).setEnabled(magnifierEnabled)
         if (language != null) {
@@ -759,6 +897,16 @@ class CodeEditorState(
                 _selection = TextRange(ed.cursor.left, ed.cursor.right)
                 _scrollX = ed.offsetX
                 _scrollY = ed.offsetY
+                _scrollbarThumbColor = ed.props.scrollbarThumbColor
+                _scrollbarThumbHoldColor = ed.props.scrollbarThumbHoldColor
+                _scrollbarBorderEnabled = ed.props.scrollbarBorderEnabled
+                _scrollbarBorderColor = ed.props.scrollbarBorderColor
+                _scrollbarBorderRadiusDip = ed.props.scrollbarBorderRadiusDip
+                _completionCornerRadiusDip = ed.props.completionCornerRadiusDip
+                _completionBorderWidthDip = ed.props.completionBorderWidthDip
+                _completionBorderColor = ed.props.completionBorderColor
+                _completionBackgroundColor = ed.props.completionBackgroundColor
+                _reverseListWhenAbove = ed.props.reverseListWhenAbove
             }
             for (u in unsubscribes) {
                 try {
@@ -808,7 +956,17 @@ class CodeEditorState(
                     state.dividerEnabled,
                     state.editor?.isScalable ?: state.isScalable,
                     state.scrollX,
-                    state.scrollY
+                    state.scrollY,
+                    state.scrollbarThumbColor,
+                    state.scrollbarThumbHoldColor,
+                    state.scrollbarBorderEnabled,
+                    state.scrollbarBorderColor,
+                    state.scrollbarBorderRadiusDip,
+                    state.completionCornerRadiusDip,
+                    state.completionBorderWidthDip,
+                    state.completionBorderColor,
+                    state.completionBackgroundColor,
+                    state.reverseListWhenAbove
                 )
             },
             restore = { savedList ->
@@ -829,6 +987,16 @@ class CodeEditorState(
                     if (savedList.size > 13) isScalable = savedList[13] as Boolean
                     if (savedList.size > 14) scrollX = savedList[14] as Int
                     if (savedList.size > 15) scrollY = savedList[15] as Int
+                    if (savedList.size > 16) scrollbarThumbColor = savedList[16] as Int
+                    if (savedList.size > 17) scrollbarThumbHoldColor = savedList[17] as Int
+                    if (savedList.size > 18) scrollbarBorderEnabled = savedList[18] as Boolean
+                    if (savedList.size > 19) scrollbarBorderColor = savedList[19] as Int
+                    if (savedList.size > 20) scrollbarBorderRadiusDip = savedList[20] as Float
+                    if (savedList.size > 21) completionCornerRadiusDip = savedList[21] as Float
+                    if (savedList.size > 22) completionBorderWidthDip = savedList[22] as Float
+                    if (savedList.size > 23) completionBorderColor = savedList[23] as Int
+                    if (savedList.size > 24) completionBackgroundColor = savedList[24] as Int
+                    if (savedList.size > 25) reverseListWhenAbove = savedList[25] as Boolean
                 }
             }
         )

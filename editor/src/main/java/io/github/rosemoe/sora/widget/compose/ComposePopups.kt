@@ -26,16 +26,49 @@
  */
 package io.github.rosemoe.sora.widget.compose
 
+import android.content.Context
+import android.database.DataSetObserver
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Adapter
+import android.widget.AdapterView
+import android.widget.ListView
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionContext
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
@@ -49,11 +82,15 @@ import io.github.rosemoe.sora.widget.CodeEditor
 import io.github.rosemoe.sora.widget.base.findLifecycleOwner
 import io.github.rosemoe.sora.widget.base.findSavedStateRegistryOwner
 import io.github.rosemoe.sora.widget.base.findViewModelStoreOwner
+import io.github.rosemoe.sora.widget.component.CompletionLayout
 import io.github.rosemoe.sora.widget.component.DiagnosticTooltipLayout
+import io.github.rosemoe.sora.widget.component.EditorAutoCompletion
 import io.github.rosemoe.sora.widget.component.EditorCompletionAdapter
 import io.github.rosemoe.sora.widget.component.EditorDiagnosticTooltipWindow
 import io.github.rosemoe.sora.widget.component.EditorTextActionWindow
 import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.min
 
@@ -158,6 +195,226 @@ class ComposeCompletionItemAdapter(
             }
         }
         return composeView
+    }
+}
+
+/**
+ * A Compose-native implementation of [CompletionLayout].
+ *
+ * Renders auto-completion suggestions natively in Jetpack Compose, giving developers
+ * complete control over layout, styling, header/footer positioning, and item rendering
+ * in a single unified composable slot.
+ *
+ * @param parentCompositionContext Optional parent composition context to inherit themes and locals.
+ * @param content Composable slot receiving:
+ * - `isAboveTheCursor: Boolean`: whether the popup is positioned above the active cursor line
+ * - `items: List<CompletionItem>`: the list of suggestion items
+ * - `onItemClick: (CompletionItem) -> Unit`: callback to select and apply a completion item
+ * - `selectedItem: CompletionItem?`: the currently highlighted item (e.g. from keyboard navigation)
+ */
+class ComposeCompletionLayout(
+    private val parentCompositionContext: CompositionContext? = null,
+    content: @Composable (isAboveTheCursor: Boolean, items: List<CompletionItem>, onItemClick: (CompletionItem) -> Unit, selectedItem: CompletionItem?) -> Unit
+) : CompletionLayout {
+
+    private var editorAutoCompletion: EditorAutoCompletion? = null
+    private var dummyListView: ListView? = null
+    private var dataSetObserver: DataSetObserver? = null
+
+    var itemsState by mutableStateOf<List<CompletionItem>>(emptyList())
+    var selectedPositionState by mutableIntStateOf(-1)
+    var isAboveTheCursor: Boolean by mutableStateOf(false)
+    var loadingState by mutableStateOf(false)
+
+    val isLoading: Boolean
+        get() = loadingState
+
+    private var contentState by mutableStateOf(content)
+    var content: @Composable (isAboveTheCursor: Boolean, items: List<CompletionItem>, onItemClick: (CompletionItem) -> Unit, selectedItem: CompletionItem?) -> Unit
+        get() = contentState
+        set(value) {
+            contentState = value
+        }
+
+    override fun setEditorCompletion(completion: EditorAutoCompletion) {
+        editorAutoCompletion = completion
+        isAboveTheCursor = completion.isPositionedAbove
+        attachAdapterObserver(completion.adapter)
+    }
+
+    override fun onPositionChanged(isPositionedAbove: Boolean) {
+        this.isAboveTheCursor = isPositionedAbove
+    }
+
+    override fun setLoading(loading: Boolean) {
+        this.loadingState = loading
+    }
+
+    override fun onApplyColorScheme(colorScheme: EditorColorScheme) {
+        // Compose manages color schemes reactively
+    }
+
+    override fun ensureListPositionVisible(position: Int, incrementPixels: Int) {
+        selectedPositionState = position
+    }
+
+    override fun getExtraHeight(): Int {
+        val dp = editorAutoCompletion?.editor?.dpUnit ?: 2f
+        return (dp * 60).toInt()
+    }
+
+    private fun attachAdapterObserver(adapter: EditorCompletionAdapter?) {
+        if (adapter == null) return
+        dataSetObserver?.let { runCatching { adapter.unregisterDataSetObserver(it) } }
+        val observer = object : DataSetObserver() {
+            override fun onChanged() {
+                syncFromAdapter()
+            }
+
+            override fun onInvalidated() {
+                syncFromAdapter()
+            }
+        }
+        dataSetObserver = observer
+        runCatching { adapter.registerDataSetObserver(observer) }
+        syncFromAdapter()
+    }
+
+    fun syncFromAdapter() {
+        val adapter = editorAutoCompletion?.adapter
+        val rawItems = adapter?.currentItems ?: emptyList()
+        itemsState = ArrayList(rawItems)
+        selectedPositionState = editorAutoCompletion?.currentPosition ?: -1
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun getCompletionList(): AdapterView<Adapter> {
+        val lv = dummyListView ?: throw IllegalStateException("Layout not inflated")
+        return lv as AdapterView<Adapter>
+    }
+
+    override fun inflate(context: Context): View {
+        val lv = object : ListView(context) {
+            override fun setAdapter(adapter: android.widget.ListAdapter?) {
+                super.setAdapter(adapter)
+                if (adapter is EditorCompletionAdapter) {
+                    attachAdapterObserver(adapter)
+                }
+            }
+        }
+        dummyListView = lv
+
+        val composeView = ComposeView(context).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool)
+            if (parentCompositionContext != null) {
+                setParentCompositionContext(parentCompositionContext)
+            }
+            editorAutoCompletion?.editor?.let { editor ->
+                attachViewTreeOwnersFrom(editor)
+            }
+        }
+
+        composeView.setContent {
+            val items = itemsState
+            val selectedIndex = selectedPositionState
+            val isAbove = isAboveTheCursor
+            val selectedItem = if (selectedIndex in items.indices) items[selectedIndex] else null
+
+            val onItemClick: (CompletionItem) -> Unit = { item ->
+                try {
+                    editorAutoCompletion?.select(item)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+
+            contentState(isAbove, items, onItemClick, selectedItem)
+        }
+
+        return composeView
+    }
+}
+
+/**
+ * Default Compose renderer for individual completion items when no custom `completionItemContent` is provided.
+ */
+@Composable
+fun DefaultComposeCompletionItem(
+    item: CompletionItem,
+    isSelected: Boolean,
+    editor: CodeEditor? = null,
+    onClick: () -> Unit
+) {
+    val textColor = editor?.colorScheme?.getColor(
+        if (isSelected) EditorColorScheme.COMPLETION_WND_ITEM_CURRENT
+        else EditorColorScheme.COMPLETION_WND_TEXT_PRIMARY
+    ) ?: if (isSelected) 0xFFFFFFFF.toInt() else 0xFFEEEEEE.toInt()
+
+    val descColor = editor?.colorScheme?.getColor(
+        EditorColorScheme.COMPLETION_WND_TEXT_SECONDARY
+    ) ?: 0xFF888888.toInt()
+
+    val bgColor = if (isSelected) {
+        editor?.colorScheme?.getColor(EditorColorScheme.COMPLETION_WND_ITEM_CURRENT)
+            ?: 0x33888888
+    } else {
+        0
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(bgColor))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        BasicText(
+            text = item.label.toString(),
+            style = TextStyle(color = Color(textColor), fontSize = 14.sp),
+            modifier = Modifier.weight(1f)
+        )
+        item.desc?.let { desc ->
+            Spacer(Modifier.width(8.dp))
+            BasicText(
+                text = desc.toString(),
+                style = TextStyle(color = Color(descColor), fontSize = 12.sp)
+            )
+        }
+    }
+}
+
+/**
+ * Default Compose container for the auto-completion list when no custom `completionBoxContent` is provided.
+ */
+@Composable
+fun DefaultComposeCompletionBox(
+    editor: CodeEditor? = null,
+    content: @Composable () -> Unit
+) {
+    val cornerRadius = editor?.props?.completionCornerRadiusDip ?: 8f
+    val borderWidth = editor?.props?.completionBorderWidthDip ?: 1f
+    val borderColor = editor?.let {
+        if (it.props.completionBorderColor != 0) Color(it.props.completionBorderColor)
+        else Color(it.colorScheme.getColor(EditorColorScheme.COMPLETION_WND_CORNER))
+    } ?: Color(0x33888888)
+
+    val bgColor = editor?.let {
+        if (it.props.completionBackgroundColor != 0) Color(it.props.completionBackgroundColor)
+        else Color(it.colorScheme.getColor(EditorColorScheme.COMPLETION_WND_BACKGROUND))
+    } ?: Color(0xFF2B2B2B)
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(bgColor, RoundedCornerShape(cornerRadius.dp))
+            .then(
+                if (borderWidth > 0f) {
+                    Modifier.border(borderWidth.dp, borderColor, RoundedCornerShape(cornerRadius.dp))
+                } else Modifier
+            )
+    ) {
+        content()
     }
 }
 

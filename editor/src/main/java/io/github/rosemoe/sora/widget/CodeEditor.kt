@@ -1494,6 +1494,94 @@ open class CodeEditor(
         this.verticalScrollBarEnabled = verticalScrollBarEnabled
     }
 
+    /** Custom normal fill color for scrollbar indicator. */
+    var scrollbarThumbColor: Int
+        get() = props.scrollbarThumbColor
+        set(value) {
+            props.scrollbarThumbColor = value
+            postInvalidate()
+        }
+
+    /** Custom pressed/holding fill color for scrollbar indicator. */
+    var scrollbarThumbHoldColor: Int
+        get() = props.scrollbarThumbHoldColor
+        set(value) {
+            props.scrollbarThumbHoldColor = value
+            postInvalidate()
+        }
+
+    /** Whether border rendering is enabled for the scrollbar indicator. */
+    var scrollbarBorderEnabled: Boolean
+        get() = props.scrollbarBorderEnabled
+        set(value) {
+            props.scrollbarBorderEnabled = value
+            postInvalidate()
+        }
+
+    /** Border color for the scrollbar indicator. */
+    var scrollbarBorderColor: Int
+        get() = props.scrollbarBorderColor
+        set(value) {
+            props.scrollbarBorderColor = value
+            postInvalidate()
+        }
+
+    /** Border width for the scrollbar indicator in DIP. */
+    var scrollbarBorderWidthDip: Float
+        get() = props.scrollbarBorderWidthDip
+        set(value) {
+            props.scrollbarBorderWidthDip = value
+            postInvalidate()
+        }
+
+    /** Corner / border radius for the scrollbar indicator in DIP. */
+    var scrollbarBorderRadiusDip: Float
+        get() = props.scrollbarBorderRadiusDip
+        set(value) {
+            props.scrollbarBorderRadiusDip = value
+            postInvalidate()
+        }
+
+    /** Custom background color for scrollbar line indication panel. */
+    var scrollbarLinePanelColor: Int
+        get() = props.scrollbarLinePanelColor
+        set(value) {
+            props.scrollbarLinePanelColor = value
+            postInvalidate()
+        }
+
+    /** Custom text color for scrollbar line indication panel. */
+    var scrollbarLinePanelTextColor: Int
+        get() = props.scrollbarLinePanelTextColor
+        set(value) {
+            props.scrollbarLinePanelTextColor = value
+            postInvalidate()
+        }
+
+    /** Whether border rendering is enabled for scrollbar line indication panel. */
+    var scrollbarLinePanelBorderEnabled: Boolean
+        get() = props.scrollbarLinePanelBorderEnabled
+        set(value) {
+            props.scrollbarLinePanelBorderEnabled = value
+            postInvalidate()
+        }
+
+    /** Border color for scrollbar line indication panel. */
+    var scrollbarLinePanelBorderColor: Int
+        get() = props.scrollbarLinePanelBorderColor
+        set(value) {
+            props.scrollbarLinePanelBorderColor = value
+            postInvalidate()
+        }
+
+    /** Corner radius for scrollbar line indication panel in DIP. */
+    var scrollbarLinePanelRadiusDip: Float
+        get() = props.scrollbarLinePanelRadiusDip
+        set(value) {
+            props.scrollbarLinePanelRadiusDip = value
+            postInvalidate()
+        }
+
     @get:Px
     var textSizePx: Float
         /**

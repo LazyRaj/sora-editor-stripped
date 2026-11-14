@@ -44,11 +44,16 @@ import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
 class DefaultCompletionItemAdapter : EditorCompletionAdapter() {
 
     override fun getItemHeight(): Int {
-        return TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            45f,
-            getContext().resources.displayMetrics
-        ).toInt()
+        val dm = runCatching { getContext().resources.displayMetrics }.getOrNull()
+        return if (dm != null) {
+            TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                45f,
+                dm
+            ).toInt()
+        } else {
+            (45f * 2.5f).toInt()
+        }
     }
 
     override fun getView(

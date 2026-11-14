@@ -90,7 +90,7 @@ abstract class EditorCompletionAdapter : BaseAdapter(), Adapter {
      * Get context from editor
      */
     protected open fun getContext(): Context {
-        return window?.context ?: throw IllegalStateException("Window not attached")
+        return window?.context ?: window?.editor?.context ?: throw IllegalStateException("Window not attached")
     }
 
     /**

@@ -106,6 +106,16 @@ open class EditorAutoCompletion(
     open var isPositionedAbove: Boolean = false
         protected set
 
+    /**
+     * Whether the completion list items should be reversed when the window is positioned
+     * above the cursor line, placing primary matches closest to the cursor.
+     */
+    open var reverseListWhenAbove: Boolean
+        get() = editor.props.reverseListWhenAbove
+        set(value) {
+            editor.props.reverseListWhenAbove = value
+        }
+
     protected var completionThread: CompletionThread? = null
 
     protected var publisher: CompletionPublisher? = null
@@ -114,13 +124,23 @@ open class EditorAutoCompletion(
 
     protected var currentSelection: Int = -1
 
-    open var adapter: EditorCompletionAdapter = DefaultCompletionItemAdapter()
+    open var adapter: EditorCompletionAdapter = DefaultCompletionItemAdapter().also {
+        it.attachValues(this, emptyList())
+    }
         set(value) {
             field = value
+            value.attachValues(this, value.currentItems ?: emptyList())
             if (::_layout.isInitialized) {
-                layout.getCompletionList().adapter = value
+                runCatching { layout.getCompletionList().adapter = value }
             }
         }
+
+    fun getItemHeight(): Int {
+        if (adapter.completionWindow == null) {
+            adapter.attachValues(this, adapter.currentItems ?: emptyList())
+        }
+        return runCatching { adapter.getItemHeight() }.getOrDefault((editor.dpUnit * 45).toInt()).coerceAtLeast(1)
+    }
 
     protected lateinit var _layout: CompletionLayout
 
@@ -348,6 +368,22 @@ open class EditorAutoCompletion(
             spaceAbove > spaceBelow
         }
 
+        val wasAbove = isPositionedAbove
+        isPositionedAbove = shouldShowAbove
+        if (::_layout.isInitialized) {
+            layout.onPositionChanged(shouldShowAbove)
+        }
+
+        if (wasAbove != shouldShowAbove && reverseListWhenAbove) {
+            val pub = publisher
+            if (pub != null && pub.hasData()) {
+                val rawItems = pub.items
+                val displayItems = if (shouldShowAbove) rawItems.asReversed() else rawItems
+                adapter.attachValues(this, displayItems)
+                adapter.notifyDataSetChanged()
+            }
+        }
+
         val width =
             if ((editor.width < 500 * dp && completionWndPositionMode == WINDOW_POS_MODE_AUTO) || completionWndPositionMode == WINDOW_POS_MODE_FULL_WIDTH_ALWAYS) {
                 (editor.width * 7 / 8)
@@ -373,7 +409,7 @@ open class EditorAutoCompletion(
             h = when {
                 expectedHeight > 0 -> min(expectedHeight, maxHeight)
                 height > 0 -> min(height, maxHeight)
-                adapter.count > 0 -> min(adapter.getItemHeight() * adapter.count, maxHeight)
+                adapter.count > 0 -> min(getItemHeight() * adapter.count, maxHeight)
                 else -> maxHeight
             }
             panelY = (cursorRowTop - margin - h).coerceAtLeast(0f)
@@ -398,7 +434,7 @@ open class EditorAutoCompletion(
             h = when {
                 expectedHeight > 0 -> min(expectedHeight, maxHeight)
                 height > 0 -> min(height, maxHeight)
-                adapter.count > 0 -> min(adapter.getItemHeight() * adapter.count, maxHeight)
+                adapter.count > 0 -> min(getItemHeight() * adapter.count, maxHeight)
                 else -> maxHeight
             }
             panelY = candidatePanelY
@@ -487,29 +523,27 @@ open class EditorAutoCompletion(
     }
 
     open fun moveDown() {
-        val adpView = layout.getCompletionList()
-        val count = adpView.adapter?.count ?: 0
+        val count = adapter.count
         if (currentSelection + 1 >= count) {
             return
         }
         currentSelection++
-        (adpView.adapter as? EditorCompletionAdapter)?.notifyDataSetChanged()
+        adapter.notifyDataSetChanged()
         ensurePosition()
     }
 
     open fun moveUp() {
-        val adpView = layout.getCompletionList()
         if (currentSelection - 1 < 0) {
             return
         }
         currentSelection--
-        (adpView.adapter as? EditorCompletionAdapter)?.notifyDataSetChanged()
+        adapter.notifyDataSetChanged()
         ensurePosition()
     }
 
     private fun ensurePosition() {
         if (currentSelection != -1) {
-            layout.ensureListPositionVisible(currentSelection, adapter.getItemHeight())
+            layout.ensureListPositionVisible(currentSelection, getItemHeight())
         }
     }
 
@@ -520,7 +554,13 @@ open class EditorAutoCompletion(
             return false
         }
         val adpView = layout.getCompletionList()
-        val item = (adpView.adapter as? EditorCompletionAdapter)?.getItem(pos) ?: return false
+        val item = (adpView.adapter as? EditorCompletionAdapter)?.getItem(pos)
+            ?: runCatching { adapter.getItem(pos) }.getOrNull()
+            ?: return false
+        return select(item)
+    }
+
+    open fun select(item: CompletionItem): Boolean {
         val cursor = editor.cursor
         val currentCompletionThread = this.completionThread
         if (!cursor.isSelected && currentCompletionThread != null) {
@@ -577,14 +617,23 @@ open class EditorAutoCompletion(
         val handler = editor.handler ?: android.os.Handler(android.os.Looper.getMainLooper())
         publisher = CompletionPublisher(handler, {
             val pub = publisher ?: return@CompletionPublisher
-            val items = pub.items
+            val rawItems = pub.items
             if (highlightMatchedLabel) {
-                items.highlightMatchLabel(editor.colorScheme)
+                rawItems.highlightMatchLabel(editor.colorScheme)
             }
-            if (lastAttachedItems == null || lastAttachedItems?.get() !== items) {
-                adapter.attachValues(this, items)
+            val extraHeight = if (::_layout.isInitialized) layout.getExtraHeight() else 0
+            val estimatedHeight = getItemHeight() * rawItems.size + extraHeight
+            updateCompletionWindowPosition(true, estimatedHeight)
+
+            val displayItems = if (isPositionedAbove && reverseListWhenAbove) {
+                rawItems.asReversed()
+            } else {
+                rawItems
+            }
+            if (lastAttachedItems == null || lastAttachedItems?.get() !== displayItems) {
+                adapter.attachValues(this, displayItems)
                 adapter.notifyDataSetInvalidated()
-                lastAttachedItems = WeakReference(items)
+                lastAttachedItems = WeakReference(displayItems)
             } else {
                 adapter.notifyDataSetChanged()
             }
@@ -594,11 +643,10 @@ open class EditorAutoCompletion(
             ) {
                 moveDown()
             }
-            val newHeight = adapter.getItemHeight() * adapter.count
+            val newHeight = getItemHeight() * adapter.count + extraHeight
             if (newHeight == 0) {
                 hide()
             }
-            updateCompletionWindowPosition(true, newHeight)
             setSize(width, min(newHeight, maxHeight))
             resetScrollPosition()
             if (!isShowing) {

@@ -73,4 +73,18 @@ interface CompletionLayout {
     fun setEnabledAnimation(enabledAnimation: Boolean) {
         // ignore
     }
+
+    /**
+     * Called when the completion window position changes relative to the cursor line.
+     *
+     * @param isPositionedAbove True if the window is displayed above the cursor line, false if below.
+     */
+    fun onPositionChanged(isPositionedAbove: Boolean) {
+        // default no-op
+    }
+
+    /**
+     * Extra height in pixels required by the layout (e.g. for custom headers, footers or container padding).
+     */
+    fun getExtraHeight(): Int = 0
 }

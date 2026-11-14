@@ -487,4 +487,118 @@ open class DirectAccessProps : Serializable {
     @Experimental
     @InvalidateRequired
     var minimapConfig: MinimapConfig = MinimapConfig.DefaultConfig
+
+    // -----------------------------------------------------------------------------------------
+    // Scrollbar Indicator & Indication Customization
+    // -----------------------------------------------------------------------------------------
+
+    /**
+     * Custom normal fill color for the scrollbar thumb indicator.
+     * When 0, falls back to [io.github.rosemoe.sora.widget.schemes.EditorColorScheme.SCROLL_BAR_THUMB].
+     */
+    @InvalidateRequired
+    var scrollbarThumbColor: Int = 0
+
+    /**
+     * Custom pressed/holding fill color for the scrollbar thumb indicator.
+     * When 0, falls back to [io.github.rosemoe.sora.widget.schemes.EditorColorScheme.SCROLL_BAR_THUMB_PRESSED].
+     */
+    @InvalidateRequired
+    var scrollbarThumbHoldColor: Int = 0
+
+    /**
+     * Whether border rendering is enabled for the scrollbar thumb indicator.
+     */
+    @InvalidateRequired
+    var scrollbarBorderEnabled: Boolean = false
+
+    /**
+     * Border stroke color for the scrollbar thumb indicator.
+     * When 0, falls back to [io.github.rosemoe.sora.widget.schemes.EditorColorScheme.SCROLL_BAR_BORDER].
+     */
+    @InvalidateRequired
+    var scrollbarBorderColor: Int = 0
+
+    /**
+     * Border stroke width for the scrollbar thumb indicator in DIP.
+     */
+    @InvalidateRequired
+    var scrollbarBorderWidthDip: Float = 1f
+
+    /**
+     * Corner / border radius for the scrollbar thumb indicator in DIP.
+     * When 0f, draws a sharp rectangle.
+     */
+    @InvalidateRequired
+    var scrollbarBorderRadiusDip: Float = 0f
+
+    /**
+     * Custom background color for the scrollbar line indication panel ("L1" tooltip).
+     * When 0, falls back to [io.github.rosemoe.sora.widget.schemes.EditorColorScheme.LINE_NUMBER_PANEL].
+     */
+    @InvalidateRequired
+    var scrollbarLinePanelColor: Int = 0
+
+    /**
+     * Custom text color for the scrollbar line indication panel.
+     * When 0, falls back to [io.github.rosemoe.sora.widget.schemes.EditorColorScheme.LINE_NUMBER_PANEL_TEXT].
+     */
+    @InvalidateRequired
+    var scrollbarLinePanelTextColor: Int = 0
+
+    /**
+     * Whether border rendering is enabled for the scrollbar line indication panel.
+     */
+    @InvalidateRequired
+    var scrollbarLinePanelBorderEnabled: Boolean = false
+
+    /**
+     * Border stroke color for the scrollbar line indication panel.
+     */
+    @InvalidateRequired
+    var scrollbarLinePanelBorderColor: Int = 0
+
+    /**
+     * Border stroke width for the scrollbar line indication panel in DIP.
+     */
+    @InvalidateRequired
+    var scrollbarLinePanelBorderWidthDip: Float = 1f
+
+    /**
+     * Corner/border radius for the scrollbar line indication panel in DIP.
+     * When negative (-1f, default), uses standard bubble shape.
+     */
+    @InvalidateRequired
+    var scrollbarLinePanelRadiusDip: Float = -1f
+
+    // -----------------------------------------------------------------------------------------
+    // Auto-completion Window Background Box Customization
+    // -----------------------------------------------------------------------------------------
+
+    /**
+     * Corner radius of the default auto-completion window box in DIP.
+     */
+    var completionCornerRadiusDip: Float = 8f
+
+    /**
+     * Border stroke width of the default auto-completion window box in DIP.
+     */
+    var completionBorderWidthDip: Float = 1f
+
+    /**
+     * Border stroke color of the auto-completion window box.
+     * When 0, falls back to [io.github.rosemoe.sora.widget.schemes.EditorColorScheme.COMPLETION_WND_CORNER].
+     */
+    var completionBorderColor: Int = 0
+
+    /**
+     * Background color of the auto-completion window box.
+     * When 0, falls back to [io.github.rosemoe.sora.widget.schemes.EditorColorScheme.COMPLETION_WND_BACKGROUND].
+     */
+    var completionBackgroundColor: Int = 0
+
+    /**
+     * Whether to reverse the displayed completion list when the window is positioned above the cursor line.
+     */
+    var reverseListWhenAbove: Boolean = true
 }

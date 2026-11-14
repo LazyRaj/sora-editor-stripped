@@ -177,7 +177,7 @@ open class EditorColorScheme(
             SCROLL_BAR_THUMB -> color = 0xffd8d8d8.toInt()
             SCROLL_BAR_THUMB_PRESSED -> color = 0xFF27292A.toInt()
             BLOCK_LINE -> color = 0xffdddddd.toInt()
-            LINE_BLOCK_LABEL, SCROLL_BAR_TRACK, TEXT_SELECTED, STRIKETHROUGH -> color = 0
+            LINE_BLOCK_LABEL, SCROLL_BAR_TRACK, TEXT_SELECTED, STRIKETHROUGH, SCROLL_BAR_BORDER, LINE_NUMBER_PANEL_BORDER -> color = 0
             LINE_NUMBER_PANEL -> color = 0xdd000000.toInt()
             BLOCK_LINE_CURRENT, SIDE_BLOCK_LINE -> color = 0xff999999.toInt()
             IDENTIFIER_VAR -> color = 0xff546e7a.toInt()
@@ -385,6 +385,9 @@ open class EditorColorScheme(
         const val MINIMAP_VIEWPORT = 82
         const val MINIMAP_VIEWPORT_BORDER = 83
 
+        const val SCROLL_BAR_BORDER = 84
+        const val LINE_NUMBER_PANEL_BORDER = 85
+
         /**
          * Min pre-defined color id
          */
@@ -393,7 +396,7 @@ open class EditorColorScheme(
         /**
          * Max pre-defined color id
          */
-        const val END_COLOR_ID = 83
+        const val END_COLOR_ID = 85
 
         private const val PRIMARY_TEXT_COLOR_DEFAULT_LIGHT = 0xff424242.toInt()
         private const val PRIMARY_TEXT_COLOR_DEFAULT_DARK = 0xfff5f5f5.toInt()

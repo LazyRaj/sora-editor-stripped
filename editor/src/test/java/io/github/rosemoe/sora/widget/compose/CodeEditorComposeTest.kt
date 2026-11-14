@@ -31,6 +31,8 @@ import androidx.compose.runtime.saveable.SaverScope
 import androidx.compose.ui.text.TextRange
 import com.google.common.truth.Truth.assertThat
 import io.github.rosemoe.sora.event.ContentChangeEvent
+import io.github.rosemoe.sora.lang.completion.CompletionItem
+import io.github.rosemoe.sora.lang.completion.SimpleCompletionItem
 import io.github.rosemoe.sora.lang.diagnostic.DiagnosticDetail
 import io.github.rosemoe.sora.lang.diagnostic.DiagnosticRegion
 import io.github.rosemoe.sora.widget.CodeEditor
@@ -512,5 +514,100 @@ class CodeEditorComposeTest {
         autoComp.updateCompletionWindowPosition(false)
         // Now space below line 20 is abundant (> 1000px), it should position below again
         assertThat(autoComp.isPositionedAbove).isFalse()
+    }
+
+    @Test
+    fun testScrollbarIndicationCustomization() {
+        val editor = CodeEditor(context)
+        val state = CodeEditorState()
+        state.attachEditor(editor)
+
+        // Custom colors and border props
+        state.scrollbarThumbColor = 0xFF112233.toInt()
+        state.scrollbarThumbHoldColor = 0xFF445566.toInt()
+        state.scrollbarBorderEnabled = true
+        state.scrollbarBorderColor = 0xFF778899.toInt()
+        state.scrollbarBorderRadiusDip = 4f
+
+        assertThat(editor.props.scrollbarThumbColor).isEqualTo(0xFF112233.toInt())
+        assertThat(editor.props.scrollbarThumbHoldColor).isEqualTo(0xFF445566.toInt())
+        assertThat(editor.props.scrollbarBorderEnabled).isTrue()
+        assertThat(editor.props.scrollbarBorderColor).isEqualTo(0xFF778899.toInt())
+        assertThat(editor.props.scrollbarBorderRadiusDip).isEqualTo(4f)
+
+        // Line panel tooltip customization
+        editor.props.scrollbarLinePanelColor = 0xFFAABBCC.toInt()
+        editor.props.scrollbarLinePanelTextColor = 0xFFDDEEFF.toInt()
+        editor.props.scrollbarLinePanelBorderEnabled = true
+        editor.props.scrollbarLinePanelBorderColor = 0xFF00FF00.toInt()
+        editor.props.scrollbarLinePanelRadiusDip = 6f
+
+        assertThat(editor.scrollbarLinePanelColor).isEqualTo(0xFFAABBCC.toInt())
+        assertThat(editor.scrollbarLinePanelTextColor).isEqualTo(0xFFDDEEFF.toInt())
+        assertThat(editor.scrollbarLinePanelBorderEnabled).isTrue()
+        assertThat(editor.scrollbarLinePanelBorderColor).isEqualTo(0xFF00FF00.toInt())
+        assertThat(editor.scrollbarLinePanelRadiusDip).isEqualTo(6f)
+
+        // Verify state preservation across save / restore
+        state.detachEditor(editor)
+        val saverScope = SaverScope { true }
+        val saved = with(CodeEditorState.Saver) { saverScope.save(state) } as List<*>
+        val restored = CodeEditorState.Saver.restore(saved) as CodeEditorState
+
+        assertThat(restored.scrollbarThumbColor).isEqualTo(0xFF112233.toInt())
+        assertThat(restored.scrollbarThumbHoldColor).isEqualTo(0xFF445566.toInt())
+        assertThat(restored.scrollbarBorderEnabled).isTrue()
+        assertThat(restored.scrollbarBorderColor).isEqualTo(0xFF778899.toInt())
+        assertThat(restored.scrollbarBorderRadiusDip).isEqualTo(4f)
+    }
+
+    @Test
+    fun testAutoCompletionBackgroundBoxAndReversedList() {
+        val editor = CodeEditor(context)
+        val autoComp = editor.getComponent(EditorAutoCompletion::class.java)
+
+        // Custom completion box properties
+        editor.props.completionCornerRadiusDip = 12f
+        editor.props.completionBorderWidthDip = 2f
+        editor.props.completionBorderColor = 0xFF336699.toInt()
+        editor.props.completionBackgroundColor = 0xFF222222.toInt()
+        editor.props.reverseListWhenAbove = true
+
+        assertThat(autoComp.reverseListWhenAbove).isTrue()
+
+        // Test ComposeCompletionLayout integration
+        var capturedIsAbove = false
+        var capturedItems: List<CompletionItem> = emptyList()
+        var clickedItem: CompletionItem? = null
+        val composeLayout = ComposeCompletionLayout { isAbove, items, onItemClick, selectedItem ->
+            capturedIsAbove = isAbove
+            capturedItems = items
+        }
+        autoComp.setLayout(composeLayout)
+        val view = composeLayout.inflate(context)
+        assertThat(view).isNotNull()
+        assertThat(composeLayout.getCompletionList()).isNotNull()
+
+        // Position change notification
+        composeLayout.onPositionChanged(true)
+        assertThat(composeLayout.isAboveTheCursor).isTrue()
+
+        composeLayout.onPositionChanged(false)
+        assertThat(composeLayout.isAboveTheCursor).isFalse()
+
+        // Verify extra height calculation for box content container
+        assertThat(composeLayout.getExtraHeight()).isGreaterThan(0)
+
+        // Verify reactive sync of items to Compose state
+        val sampleItems: List<CompletionItem> = listOf(
+            SimpleCompletionItem("itemA", "descA"),
+            SimpleCompletionItem("itemB", "descB")
+        )
+        autoComp.adapter.attachValues(autoComp, sampleItems)
+        autoComp.adapter.notifyDataSetChanged()
+
+        assertThat(composeLayout.itemsState).hasSize(2)
+        assertThat(composeLayout.itemsState[0].label).isEqualTo("itemA")
+        assertThat(composeLayout.itemsState[1].label).isEqualTo("itemB")
     }
 }

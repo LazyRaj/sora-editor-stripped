@@ -2653,11 +2653,48 @@ open class EditorRenderer(protected val editor: CodeEditor) {
             )
             thumb.draw(canvas)
         } else {
-            drawColor(
+            drawScrollBarThumb(
                 canvas,
-                editor.colorScheme.getColor(if (editor.eventHandler.holdVerticalScrollBar()) EditorColorScheme.SCROLL_BAR_THUMB_PRESSED else EditorColorScheme.SCROLL_BAR_THUMB),
-                verticalScrollBarRect
+                verticalScrollBarRect,
+                editor.eventHandler.holdVerticalScrollBar()
             )
+        }
+    }
+
+    protected open fun drawScrollBarThumb(canvas: Canvas, rect: RectF, isHeld: Boolean) {
+        val props = editor.props
+        val fillColor = if (isHeld) {
+            if (props.scrollbarThumbHoldColor != 0) props.scrollbarThumbHoldColor
+            else editor.colorScheme.getColor(EditorColorScheme.SCROLL_BAR_THUMB_PRESSED)
+        } else {
+            if (props.scrollbarThumbColor != 0) props.scrollbarThumbColor
+            else editor.colorScheme.getColor(EditorColorScheme.SCROLL_BAR_THUMB)
+        }
+        val radius = props.scrollbarBorderRadiusDip * editor.dpUnit
+        if (fillColor != 0) {
+            paintGeneral.color = fillColor
+            paintGeneral.style = AndroidPaint.Style.FILL
+            if (radius > 0f) {
+                canvas.drawRoundRect(rect, radius, radius, paintGeneral)
+            } else {
+                canvas.drawRect(rect, paintGeneral)
+            }
+        }
+        if (props.scrollbarBorderEnabled) {
+            val borderColor = if (props.scrollbarBorderColor != 0) props.scrollbarBorderColor
+            else editor.colorScheme.getColor(EditorColorScheme.SCROLL_BAR_BORDER)
+            if (borderColor != 0) {
+                val strokeWidth = props.scrollbarBorderWidthDip * editor.dpUnit
+                paintGeneral.color = borderColor
+                paintGeneral.style = AndroidPaint.Style.STROKE
+                paintGeneral.strokeWidth = strokeWidth
+                if (radius > 0f) {
+                    canvas.drawRoundRect(rect, radius, radius, paintGeneral)
+                } else {
+                    canvas.drawRect(rect, paintGeneral)
+                }
+                paintGeneral.style = AndroidPaint.Style.FILL
+            }
         }
     }
 
@@ -2683,6 +2720,16 @@ open class EditorRenderer(protected val editor: CodeEditor) {
         val textWidth = paintGeneral.measureText(text)
         var baseline: Float
         var textOffset = 0f
+        val panelColor = if (editor.props.scrollbarLinePanelColor != 0) {
+            editor.props.scrollbarLinePanelColor
+        } else {
+            editor.colorScheme.getColor(EditorColorScheme.LINE_NUMBER_PANEL)
+        }
+        val textColor = if (editor.props.scrollbarLinePanelTextColor != 0) {
+            editor.props.scrollbarLinePanelTextColor
+        } else {
+            editor.colorScheme.getColor(EditorColorScheme.LINE_NUMBER_PANEL_TEXT)
+        }
         if (mode == LineInfoPanelPositionMode.FIXED) {
             tmpRect.top = editor.height / 2f - editor.rowHeight / 2f - expand
             tmpRect.bottom = editor.height / 2f + editor.rowHeight / 2f + expand
@@ -2711,11 +2758,30 @@ open class EditorRenderer(protected val editor: CodeEditor) {
                     tmpRect.left = editor.width - offset - expand * 2f - textWidth
                 }
             }
-            drawColorRound(
-                canvas,
-                editor.colorScheme.getColor(EditorColorScheme.LINE_NUMBER_PANEL),
-                tmpRect
-            )
+            val radius = if (editor.props.scrollbarLinePanelRadiusDip >= 0f) {
+                editor.props.scrollbarLinePanelRadiusDip * editor.dpUnit
+            } else {
+                tmpRect.height() * RenderingConstants.ROUND_RECT_FACTOR
+            }
+            if (panelColor != 0) {
+                paintGeneral.color = panelColor
+                paintGeneral.style = AndroidPaint.Style.FILL
+                canvas.drawRoundRect(tmpRect, radius, radius, paintGeneral)
+            }
+            if (editor.props.scrollbarLinePanelBorderEnabled) {
+                val borderColor = if (editor.props.scrollbarLinePanelBorderColor != 0) {
+                    editor.props.scrollbarLinePanelBorderColor
+                } else {
+                    editor.colorScheme.getColor(EditorColorScheme.LINE_NUMBER_PANEL_BORDER)
+                }
+                if (borderColor != 0) {
+                    paintGeneral.color = borderColor
+                    paintGeneral.style = AndroidPaint.Style.STROKE
+                    paintGeneral.strokeWidth = editor.props.scrollbarLinePanelBorderWidthDip * editor.dpUnit
+                    canvas.drawRoundRect(tmpRect, radius, radius, paintGeneral)
+                    paintGeneral.style = AndroidPaint.Style.FILL
+                }
+            }
         } else {
             var radii: FloatArray? = null
             tmpRect.right = editor.width - rightMargin
@@ -2740,7 +2806,11 @@ open class EditorRenderer(protected val editor: CodeEditor) {
                 tmpRect.bottom = centerY + editor.rowHeight / 2f + expand
                 baseline = centerY - editor.rowHeight / 2f + editor.getRowBaseline(0).toFloat()
             }
-            if (radii != null) {
+            if (editor.props.scrollbarLinePanelRadiusDip >= 0f) {
+                val r = editor.props.scrollbarLinePanelRadiusDip * editor.dpUnit
+                tmpPath.reset()
+                tmpPath.addRoundRect(tmpRect, r, r, Path.Direction.CW)
+            } else if (radii != null) {
                 tmpPath.reset()
                 tmpPath.addRoundRect(tmpRect, radii, Path.Direction.CW)
             } else {
@@ -2749,11 +2819,28 @@ open class EditorRenderer(protected val editor: CodeEditor) {
                 textOffset = -expand / 2f
                 BubbleHelper.buildBubblePath(tmpPath, tmpRect)
             }
-            paintGeneral.color = editor.colorScheme.getColor(EditorColorScheme.LINE_NUMBER_PANEL)
-            canvas.drawPath(tmpPath, paintGeneral)
+            if (panelColor != 0) {
+                paintGeneral.color = panelColor
+                paintGeneral.style = AndroidPaint.Style.FILL
+                canvas.drawPath(tmpPath, paintGeneral)
+            }
+            if (editor.props.scrollbarLinePanelBorderEnabled) {
+                val borderColor = if (editor.props.scrollbarLinePanelBorderColor != 0) {
+                    editor.props.scrollbarLinePanelBorderColor
+                } else {
+                    editor.colorScheme.getColor(EditorColorScheme.LINE_NUMBER_PANEL_BORDER)
+                }
+                if (borderColor != 0) {
+                    paintGeneral.color = borderColor
+                    paintGeneral.style = AndroidPaint.Style.STROKE
+                    paintGeneral.strokeWidth = editor.props.scrollbarLinePanelBorderWidthDip * editor.dpUnit
+                    canvas.drawPath(tmpPath, paintGeneral)
+                    paintGeneral.style = AndroidPaint.Style.FILL
+                }
+            }
         }
         val centerX = (tmpRect.left + tmpRect.right) / 2f + textOffset
-        paintGeneral.color = editor.colorScheme.getColor(EditorColorScheme.LINE_NUMBER_PANEL_TEXT)
+        paintGeneral.color = textColor
         paintGeneral.textAlign = AndroidPaint.Align.CENTER
         canvas.drawText(text, centerX, baseline, paintGeneral)
         paintGeneral.textAlign = AndroidPaint.Align.LEFT
@@ -3148,10 +3235,10 @@ open class EditorRenderer(protected val editor: CodeEditor) {
             )
             thumb.draw(canvas)
         } else {
-            drawColor(
+            drawScrollBarThumb(
                 canvas,
-                editor.colorScheme.getColor(if (editor.eventHandler.holdHorizontalScrollBar()) EditorColorScheme.SCROLL_BAR_THUMB_PRESSED else EditorColorScheme.SCROLL_BAR_THUMB),
-                horizontalScrollBarRect
+                horizontalScrollBarRect,
+                editor.eventHandler.holdHorizontalScrollBar()
             )
         }
     }
