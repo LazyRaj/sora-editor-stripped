@@ -26,6 +26,7 @@
  */
 package io.github.rosemoe.sora.widget.base
 
+import android.content.Context
 import android.content.ContextWrapper
 import android.view.Gravity
 import android.view.View
@@ -199,7 +200,7 @@ open class EditorPopupWindow(
         return max(0, min(vertical, editor.height))
     }
 
-    private fun applyWindowAttributes(show: Boolean) {
+    protected open fun applyWindowAttributes(show: Boolean) {
         if (!show && !isShowing) {
             return
         }
@@ -247,8 +248,7 @@ open class EditorPopupWindow(
         val decorView = view.rootView ?: view
 
         val lifecycleOwner = editor.findViewTreeLifecycleOwner()
-            ?: (editor.context as? LifecycleOwner)
-            ?: ((editor.context as? ContextWrapper)?.baseContext as? LifecycleOwner)
+            ?: editor.context.findLifecycleOwner()
         if (lifecycleOwner != null) {
             if (decorView.findViewTreeLifecycleOwner() == null) {
                 decorView.setViewTreeLifecycleOwner(lifecycleOwner)
@@ -259,8 +259,7 @@ open class EditorPopupWindow(
         }
 
         val viewModelStoreOwner = editor.findViewTreeViewModelStoreOwner()
-            ?: (editor.context as? ViewModelStoreOwner)
-            ?: ((editor.context as? ContextWrapper)?.baseContext as? ViewModelStoreOwner)
+            ?: editor.context.findViewModelStoreOwner()
         if (viewModelStoreOwner != null) {
             if (decorView.findViewTreeViewModelStoreOwner() == null) {
                 decorView.setViewTreeViewModelStoreOwner(viewModelStoreOwner)
@@ -271,8 +270,7 @@ open class EditorPopupWindow(
         }
 
         val savedStateRegistryOwner = editor.findViewTreeSavedStateRegistryOwner()
-            ?: (editor.context as? SavedStateRegistryOwner)
-            ?: ((editor.context as? ContextWrapper)?.baseContext as? SavedStateRegistryOwner)
+            ?: editor.context.findSavedStateRegistryOwner()
         if (savedStateRegistryOwner != null) {
             if (decorView.findViewTreeSavedStateRegistryOwner() == null) {
                 decorView.setViewTreeSavedStateRegistryOwner(savedStateRegistryOwner)
@@ -332,4 +330,22 @@ open class EditorPopupWindow(
             window.dismiss()
         }
     }
+}
+
+internal tailrec fun Context?.findLifecycleOwner(): LifecycleOwner? = when (this) {
+    is LifecycleOwner -> this
+    is ContextWrapper -> baseContext.findLifecycleOwner()
+    else -> null
+}
+
+internal tailrec fun Context?.findViewModelStoreOwner(): ViewModelStoreOwner? = when (this) {
+    is ViewModelStoreOwner -> this
+    is ContextWrapper -> baseContext.findViewModelStoreOwner()
+    else -> null
+}
+
+internal tailrec fun Context?.findSavedStateRegistryOwner(): SavedStateRegistryOwner? = when (this) {
+    is SavedStateRegistryOwner -> this
+    is ContextWrapper -> baseContext.findSavedStateRegistryOwner()
+    else -> null
 }

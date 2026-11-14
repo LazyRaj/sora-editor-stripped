@@ -148,6 +148,28 @@ class CodeEditorComposeTest {
         editor.replaceComponent(composeWindow)
         val component = editor.getComponent<EditorTextActionWindow>()
         assertThat(component).isSameInstanceAs(composeWindow)
+
+        // Verify window sizing is not 1x1 pixel dot
+        assertThat(composeWindow.width).isAtLeast(100)
+        assertThat(composeWindow.height).isAtLeast(40)
+
+        // Verify displayWindow and dismiss cycle survives cleanly
+        composeWindow.displayWindow()
+        assertThat(composeWindow.width).isAtLeast(100)
+        assertThat(composeWindow.height).isAtLeast(40)
+
+        composeWindow.dismiss()
+        assertThat(composeWindow.isShowing).isFalse()
+
+        // Re-displaying must not crash or fail due to disposed composition
+        composeWindow.displayWindow()
+
+        // Updating action content dynamically
+        var updated = false
+        composeWindow.actionContent = { scope ->
+            updated = true
+        }
+        assertThat(composeWindow.actionContent).isNotNull()
     }
 
     @Test

@@ -51,6 +51,9 @@ import io.github.rosemoe.sora.lang.completion.CompletionItem
 import io.github.rosemoe.sora.lang.diagnostic.DiagnosticDetail
 import io.github.rosemoe.sora.lang.diagnostic.DiagnosticRegion
 import io.github.rosemoe.sora.widget.CodeEditor
+import io.github.rosemoe.sora.widget.base.findLifecycleOwner
+import io.github.rosemoe.sora.widget.base.findSavedStateRegistryOwner
+import io.github.rosemoe.sora.widget.base.findViewModelStoreOwner
 import io.github.rosemoe.sora.widget.component.DiagnosticTooltipLayout
 import io.github.rosemoe.sora.widget.component.EditorCompletionAdapter
 import io.github.rosemoe.sora.widget.component.EditorDiagnosticTooltipWindow
@@ -62,16 +65,16 @@ import kotlin.math.min
 internal fun View.attachViewTreeOwnersFrom(anchor: View?) {
     val ctx = this.context
     val lifecycleOwner = (anchor?.findViewTreeLifecycleOwner())
-        ?: (ctx as? LifecycleOwner)
-        ?: ((ctx as? ContextWrapper)?.baseContext as? LifecycleOwner)
+        ?: (anchor?.context?.findLifecycleOwner())
+        ?: (ctx.findLifecycleOwner())
 
     val viewModelStoreOwner = (anchor?.findViewTreeViewModelStoreOwner())
-        ?: (ctx as? ViewModelStoreOwner)
-        ?: ((ctx as? ContextWrapper)?.baseContext as? ViewModelStoreOwner)
+        ?: (anchor?.context?.findViewModelStoreOwner())
+        ?: (ctx.findViewModelStoreOwner())
 
     val savedStateOwner = (anchor?.findViewTreeSavedStateRegistryOwner())
-        ?: (ctx as? SavedStateRegistryOwner)
-        ?: ((ctx as? ContextWrapper)?.baseContext as? SavedStateRegistryOwner)
+        ?: (anchor?.context?.findSavedStateRegistryOwner())
+        ?: (ctx.findSavedStateRegistryOwner())
 
     fun applyOwners(target: View) {
         if (lifecycleOwner != null && target.findViewTreeLifecycleOwner() == null) {
@@ -113,8 +116,15 @@ internal fun View.attachViewTreeOwnersFrom(anchor: View?) {
 class ComposeCompletionItemAdapter(
     private val itemHeightDp: Float = 45f,
     private val parentCompositionContext: CompositionContext? = null,
-    private val itemContent: @Composable (item: CompletionItem, isSelected: Boolean, onClick: () -> Unit) -> Unit
+    itemContent: @Composable (item: CompletionItem, isSelected: Boolean, onClick: () -> Unit) -> Unit
 ) : EditorCompletionAdapter() {
+
+    private var itemContentState by mutableStateOf(itemContent)
+    var itemContent: @Composable (item: CompletionItem, isSelected: Boolean, onClick: () -> Unit) -> Unit
+        get() = itemContentState
+        set(value) {
+            itemContentState = value
+        }
 
     override fun getItemHeight(): Int {
         val density = runCatching { getContext().resources.displayMetrics.density }.getOrDefault(1f)
@@ -147,7 +157,7 @@ class ComposeCompletionItemAdapter(
         val item = if (position in 0 until count) getItem(position) else null
         composeView.setContent {
             if (item != null) {
-                itemContent(item, isCurrentCursorPosition) {
+                itemContentState(item, isCurrentCursorPosition) {
                     completionWindow?.select(position)
                 }
             }
@@ -206,11 +216,21 @@ interface TextActionScope {
 class ComposeTextActionWindow(
     editor: CodeEditor,
     private val parentCompositionContext: CompositionContext? = null,
-    var actionContent: @Composable (TextActionScope) -> Unit
+    actionContent: @Composable (TextActionScope) -> Unit
 ) : EditorTextActionWindow(editor) {
 
+    private var actionContentState by mutableStateOf(actionContent)
+    var actionContent: @Composable (TextActionScope) -> Unit
+        get() = actionContentState
+        set(value) {
+            actionContentState = value
+        }
+
+    private var lastMeasuredW: Int = (editor.dpUnit * 220).toInt().coerceAtLeast(100)
+    private var lastMeasuredH: Int = (editor.dpUnit * 48).toInt().coerceAtLeast(40)
+
     private val composeView: ComposeView = ComposeView(editor.context).apply {
-        setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool)
+        setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         if (parentCompositionContext != null) {
             setParentCompositionContext(parentCompositionContext)
         }
@@ -222,12 +242,22 @@ class ComposeTextActionWindow(
     init {
         rootView = composeView
         setContentView(composeView)
-        updateContent()
-    }
+        setSize(lastMeasuredW, lastMeasuredH)
 
-    private fun updateContent() {
+        composeView.addOnLayoutChangeListener { _, left, top, right, bottom, _, _, _, _ ->
+            val w = right - left
+            val h = bottom - top
+            if (w > 0 && h > 0 && (w != lastMeasuredW || h != lastMeasuredH)) {
+                lastMeasuredW = w
+                lastMeasuredH = h
+                if (isShowing) {
+                    repositionWindow(w, h)
+                }
+            }
+        }
+
         composeView.setContent {
-            actionContent(scopeState)
+            actionContentState(scopeState)
         }
     }
 
@@ -285,53 +315,74 @@ class ComposeTextActionWindow(
         // Compose manages its own styling/theming internally
     }
 
-    override fun displayWindow() {
-        if (!isEnabled() || !editor.isAttachedToWindow || !editor.hasFocus() || editor.snippetController.isInSnippet()) {
-            dismiss()
-            return
-        }
-
-        scopeState = createScope()
-        try {
-            composeView.measure(
-                View.MeasureSpec.makeMeasureSpec(editor.width, View.MeasureSpec.AT_MOST),
-                View.MeasureSpec.makeMeasureSpec(editor.height, View.MeasureSpec.AT_MOST)
-            )
-        } catch (_: IllegalStateException) {
-            // Unattached headless unit test environment fallback
-        }
-
-        val measuredW = composeView.measuredWidth.coerceAtLeast(1)
-        val measuredH = composeView.measuredHeight.coerceAtLeast(1)
-        setSize(measuredW, measuredH)
-
+    protected fun repositionWindow(w: Int, h: Int) {
+        setSize(w, h)
         val cursor = editor.cursor
         val top = if (cursor.isSelected) {
             val leftRect = editor.leftHandleDescriptor.position
             val rightRect = editor.rightHandleDescriptor.position
-            val top1 = selectTop(leftRect, measuredH)
-            val top2 = selectTop(rightRect, measuredH)
+            val top1 = selectTop(leftRect)
+            val top2 = selectTop(rightRect)
             min(top1, top2)
         } else {
-            selectTop(editor.insertHandleDescriptor.position, measuredH)
+            selectTop(editor.insertHandleDescriptor.position)
         }
-        val boundedTop = max(0, min(top, editor.height - measuredH - 5))
+        val maxBoundedTop = max(0, editor.height - h - 5)
+        val boundedTop = max(0, min(top, maxBoundedTop))
 
         val handleLeftX = editor.getOffset(cursor.leftLine, cursor.leftColumn)
         val handleRightX = editor.getOffset(cursor.rightLine, cursor.rightColumn)
-        val panelX = ((handleLeftX + handleRightX) / 2f - measuredW / 2f).toInt()
-        val boundedX = max(0, min(panelX, editor.width - measuredW))
+        val panelX = ((handleLeftX + handleRightX) / 2f - w / 2f).toInt()
+        val maxBoundedX = max(0, editor.width - w)
+        val boundedX = max(0, min(panelX, maxBoundedX))
 
         setLocationAbsolutely(boundedX, boundedTop)
+    }
+
+    override fun displayWindow() {
+        if (!isEnabled() || editor.snippetController.isInSnippet() || editor.isInMouseMode) {
+            dismiss()
+            return
+        }
+
+        if (!editor.hasFocus() && editor.cursor.isSelected) {
+            editor.requestFocus()
+        }
+
+        scopeState = createScope()
+        try {
+            val maxW = if (editor.width > 0) editor.width else (editor.dpUnit * 300).toInt()
+            val maxH = if (editor.height > 0) editor.height else (editor.dpUnit * 200).toInt()
+            composeView.measure(
+                View.MeasureSpec.makeMeasureSpec(maxW, View.MeasureSpec.AT_MOST),
+                View.MeasureSpec.makeMeasureSpec(maxH, View.MeasureSpec.AT_MOST)
+            )
+            if (composeView.measuredWidth > 0 && composeView.measuredHeight > 0) {
+                lastMeasuredW = composeView.measuredWidth
+                lastMeasuredH = composeView.measuredHeight
+            }
+        } catch (_: Throwable) {
+            // Headless unit test fallback
+        }
+
+        repositionWindow(lastMeasuredW, lastMeasuredH)
         show()
     }
 
-    private fun selectTop(rect: RectF, h: Int): Int {
-        val rowHeight = editor.rowHeight
-        return if (rect.top - rowHeight * 1.5f > h) {
-            (rect.top - rowHeight * 1.5f - h).toInt()
-        } else {
-            (rect.bottom + rowHeight / 2f).toInt()
+    override fun show() {
+        if (!isEnabled() || editor.snippetController.isInSnippet() || editor.isInMouseMode) {
+            return
+        }
+        if (!editor.hasFocus() && editor.cursor.isSelected) {
+            editor.requestFocus()
+        }
+        if (isShowing) {
+            return
+        }
+        try {
+            applyWindowAttributes(true)
+        } catch (_: Throwable) {
+            // E.g. BadTokenException if window is detaching or in headless environment
         }
     }
 }
@@ -361,13 +412,20 @@ interface DiagnosticTooltipScope {
  */
 class ComposeDiagnosticTooltipLayout(
     private val parentCompositionContext: CompositionContext? = null,
-    var tooltipContent: @Composable (DiagnosticTooltipScope) -> Unit
+    tooltipContent: @Composable (DiagnosticTooltipScope) -> Unit
 ) : DiagnosticTooltipLayout {
 
     private var hostWindow: EditorDiagnosticTooltipWindow? = null
     private var composeView: ComposeView? = null
     private var currentDiagnostic by mutableStateOf<DiagnosticDetail?>(null)
     private var currentRegion by mutableStateOf<DiagnosticRegion?>(null)
+    private var tooltipContentState by mutableStateOf(tooltipContent)
+
+    var tooltipContent: @Composable (DiagnosticTooltipScope) -> Unit
+        get() = tooltipContentState
+        set(value) {
+            tooltipContentState = value
+        }
 
     override fun attach(window: EditorDiagnosticTooltipWindow) {
         this.hostWindow = window
@@ -375,7 +433,7 @@ class ComposeDiagnosticTooltipLayout(
 
     override fun createView(inflater: LayoutInflater): View {
         val view = ComposeView(inflater.context).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool)
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             if (parentCompositionContext != null) {
                 setParentCompositionContext(parentCompositionContext)
             }
@@ -389,7 +447,7 @@ class ComposeDiagnosticTooltipLayout(
                         hostWindow?.dismiss()
                     }
                 }
-                tooltipContent(scope)
+                tooltipContentState(scope)
             }
         }
         composeView = view

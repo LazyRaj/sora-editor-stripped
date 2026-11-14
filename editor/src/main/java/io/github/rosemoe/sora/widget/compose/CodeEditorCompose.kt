@@ -36,6 +36,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import io.github.rosemoe.sora.lang.completion.CompletionItem
 import io.github.rosemoe.sora.widget.CodeEditor
+import io.github.rosemoe.sora.widget.component.DefaultCompletionItemAdapter
+import io.github.rosemoe.sora.widget.component.DefaultDiagnosticTooltipLayout
 import io.github.rosemoe.sora.widget.component.EditorAutoCompletion
 import io.github.rosemoe.sora.widget.component.EditorTextActionWindow
 
@@ -255,16 +257,33 @@ fun CodeEditorCompose(
                             composeActionWindow
                         )
                     }
+                } else {
+                    val currentActionWindow =
+                        editor.getComponent(EditorTextActionWindow::class.java)
+                    if (currentActionWindow is ComposeTextActionWindow) {
+                        editor.replaceComponent(
+                            EditorTextActionWindow::class.java,
+                            EditorTextActionWindow(editor)
+                        )
+                    }
                 }
 
                 if (completionItemContent != null) {
                     val autoComp = editor.getComponent(EditorAutoCompletion::class.java)
-                    if (autoComp.adapter !is ComposeCompletionItemAdapter) {
+                    val adapter = autoComp.adapter
+                    if (adapter is ComposeCompletionItemAdapter) {
+                        adapter.itemContent = completionItemContent
+                    } else {
                         autoComp.adapter =
                             ComposeCompletionItemAdapter(
                                 itemContent = completionItemContent,
                                 parentCompositionContext = compositionContext
                             )
+                    }
+                } else {
+                    val autoComp = editor.getComponent(EditorAutoCompletion::class.java)
+                    if (autoComp.adapter is ComposeCompletionItemAdapter) {
+                        autoComp.adapter = DefaultCompletionItemAdapter()
                     }
                 }
 
@@ -278,6 +297,11 @@ fun CodeEditorCompose(
                                 tooltipContent = diagnosticTooltipContent,
                                 parentCompositionContext = compositionContext
                             )
+                    }
+                } else {
+                    val currentLayout = editor.diagnosticTooltip?.layout
+                    if (currentLayout is ComposeDiagnosticTooltipLayout) {
+                        editor.diagnosticTooltip?.layout = DefaultDiagnosticTooltipLayout()
                     }
                 }
 
