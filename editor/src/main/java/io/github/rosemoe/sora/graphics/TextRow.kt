@@ -623,7 +623,7 @@ open class TextRow {
                     if (currentRow.isEmpty) {
                         currentRow.setInitialRange(e.startColumn, e.endColumn)
                     } else {
-                        currentRow.setEndColumn(e.endColumn)
+                        currentRow.endColumn = e.endColumn
                     }
                     currentWidth += runWidth
                     TemporaryFloatBuffer.recycle(advances)
@@ -659,7 +659,7 @@ open class TextRow {
                     if (currentRow.isEmpty) {
                         currentRow.setInitialRange(e.startColumn + offset, e.startColumn + next)
                     } else {
-                        currentRow.setEndColumn(e.startColumn + next)
+                        currentRow.endColumn = e.startColumn + next
                     }
                     currentWidth += advance
                     if (beforeOptimization != next) {
@@ -1838,33 +1838,28 @@ open class TextRow {
         /**
          * Start column (inclusive)
          */
-        @JvmField
         var startColumn: Int = 0
 
         /**
          * End column (exclusive)
          */
-        @JvmField
         var endColumn: Int = 0
+            set(value) {
+                check(!isEmpty) { "Row is empty" }
+                field = value
+            }
 
         /**
          * Inlay hints on the row, maybe null or empty
          */
-        @JvmField
         var inlayHints: MutableList<InlayHint>? = null
 
-        @JvmField
         var rowWidth: Float = 0f
 
         fun setInitialRange(start: Int, end: Int) {
             isEmpty = false
             startColumn = start
             endColumn = end
-        }
-
-        fun setEndColumn(column: Int) {
-            check(!isEmpty) { "Row is empty" }
-            this.endColumn = column
         }
 
         fun addInlayHint(inlayHint: InlayHint) {
@@ -1876,12 +1871,10 @@ open class TextRow {
         }
     }
 
-    class ListPointers(
-        @JvmField var spanIndex: Int,
-        @JvmField var inlineElementIndex: Int
-    ) {
-        fun copy(): ListPointers = ListPointers(spanIndex, inlineElementIndex)
-    }
+    data class ListPointers(
+        var spanIndex: Int,
+        var inlineElementIndex: Int
+    )
 
     private class RegionBuffer(
         private val ctx: IteratingContext,
@@ -1990,9 +1983,9 @@ open class TextRow {
         )
     }
 
-    class ElementPosition(
-        @JvmField val element: RowElement?,
-        @JvmField val isInElementBounds: Boolean,
-        @JvmField val textOffset: Int
+    data class ElementPosition(
+        val element: RowElement?,
+        val isInElementBounds: Boolean,
+        val textOffset: Int
     )
 }

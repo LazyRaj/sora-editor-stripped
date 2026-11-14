@@ -43,21 +43,17 @@ class SingleCharacterWidths(private val tabWidth: Int) {
          */
         private const val PRECISION = 1000L
 
-        @JvmStatic
         fun isEmoji(ch: Char): Boolean {
             val code = ch.code
             return code == 0xd83c || code == 0xd83d || code == 0xd83e
         }
     }
 
-    @JvmField
-    val widths = FloatArray(10)
+    private val widths = FloatArray(10)
 
-    @JvmField
-    val codePointWidths = SparseArray<Float>()
+    private val codePointWidths = SparseArray<Float>()
 
-    @JvmField
-    val buffer = CharArray(10)
+    private val buffer = CharArray(10)
 
     private val cache = FloatArray(65536)
 
@@ -156,3 +152,9 @@ class SingleCharacterWidths(private val tabWidth: Int) {
         return width.toFloat() / PRECISION
     }
 }
+
+/**
+ * Check if character is an emoji surrogate.
+ */
+inline val Char.isEmoji: Boolean get() = SingleCharacterWidths.isEmoji(this)
+

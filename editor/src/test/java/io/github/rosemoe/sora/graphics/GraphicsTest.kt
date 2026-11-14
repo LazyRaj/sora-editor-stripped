@@ -52,17 +52,25 @@ class GraphicsTest {
 
         // Inside
         assertTrue(RectUtils.contains(rect, 30f, 40f, 0f))
+        assertTrue(rect.contains(30f, 40f))
         // Outside bounds but inside extraXSpace
         assertFalse(RectUtils.contains(rect, 5f, 40f, 0f))
+        assertFalse(rect.contains(5f, 40f))
         assertTrue(RectUtils.contains(rect, 5f, 40f, 10f))
+        assertTrue(rect.contains(5f, 40f, 10f))
         // Y outside
         assertFalse(RectUtils.contains(rect, 30f, 15f, 10f))
+        assertFalse(rect.contains(30f, 15f, 10f))
 
         // almostContains
         assertTrue(RectUtils.almostContains(rect, 30f, 40f, 0f))
+        assertTrue(rect.almostContains(30f, 40f, 0f))
         assertFalse(RectUtils.almostContains(rect, 5f, 15f, 0f))
+        assertFalse(rect.almostContains(5f, 15f, 0f))
         assertTrue(RectUtils.almostContains(rect, 5f, 15f, 10f))
+        assertTrue(rect.almostContains(5f, 15f, 10f))
         assertFalse(RectUtils.almostContains(rect, 5f, 5f, 10f))
+        assertFalse(rect.almostContains(5f, 5f, 10f))
     }
 
     @Test
@@ -71,6 +79,10 @@ class GraphicsTest {
         val bounds = RectF(10f, 10f, 100f, 60f)
         BubbleHelper.buildBubblePath(path, bounds)
         assertFalse(path.isEmpty)
+
+        val path2 = Path()
+        path2.buildBubble(bounds)
+        assertFalse(path2.isEmpty)
     }
 
     @Test
@@ -96,23 +108,31 @@ class GraphicsTest {
     fun testGraphicCharacter() {
         // ASCII combining symbols
         assertTrue(GraphicCharacter.isASCIICombiningSymbol('.'.code))
+        assertTrue('.'.code.isAsciiCombiningSymbol)
         assertTrue(GraphicCharacter.isASCIICombiningSymbol('/'.code))
+        assertTrue('/'.code.isAsciiCombiningSymbol)
         assertTrue(GraphicCharacter.isASCIICombiningSymbol('!'.code))
         assertTrue(GraphicCharacter.isASCIICombiningSymbol('='.code))
         assertTrue(GraphicCharacter.isASCIICombiningSymbol('<'.code))
         assertTrue(GraphicCharacter.isASCIICombiningSymbol('>'.code))
         assertTrue(GraphicCharacter.isASCIICombiningSymbol('-'.code))
         assertFalse(GraphicCharacter.isASCIICombiningSymbol('a'.code))
+        assertFalse('a'.code.isAsciiCombiningSymbol)
         assertFalse(GraphicCharacter.isASCIICombiningSymbol('1'.code))
 
         // Combining characters
         assertTrue(GraphicCharacter.isCombiningCharacter(0x200D)) // ZWJ
+        assertTrue(0x200D.isCombiningCharacter)
         assertTrue(GraphicCharacter.isCombiningCharacter(0x200C)) // ZWNJ
+        assertTrue(0x200C.isCombiningCharacter)
         assertTrue(GraphicCharacter.isCombiningCharacter('.'.code))
+        assertTrue('.'.code.isCombiningCharacter)
 
         // Emoji parts
         assertTrue(GraphicCharacter.couldBeEmojiPart(0x200D))
+        assertTrue(0x200D.couldBeEmojiPart)
         assertFalse(GraphicCharacter.couldBeEmojiPart('A'.code))
+        assertFalse('A'.code.couldBeEmojiPart)
     }
 
     @Test
@@ -216,10 +236,25 @@ class GraphicsTest {
 
         val pos = textRow.getElementPositionForCursorOffset(cursorOffset)
         assertEquals(5, pos.textOffset)
+        val (elem, inBounds, textOff) = pos
+        assertEquals(5, textOff)
+
+        val pointers = TextRow.ListPointers(1, 2)
+        val (spanIdx, elemIdx) = pointers
+        assertEquals(1, spanIdx)
+        assertEquals(2, elemIdx)
 
         val bitmap = Bitmap.createBitmap(200, 50, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val drawResult = textRow.draw(canvas, 0f, 500f)
         assertTrue(IntPair.getSecond(drawResult) > 0f)
+    }
+
+    @Test
+    fun testEmojiExtension() {
+        assertTrue('\uD83C'.isEmoji)
+        assertTrue('\uD83D'.isEmoji)
+        assertTrue('\uD83E'.isEmoji)
+        assertFalse('A'.isEmoji)
     }
 }

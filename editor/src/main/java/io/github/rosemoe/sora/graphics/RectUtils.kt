@@ -29,13 +29,24 @@ import android.graphics.RectF
 
 object RectUtils {
 
-    @JvmStatic
-    fun contains(rect: RectF, x: Float, y: Float, extraXSpace: Float): Boolean {
+    fun contains(rect: RectF, x: Float, y: Float, extraXSpace: Float = 0f): Boolean {
         return x >= rect.left - extraXSpace && x <= rect.right + extraXSpace && y >= rect.top && y <= rect.bottom
     }
 
-    @JvmStatic
     fun almostContains(rect: RectF, x: Float, y: Float, extraSpace: Float): Boolean {
         return x >= rect.left - extraSpace && x <= rect.right + extraSpace && y >= rect.top - extraSpace && y <= rect.bottom + extraSpace
     }
 }
+
+/**
+ * Extension function to check if [RectF] contains point (x, y) with optional [extraXSpace].
+ */
+fun RectF.contains(x: Float, y: Float, extraXSpace: Float = 0f): Boolean =
+    RectUtils.contains(this, x, y, extraXSpace)
+
+/**
+ * Extension function to check if [RectF] almost contains point (x, y) with [extraSpace].
+ */
+fun RectF.almostContains(x: Float, y: Float, extraSpace: Float): Boolean =
+    RectUtils.almostContains(this, x, y, extraSpace)
+

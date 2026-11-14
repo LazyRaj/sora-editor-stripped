@@ -29,7 +29,6 @@ import io.github.rosemoe.sora.util.MyCharacter
 
 object GraphicCharacter {
 
-    @JvmStatic
     fun isCombiningCharacter(codePoint: Int): Boolean {
         return MyCharacter.isVariationSelector(codePoint) ||
                 MyCharacter.isFitzpatrick(codePoint) ||
@@ -40,7 +39,6 @@ object GraphicCharacter {
                 isASCIICombiningSymbol(codePoint)
     }
 
-    @JvmStatic
     fun isASCIICombiningSymbol(codePoint: Int): Boolean {
         return codePoint == '.'.code ||
                 codePoint == '/'.code ||
@@ -51,7 +49,6 @@ object GraphicCharacter {
                 codePoint == '-'.code
     }
 
-    @JvmStatic
     fun couldBeEmojiPart(codePoint: Int): Boolean {
         return MyCharacter.isVariationSelector(codePoint) ||
                 MyCharacter.isFitzpatrick(codePoint) ||
@@ -60,3 +57,19 @@ object GraphicCharacter {
                 MyCharacter.couldBeEmoji(codePoint)
     }
 }
+
+/**
+ * Check if this codepoint represents a combining character.
+ */
+inline val Int.isCombiningCharacter: Boolean get() = GraphicCharacter.isCombiningCharacter(this)
+
+/**
+ * Check if this codepoint is an ASCII combining symbol.
+ */
+inline val Int.isAsciiCombiningSymbol: Boolean get() = GraphicCharacter.isASCIICombiningSymbol(this)
+
+/**
+ * Check if this codepoint could be part of an emoji sequence.
+ */
+inline val Int.couldBeEmojiPart: Boolean get() = GraphicCharacter.couldBeEmojiPart(this)
+

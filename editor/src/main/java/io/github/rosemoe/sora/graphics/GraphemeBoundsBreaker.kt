@@ -35,7 +35,6 @@ object GraphemeBoundsBreaker {
     /**
      * Find next grapheme break point before the given width
      */
-    @JvmStatic
     fun findGraphemeBreakPoint(advances: FloatArray, length: Int, width: Int, start: Int): Int {
         var currentWidth = 0f
         var next = start

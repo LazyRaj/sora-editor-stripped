@@ -30,8 +30,9 @@ import android.text.GetChars
 import android.text.TextUtils
 import io.github.rosemoe.sora.text.FunctionCharacters
 import io.github.rosemoe.sora.util.TemporaryCharBuffer
+import io.github.rosemoe.sora.util.use
 
-open class Paint @JvmOverloads constructor(
+open class Paint(
     var isRenderFunctionCharacters: Boolean = false
 ) : android.graphics.Paint() {
 
@@ -76,35 +77,35 @@ open class Paint @JvmOverloads constructor(
         advances: FloatArray?,
         advancesIndex: Int
     ): Float {
-        val buffer = TemporaryCharBuffer.obtain(contextCount)
-        TextUtils.getChars(chars, contextIndex, contextIndex + contextCount, buffer, 0)
-        var advance = getTextRunAdvances(
-            buffer,
-            index - contextIndex,
-            count,
-            0,
-            contextCount,
-            isRtl,
-            advances,
-            advancesIndex
-        )
-        if (isRenderFunctionCharacters) {
-            for (i in 0 until count) {
-                val ch = chars[index + i]
-                if (FunctionCharacters.isEditorFunctionChar(ch)) {
-                    val width = measureText(FunctionCharacters.getNameForFunctionCharacter(ch))
-                    if (advances != null) {
-                        advance -= advances[advancesIndex + i]
-                        advances[advancesIndex + i] = width
-                    } else {
-                        advance -= measureText(ch.toString())
+        return TemporaryCharBuffer.use(contextCount) { buffer ->
+            TextUtils.getChars(chars, contextIndex, contextIndex + contextCount, buffer, 0)
+            var advance = getTextRunAdvances(
+                buffer,
+                index - contextIndex,
+                count,
+                0,
+                contextCount,
+                isRtl,
+                advances,
+                advancesIndex
+            )
+            if (isRenderFunctionCharacters) {
+                for (i in 0 until count) {
+                    val ch = chars[index + i]
+                    if (FunctionCharacters.isEditorFunctionChar(ch)) {
+                        val width = measureText(FunctionCharacters.getNameForFunctionCharacter(ch))
+                        if (advances != null) {
+                            advance -= advances[advancesIndex + i]
+                            advances[advancesIndex + i] = width
+                        } else {
+                            advance -= measureText(ch.toString())
+                        }
+                        advance += width
                     }
-                    advance += width
                 }
             }
+            advance
         }
-        TemporaryCharBuffer.recycle(buffer)
-        return advance
     }
 
     /**
@@ -205,20 +206,18 @@ open class Paint @JvmOverloads constructor(
         isRtl: Boolean,
         advance: Float
     ): Int {
-        val buffer = TemporaryCharBuffer.obtain(contextEnd - contextStart)
-        TextUtils.getChars(text, contextStart, contextEnd, buffer, 0)
-        return try {
+        val count = contextEnd - contextStart
+        return TemporaryCharBuffer.use(count) { buffer ->
+            TextUtils.getChars(text, contextStart, contextEnd, buffer, 0)
             contextStart + getOffsetForAdvance(
                 buffer,
                 start - contextStart,
                 end - contextStart,
                 0,
-                contextEnd - contextStart,
+                count,
                 isRtl,
                 advance
             )
-        } finally {
-            TemporaryCharBuffer.recycle(buffer)
         }
     }
 }

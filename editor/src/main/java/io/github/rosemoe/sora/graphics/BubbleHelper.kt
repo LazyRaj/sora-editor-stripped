@@ -43,7 +43,6 @@ object BubbleHelper {
      * @param path target Path object
      * @param bounds The bounds for the bubble
      */
-    @JvmStatic
     fun buildBubblePath(path: Path, bounds: RectF) {
         path.reset()
 
@@ -82,3 +81,9 @@ object BubbleHelper {
         )
     }
 }
+
+/**
+ * Extension function to build a bubble in this [Path] for the given [bounds].
+ */
+fun Path.buildBubble(bounds: RectF) = BubbleHelper.buildBubblePath(this, bounds)
+
