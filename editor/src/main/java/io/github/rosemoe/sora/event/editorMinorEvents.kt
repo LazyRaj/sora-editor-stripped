@@ -171,3 +171,15 @@ class PublishDiagnosticsEvent(
     val oldDiagnostics: List<DiagnosticRegion>,
     val newDiagnosticsEvent: List<DiagnosticRegion>
 ) : Event(editor)
+
+/**
+ * Triggered when a visual, layout, or configuration property on [CodeEditor] is modified.
+ *
+ * @property propertyName The name of the property that changed.
+ * @property value The new value of the property.
+ */
+class EditorPropertyChangeEvent(
+    editor: CodeEditor,
+    val propertyName: String,
+    val value: Any?
+) : Event(editor)

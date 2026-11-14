@@ -46,6 +46,7 @@ import androidx.annotation.FloatRange
 import androidx.annotation.Px
 import io.github.rosemoe.sora.R
 import io.github.rosemoe.sora.event.ColorSchemeUpdateEvent
+import io.github.rosemoe.sora.event.EditorPropertyChangeEvent
 import io.github.rosemoe.sora.event.EventManager
 import io.github.rosemoe.sora.widget.CodeEditor
 import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
@@ -109,9 +110,12 @@ open class Magnifier(
     override fun isEnabled(): Boolean = _enabled
 
     override fun setEnabled(enabled: Boolean) {
-        _enabled = enabled
-        if (!enabled) {
-            dismiss()
+        if (_enabled != enabled) {
+            _enabled = enabled
+            if (!enabled) {
+                dismiss()
+            }
+            view.dispatchEvent(EditorPropertyChangeEvent(view, "magnifierEnabled", enabled))
         }
     }
 

@@ -88,6 +88,8 @@ import io.github.rosemoe.sora.event.ContentChangeEvent
 import io.github.rosemoe.sora.event.CreateContextMenuEvent
 import io.github.rosemoe.sora.event.EditorAttachStateChangeEvent
 import io.github.rosemoe.sora.event.EditorFocusChangeEvent
+import io.github.rosemoe.sora.event.EditorLanguageChangeEvent
+import io.github.rosemoe.sora.event.EditorPropertyChangeEvent
 import io.github.rosemoe.sora.event.EditorFormatEvent
 import io.github.rosemoe.sora.event.EditorReleaseEvent
 import io.github.rosemoe.sora.event.Event
@@ -253,11 +255,14 @@ open class CodeEditor(
     var tabWidth: Int = 4
         set(width) {
             require(width >= 1) { "width can not be under 1" }
-            field = width
-            _renderContext?.invalidateRenderNodes()
-            _renderer?.updateTimestamp()
-            requestLayoutIfNeeded()
-            invalidate()
+            if (field != width) {
+                field = width
+                _renderContext?.invalidateRenderNodes()
+                _renderer?.updateTimestamp()
+                requestLayoutIfNeeded()
+                invalidate()
+                dispatchEvent(EditorPropertyChangeEvent(this, "tabWidth", width))
+            }
         }
 
     /**
@@ -361,14 +366,23 @@ open class CodeEditor(
     private var wordwrap = false
 
     var isEditable: Boolean
-        get() = editable && !layoutBusy && !this.isFormatting
+        get() = editable
         set(value) {
-            this.editable = value
-            if (!value) {
-                hideSoftInput()
-                snippetController.stopSnippet()
+            if (this.editable != value) {
+                this.editable = value
+                if (!value) {
+                    hideSoftInput()
+                    snippetController.stopSnippet()
+                }
+                dispatchEvent(EditorPropertyChangeEvent(this, "isEditable", value))
             }
         }
+
+    /**
+     * Checks whether the editor can currently accept modifications (editable and not busy).
+     */
+    val canEdit: Boolean
+        get() = editable && !layoutBusy && !this.isFormatting
 
     var isWordwrap: Boolean
         get() = wordwrap
@@ -453,11 +467,14 @@ open class CodeEditor(
          * @param lineNumberEnabled The state of line number displaying
          */
         set(lineNumberEnabled) {
-            if (lineNumberEnabled != field && isWordwrap) {
-                createLayout()
+            if (lineNumberEnabled != field) {
+                if (isWordwrap) {
+                    createLayout()
+                }
+                field = lineNumberEnabled
+                invalidate()
+                dispatchEvent(EditorPropertyChangeEvent(this, "lineNumbersEnabled", lineNumberEnabled))
             }
-            field = lineNumberEnabled
-            invalidate()
         }
     private var blockLineEnabled = false
 
@@ -477,8 +494,11 @@ open class CodeEditor(
          * the background of current line
          */
         set(highlightCurrentLine) {
-            field = highlightCurrentLine
-            invalidate()
+            if (field != highlightCurrentLine) {
+                field = highlightCurrentLine
+                invalidate()
+                dispatchEvent(EditorPropertyChangeEvent(this, "highlightCurrentLine", highlightCurrentLine))
+            }
         }
     private var verticalScrollBarEnabled = false
     private var horizontalScrollBarEnabled = false
@@ -489,9 +509,12 @@ open class CodeEditor(
      */
     var isLineNumberPinned: Boolean = false
         set(value) {
-            field = value
-            if (this.isLineNumberEnabled) {
-                invalidate()
+            if (field != value) {
+                field = value
+                if (this.isLineNumberEnabled) {
+                    invalidate()
+                }
+                dispatchEvent(EditorPropertyChangeEvent(this, "pinLineNumbers", value))
             }
         }
 
@@ -1142,9 +1165,13 @@ open class CodeEditor(
         set(period) {
             if (_cursorBlink == null) {
                 _cursorBlink = CursorBlink(this, period)
+                dispatchEvent(EditorPropertyChangeEvent(this, "cursorBlinkPeriod", period))
             } else {
                 val before = cursorBlink.period
                 cursorBlink.period = period
+                if (before != period) {
+                    dispatchEvent(EditorPropertyChangeEvent(this, "cursorBlinkPeriod", period))
+                }
                 if (before <= 0 && cursorBlink.valid && isAttachedToWindow) {
                     postInLifecycle(cursorBlink)
                 }
@@ -1270,6 +1297,7 @@ open class CodeEditor(
         if (this.highlightTexts != null) {
             internalSetHighlightTexts(null)
         }
+        dispatchEvent(EditorLanguageChangeEvent(this, newLang))
     }
 
     /**
@@ -1339,6 +1367,7 @@ open class CodeEditor(
      */
     fun setWordwrap(wordwrap: Boolean, antiWordBreaking: Boolean, supportRtlRow: Boolean) {
         if (this.wordwrap != wordwrap || this.isAntiWordBreaking != antiWordBreaking || this.isWordwrapRtlDisplaySupport != supportRtlRow) {
+            val wordwrapChanged = this.wordwrap != wordwrap
             this.wordwrap = wordwrap
             this.isAntiWordBreaking = antiWordBreaking
             this.isWordwrapRtlDisplaySupport = supportRtlRow
@@ -1348,6 +1377,9 @@ open class CodeEditor(
                 renderContext.invalidateRenderNodes()
             }
             invalidate()
+            if (wordwrapChanged) {
+                dispatchEvent(EditorPropertyChangeEvent(this, "isWordwrap", wordwrap))
+            }
         }
     }
 
@@ -2803,8 +2835,11 @@ open class CodeEditor(
     var isUndoEnabled: Boolean
         get() = undoEnabled
         set(value) {
-            undoEnabled = value
-            text.isUndoEnabled = value
+            if (undoEnabled != value) {
+                undoEnabled = value
+                text.isUndoEnabled = value
+                dispatchEvent(EditorPropertyChangeEvent(this, "isUndoEnabled", value))
+            }
         }
 
     /**
@@ -2813,7 +2848,11 @@ open class CodeEditor(
     var isDividerEnabled: Boolean
         get() = dividerWidth > 0f
         set(value) {
-            dividerWidth = if (value) dpUnit else 0f
+            val newWidth = if (value) dpUnit else 0f
+            if (dividerWidth != newWidth) {
+                dividerWidth = newWidth
+                dispatchEvent(EditorPropertyChangeEvent(this, "dividerEnabled", value))
+            }
         }
 
     var diagnosticIndicatorStyle: DiagnosticIndicatorStyle

@@ -27,6 +27,7 @@
 package io.github.rosemoe.sora.widget.compose
 
 import android.view.LayoutInflater
+import androidx.compose.runtime.saveable.SaverScope
 import androidx.compose.ui.text.TextRange
 import com.google.common.truth.Truth.assertThat
 import io.github.rosemoe.sora.event.ContentChangeEvent
@@ -184,5 +185,103 @@ class CodeEditorComposeTest {
 
         val autoComp = editor.getComponent<EditorAutoCompletion>()
         assertThat(autoComp).isNotNull()
+    }
+
+    @Test
+    fun testBidirectionalSingleSourceOfTruth() {
+        val editor = CodeEditor(context)
+        val state = CodeEditorState(initialText = "Test bidirectional synchronization")
+        state.attachEditor(editor)
+
+        // 1. Direct mutation on editor -> must immediately sync to state without lag
+        editor.isWordwrap = true
+        assertThat(state.isWordwrap).isTrue()
+
+        editor.tabWidth = 8
+        assertThat(state.tabWidth).isEqualTo(8)
+
+        editor.textSize = 22f
+        assertThat(state.textSizeSp).isEqualTo(22f)
+
+        editor.isEditable = false
+        assertThat(state.isEditable).isFalse()
+
+        editor.isLineNumberEnabled = false
+        assertThat(state.lineNumbersEnabled).isFalse()
+
+        editor.isLineNumberPinned = true
+        assertThat(state.pinLineNumbers).isTrue()
+
+        editor.isHighlightCurrentLine = false
+        assertThat(state.highlightCurrentLine).isFalse()
+
+        editor.isDividerEnabled = false
+        assertThat(state.dividerEnabled).isFalse()
+
+        editor.cursorBlinkPeriod = 0
+        assertThat(state.cursorBlinkEnabled).isFalse()
+
+        // 2. Recomposition simulation: updateEditor must NOT revert direct editor changes!
+        state.updateEditor(editor)
+        assertThat(editor.isWordwrap).isTrue()
+        assertThat(editor.tabWidth).isEqualTo(8)
+        assertThat(editor.textSize).isEqualTo(22f)
+        assertThat(editor.isEditable).isFalse()
+        assertThat(editor.isLineNumberEnabled).isFalse()
+        assertThat(editor.isLineNumberPinned).isTrue()
+        assertThat(editor.isHighlightCurrentLine).isFalse()
+        assertThat(editor.isDividerEnabled).isFalse()
+        assertThat(editor.cursorBlinkPeriod).isEqualTo(0)
+
+        // 3. Mutation on state -> must reflect on editor
+        state.isWordwrap = false
+        assertThat(editor.isWordwrap).isFalse()
+
+        state.tabWidth = 2
+        assertThat(editor.tabWidth).isEqualTo(2)
+
+        state.textSizeSp = 18f
+        assertThat(editor.textSize).isEqualTo(18f)
+
+        state.isEditable = true
+        assertThat(editor.isEditable).isTrue()
+
+        state.detachEditor(editor)
+    }
+
+    @Test
+    fun testStateSaverPersistence() {
+        val state = CodeEditorState(
+            initialText = "Persistent Code",
+            initialSelection = TextRange(5, 10)
+        ).apply {
+            isWordwrap = true
+            textSizeSp = 20f
+            tabWidth = 2
+            isEditable = false
+            lineNumbersEnabled = false
+            pinLineNumbers = true
+            isUndoEnabled = false
+            cursorBlinkEnabled = false
+            highlightCurrentLine = false
+            dividerEnabled = false
+        }
+
+        val saverScope = SaverScope { true }
+        val saved = with(CodeEditorState.Saver) { saverScope.save(state) } as List<*>
+        val restored = CodeEditorState.Saver.restore(saved) as CodeEditorState
+
+        assertThat(restored.text).isEqualTo("Persistent Code")
+        assertThat(restored.selection).isEqualTo(TextRange(5, 10))
+        assertThat(restored.isWordwrap).isTrue()
+        assertThat(restored.textSizeSp).isEqualTo(20f)
+        assertThat(restored.tabWidth).isEqualTo(2)
+        assertThat(restored.isEditable).isFalse()
+        assertThat(restored.lineNumbersEnabled).isFalse()
+        assertThat(restored.pinLineNumbers).isTrue()
+        assertThat(restored.isUndoEnabled).isFalse()
+        assertThat(restored.cursorBlinkEnabled).isFalse()
+        assertThat(restored.highlightCurrentLine).isFalse()
+        assertThat(restored.dividerEnabled).isFalse()
     }
 }

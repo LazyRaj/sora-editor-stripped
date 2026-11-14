@@ -37,6 +37,7 @@ import io.github.rosemoe.sora.event.EditorFocusChangeEvent
 import io.github.rosemoe.sora.event.EditorFormatEvent
 import io.github.rosemoe.sora.event.EditorKeyEvent
 import io.github.rosemoe.sora.event.EditorLanguageChangeEvent
+import io.github.rosemoe.sora.event.EditorPropertyChangeEvent
 import io.github.rosemoe.sora.event.EditorReleaseEvent
 import io.github.rosemoe.sora.event.Event
 import io.github.rosemoe.sora.event.EventManager
@@ -342,11 +343,14 @@ open class EditorAutoCompletion(
     override fun isEnabled(): Boolean = _enabled
 
     override fun setEnabled(enabled: Boolean) {
-        _enabled = enabled
-        eventManager.isEnabled = enabled
-        if (!enabled) {
-            cancelCompletion()
-            hide()
+        if (_enabled != enabled) {
+            _enabled = enabled
+            eventManager.isEnabled = enabled
+            if (!enabled) {
+                cancelCompletion()
+                hide()
+            }
+            editor.dispatchEvent(EditorPropertyChangeEvent(editor, "autoCompletionEnabled", enabled))
         }
     }
 

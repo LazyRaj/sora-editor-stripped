@@ -36,10 +36,14 @@ import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.TextRange
+import io.github.rosemoe.sora.event.ColorSchemeUpdateEvent
 import io.github.rosemoe.sora.event.ContentChangeEvent
+import io.github.rosemoe.sora.event.EditorLanguageChangeEvent
+import io.github.rosemoe.sora.event.EditorPropertyChangeEvent
 import io.github.rosemoe.sora.event.EditorReleaseEvent
 import io.github.rosemoe.sora.event.SelectionChangeEvent
 import io.github.rosemoe.sora.event.SubscriptionReceipt
+import io.github.rosemoe.sora.event.TextSizeChangeEvent
 import io.github.rosemoe.sora.lang.Language
 import io.github.rosemoe.sora.text.CharPosition
 import io.github.rosemoe.sora.widget.CodeEditor
@@ -60,8 +64,8 @@ import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
 class CodeEditorState(
     initialText: String = "",
     initialSelection: TextRange = TextRange.Zero,
-    initialLanguage: Language? = null,
-    initialColorScheme: EditorColorScheme = EditorColorScheme()
+    private val initialLanguage: Language? = null,
+    private val initialColorScheme: EditorColorScheme = EditorColorScheme()
 ) {
 
     private var _editor: CodeEditor? = null
@@ -121,47 +125,244 @@ class CodeEditorState(
             }
         }
 
+    private var _isEditable by mutableStateOf(true)
+
     /** Whether the editor text can be modified by the user. */
-    var isEditable: Boolean by mutableStateOf(true)
+    var isEditable: Boolean
+        get() {
+            val snap = _isEditable
+            return _editor?.isEditable ?: snap
+        }
+        set(value) {
+            if (_isEditable != value) {
+                _isEditable = value
+                _editor?.let { ed ->
+                    if (ed.isEditable != value) ed.isEditable = value
+                }
+            }
+        }
+
+    private var _isWordwrap by mutableStateOf(false)
 
     /** Whether automatic soft word-wrapping is enabled. */
-    var isWordwrap: Boolean by mutableStateOf(false)
+    var isWordwrap: Boolean
+        get() {
+            val snap = _isWordwrap
+            return _editor?.isWordwrap ?: snap
+        }
+        set(value) {
+            if (_isWordwrap != value) {
+                _isWordwrap = value
+                _editor?.let { ed ->
+                    if (ed.isWordwrap != value) ed.isWordwrap = value
+                }
+            }
+        }
+
+    private var _lineNumbersEnabled by mutableStateOf(true)
 
     /** Whether line numbers are rendered in the gutter. */
-    var lineNumbersEnabled: Boolean by mutableStateOf(true)
+    var lineNumbersEnabled: Boolean
+        get() {
+            val snap = _lineNumbersEnabled
+            return _editor?.isLineNumberEnabled ?: snap
+        }
+        set(value) {
+            if (_lineNumbersEnabled != value) {
+                _lineNumbersEnabled = value
+                _editor?.let { ed ->
+                    if (ed.isLineNumberEnabled != value) ed.isLineNumberEnabled = value
+                }
+            }
+        }
+
+    private var _pinLineNumbers by mutableStateOf(false)
 
     /** Whether line numbers stay pinned to the screen edge during horizontal scrolling. */
-    var pinLineNumbers: Boolean by mutableStateOf(false)
+    var pinLineNumbers: Boolean
+        get() {
+            val snap = _pinLineNumbers
+            return _editor?.isLineNumberPinned ?: snap
+        }
+        set(value) {
+            if (_pinLineNumbers != value) {
+                _pinLineNumbers = value
+                _editor?.let { ed ->
+                    if (ed.isLineNumberPinned != value) ed.isLineNumberPinned = value
+                }
+            }
+        }
+
+    private var _textSizeSp by mutableStateOf(14f)
 
     /** Editor font size in SP units. */
-    var textSizeSp: Float by mutableStateOf(14f)
+    var textSizeSp: Float
+        get() {
+            val snap = _textSizeSp
+            return _editor?.textSize ?: snap
+        }
+        set(value) {
+            if (_textSizeSp != value) {
+                _textSizeSp = value
+                _editor?.let { ed ->
+                    if (ed.textSize != value) ed.textSize = value
+                }
+            }
+        }
+
+    private var _tabWidth by mutableIntStateOf(4)
 
     /** Tab size in space count. */
-    var tabWidth: Int by mutableIntStateOf(4)
+    var tabWidth: Int
+        get() {
+            val snap = _tabWidth
+            return _editor?.tabWidth ?: snap
+        }
+        set(value) {
+            if (_tabWidth != value) {
+                _tabWidth = value
+                _editor?.let { ed ->
+                    if (ed.tabWidth != value) ed.tabWidth = value
+                }
+            }
+        }
+
+    private var _isUndoEnabled by mutableStateOf(true)
 
     /** Whether undo and redo tracking is active. */
-    var isUndoEnabled: Boolean by mutableStateOf(true)
+    var isUndoEnabled: Boolean
+        get() {
+            val snap = _isUndoEnabled
+            return _editor?.isUndoEnabled ?: snap
+        }
+        set(value) {
+            if (_isUndoEnabled != value) {
+                _isUndoEnabled = value
+                _editor?.let { ed ->
+                    if (ed.isUndoEnabled != value) ed.isUndoEnabled = value
+                }
+            }
+        }
+
+    private var _cursorBlinkEnabled by mutableStateOf(true)
 
     /** Whether cursor blinking animation is enabled. */
-    var cursorBlinkEnabled: Boolean by mutableStateOf(true)
+    var cursorBlinkEnabled: Boolean
+        get() {
+            val snap = _cursorBlinkEnabled
+            return _editor?.let { it.cursorBlinkPeriod > 0 } ?: snap
+        }
+        set(value) {
+            if (_cursorBlinkEnabled != value) {
+                _cursorBlinkEnabled = value
+                _editor?.let { ed ->
+                    val desired = if (value) 500 else 0
+                    if (ed.cursorBlinkPeriod != desired) ed.cursorBlinkPeriod = desired
+                }
+            }
+        }
+
+    private var _highlightCurrentLine by mutableStateOf(true)
 
     /** Whether the line containing the cursor is highlighted. */
-    var highlightCurrentLine: Boolean by mutableStateOf(true)
+    var highlightCurrentLine: Boolean
+        get() {
+            val snap = _highlightCurrentLine
+            return _editor?.isHighlightCurrentLine ?: snap
+        }
+        set(value) {
+            if (_highlightCurrentLine != value) {
+                _highlightCurrentLine = value
+                _editor?.let { ed ->
+                    if (ed.isHighlightCurrentLine != value) ed.isHighlightCurrentLine = value
+                }
+            }
+        }
+
+    private var _dividerEnabled by mutableStateOf(true)
 
     /** Whether dividing lines between text and gutter are visible. */
-    var dividerEnabled: Boolean by mutableStateOf(true)
+    var dividerEnabled: Boolean
+        get() {
+            val snap = _dividerEnabled
+            return _editor?.isDividerEnabled ?: snap
+        }
+        set(value) {
+            if (_dividerEnabled != value) {
+                _dividerEnabled = value
+                _editor?.let { ed ->
+                    if (ed.isDividerEnabled != value) ed.isDividerEnabled = value
+                }
+            }
+        }
+
+    private var _autoCompletionEnabled by mutableStateOf(true)
 
     /** Whether built-in code auto-completion is active. */
-    var autoCompletionEnabled: Boolean by mutableStateOf(true)
+    var autoCompletionEnabled: Boolean
+        get() {
+            val snap = _autoCompletionEnabled
+            return _editor?.getComponent(EditorAutoCompletion::class.java)?.isEnabled() ?: snap
+        }
+        set(value) {
+            if (_autoCompletionEnabled != value) {
+                _autoCompletionEnabled = value
+                _editor?.getComponent(EditorAutoCompletion::class.java)?.let { comp ->
+                    if (comp.isEnabled() != value) comp.setEnabled(value)
+                }
+            }
+        }
+
+    private var _magnifierEnabled by mutableStateOf(true)
 
     /** Whether the magnifying glass handle is enabled on touch hold. */
-    var magnifierEnabled: Boolean by mutableStateOf(true)
+    var magnifierEnabled: Boolean
+        get() {
+            val snap = _magnifierEnabled
+            return _editor?.getComponent(Magnifier::class.java)?.isEnabled() ?: snap
+        }
+        set(value) {
+            if (_magnifierEnabled != value) {
+                _magnifierEnabled = value
+                _editor?.getComponent(Magnifier::class.java)?.let { comp ->
+                    if (comp.isEnabled() != value) comp.setEnabled(value)
+                }
+            }
+        }
+
+    private var _language: Language? by mutableStateOf(initialLanguage)
 
     /** The syntax language engine providing parsing, styling, and completion. */
-    var language: Language? by mutableStateOf(initialLanguage)
+    var language: Language?
+        get() {
+            val snap = _language
+            return _editor?.editorLanguage ?: snap
+        }
+        set(value) {
+            if (_language != value) {
+                _language = value
+                _editor?.let { ed ->
+                    if (ed.editorLanguage != value) ed.setEditorLanguage(value)
+                }
+            }
+        }
+
+    private var _colorScheme: EditorColorScheme by mutableStateOf(initialColorScheme)
 
     /** The active editor color scheme. */
-    var colorScheme: EditorColorScheme by mutableStateOf(initialColorScheme)
+    var colorScheme: EditorColorScheme
+        get() {
+            val snap = _colorScheme
+            return _editor?.colorScheme ?: snap
+        }
+        set(value) {
+            if (_colorScheme !== value) {
+                _colorScheme = value
+                _editor?.let { ed ->
+                    if (ed.colorScheme !== value) ed.colorScheme = value
+                }
+            }
+        }
 
     // -----------------------------------------------------------------------------------------
     // Read-Only Observable States
@@ -292,7 +493,7 @@ class CodeEditorState(
     // View Lifecycle & Synchronization Hooks
     // -----------------------------------------------------------------------------------------
 
-    internal fun attachEditor(editor: CodeEditor) {
+    fun attachEditor(editor: CodeEditor) {
         if (_editor === editor) return
         detachEditor()
 
@@ -300,7 +501,11 @@ class CodeEditorState(
         isAttached = true
 
         // Push initial state into editor
-        editor.setText(_text)
+        if (_text.isNotEmpty()) {
+            editor.setText(_text)
+        } else if (editor.text.isNotEmpty()) {
+            _text = editor.text.toString()
+        }
         editor.isEditable = isEditable
         editor.isWordwrap = isWordwrap
         editor.isLineNumberEnabled = lineNumbersEnabled
@@ -313,9 +518,15 @@ class CodeEditorState(
         editor.isDividerEnabled = dividerEnabled
         editor.getComponent(EditorAutoCompletion::class.java).setEnabled(autoCompletionEnabled)
         editor.getComponent(Magnifier::class.java).setEnabled(magnifierEnabled)
-        editor.colorScheme = colorScheme
         if (language != null) {
             editor.setEditorLanguage(language)
+        } else {
+            _language = editor.editorLanguage
+        }
+        if (colorScheme !== initialColorScheme) {
+            editor.colorScheme = colorScheme
+        } else {
+            _colorScheme = editor.colorScheme
         }
 
         if (_selection != TextRange.Zero) {
@@ -360,17 +571,54 @@ class CodeEditorState(
         )
 
         unsubscribes.add(
+            editor.subscribeEvent(EditorPropertyChangeEvent::class.java) { event, _ ->
+                when (event.propertyName) {
+                    "isWordwrap" -> (event.value as? Boolean)?.let { _isWordwrap = it }
+                    "isEditable" -> (event.value as? Boolean)?.let { _isEditable = it }
+                    "lineNumbersEnabled" -> (event.value as? Boolean)?.let { _lineNumbersEnabled = it }
+                    "pinLineNumbers" -> (event.value as? Boolean)?.let { _pinLineNumbers = it }
+                    "highlightCurrentLine" -> (event.value as? Boolean)?.let { _highlightCurrentLine = it }
+                    "dividerEnabled" -> (event.value as? Boolean)?.let { _dividerEnabled = it }
+                    "isUndoEnabled" -> (event.value as? Boolean)?.let { _isUndoEnabled = it }
+                    "tabWidth" -> (event.value as? Int)?.let { _tabWidth = it }
+                    "cursorBlinkPeriod" -> (event.value as? Int)?.let { _cursorBlinkEnabled = it > 0 }
+                    "autoCompletionEnabled" -> (event.value as? Boolean)?.let { _autoCompletionEnabled = it }
+                    "magnifierEnabled" -> (event.value as? Boolean)?.let { _magnifierEnabled = it }
+                }
+            }
+        )
+
+        unsubscribes.add(
+            editor.subscribeEvent(TextSizeChangeEvent::class.java) { event, _ ->
+                _textSizeSp = event.newTextSize
+            }
+        )
+
+        unsubscribes.add(
+            editor.subscribeEvent(ColorSchemeUpdateEvent::class.java) { event, _ ->
+                _colorScheme = event.editor.colorScheme
+            }
+        )
+
+        unsubscribes.add(
+            editor.subscribeEvent(EditorLanguageChangeEvent::class.java) { event, _ ->
+                _language = event.newLanguage
+            }
+        )
+
+        unsubscribes.add(
             editor.subscribeEvent(EditorReleaseEvent::class.java) { _, _ ->
                 detachEditor()
             }
         )
     }
 
-    internal fun updateEditor(editor: CodeEditor) {
+    fun updateEditor(editor: CodeEditor) {
         if (editor.isEditable != isEditable) editor.isEditable = isEditable
         if (editor.isWordwrap != isWordwrap) editor.isWordwrap = isWordwrap
         if (editor.isLineNumberEnabled != lineNumbersEnabled) editor.isLineNumberEnabled = lineNumbersEnabled
         if (editor.isLineNumberPinned != pinLineNumbers) editor.isLineNumberPinned = pinLineNumbers
+        if (editor.textSize != textSizeSp) editor.textSize = textSizeSp
         if (editor.tabWidth != tabWidth) editor.tabWidth = tabWidth
         if (editor.isUndoEnabled != isUndoEnabled) editor.isUndoEnabled = isUndoEnabled
         if (editor.isHighlightCurrentLine != highlightCurrentLine) editor.isHighlightCurrentLine = highlightCurrentLine
@@ -397,7 +645,7 @@ class CodeEditorState(
         }
     }
 
-    internal fun detachEditor(editor: CodeEditor? = null) {
+    fun detachEditor(editor: CodeEditor? = null) {
         for (u in unsubscribes) {
             try {
                 u.unsubscribe()
@@ -428,7 +676,7 @@ class CodeEditorState(
         /**
          * Standard [Saver] implementation enabling state persistence across configuration changes.
          */
-        val Saver: Saver<CodeEditorState, *> = listSaver(
+        val Saver: Saver<CodeEditorState, Any> = listSaver(
             save = { state ->
                 listOf(
                     state.text,
@@ -440,7 +688,10 @@ class CodeEditorState(
                     state.pinLineNumbers,
                     state.textSizeSp,
                     state.tabWidth,
-                    state.isUndoEnabled
+                    state.isUndoEnabled,
+                    state.cursorBlinkEnabled,
+                    state.highlightCurrentLine,
+                    state.dividerEnabled
                 )
             },
             restore = { savedList ->
@@ -455,6 +706,9 @@ class CodeEditorState(
                     textSizeSp = savedList[7] as Float
                     tabWidth = savedList[8] as Int
                     isUndoEnabled = savedList[9] as Boolean
+                    if (savedList.size > 10) cursorBlinkEnabled = savedList[10] as Boolean
+                    if (savedList.size > 11) highlightCurrentLine = savedList[11] as Boolean
+                    if (savedList.size > 12) dividerEnabled = savedList[12] as Boolean
                 }
             }
         )
