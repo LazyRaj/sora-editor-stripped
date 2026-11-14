@@ -21,7 +21,7 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  ******************************************************************************/
-
+/* Modified by Raj Dave (aka LazyRaj) */
 package io.github.rosemoe.sora.lsp.utils
 
 import android.graphics.Color
@@ -100,21 +100,25 @@ fun createPosition(line: Int, character: Int): Position {
     return Position(line, character)
 }
 
-fun CharPosition.asLspPosition(): Position {
-    return Position(this.line, this.column)
-}
+val CharPosition.lspPosition: Position
+    get() = Position(line, column)
 
-fun Position.asCharPosition(): CharPosition {
-    return CharPosition(this.line, this.character)
-}
+fun CharPosition.asLspPosition(): Position = lspPosition
 
-fun TextRange.asLspRange(): Range {
-    return Range(this.start.asLspPosition(), this.end.asLspPosition())
-}
+val Position.charPosition: CharPosition
+    get() = CharPosition(line, character)
 
-fun Range.asTextRange(): TextRange {
-    return TextRange(this.start.asCharPosition(), this.end.asCharPosition())
-}
+fun Position.asCharPosition(): CharPosition = charPosition
+
+val TextRange.lspRange: Range
+    get() = Range(start.asLspPosition(), end.asLspPosition())
+
+fun TextRange.asLspRange(): Range = lspRange
+
+val Range.textRange: TextRange
+    get() = TextRange(start.asCharPosition(), end.asCharPosition())
+
+fun Range.asTextRange(): TextRange = textRange
 
 fun LspEditor.createDidOpenTextDocumentParams(): DidOpenTextDocumentParams {
     val params = DidOpenTextDocumentParams()
@@ -196,14 +200,14 @@ fun clearVersions(func: (FileUri) -> Boolean) {
 }
 
 fun blendARGB(
-    @ColorInt color1: Int, @ColorInt color2:Int,
+    @ColorInt color1: Int, @ColorInt color2: Int,
     @FloatRange(from = 0.0, to = 1.0) ratio: Float
 ): Int {
-    val inverseRatio = 1 - ratio;
-    val a = Color.alpha(color1) * inverseRatio + Color.alpha(color2) * ratio;
-    val r = Color.red(color1) * inverseRatio + Color.red(color2) * ratio;
-    val g = Color.green(color1) * inverseRatio + Color.green(color2) * ratio;
-    val b = Color.blue(color1) * inverseRatio + Color.blue(color2) * ratio;
+    val inverseRatio = 1 - ratio
+    val a = Color.alpha(color1) * inverseRatio + Color.alpha(color2) * ratio
+    val r = Color.red(color1) * inverseRatio + Color.red(color2) * ratio
+    val g = Color.green(color1) * inverseRatio + Color.green(color2) * ratio
+    val b = Color.blue(color1) * inverseRatio + Color.blue(color2) * ratio
     return Color.argb(a.toInt(), r.toInt(), g.toInt(), b.toInt())
 }
 

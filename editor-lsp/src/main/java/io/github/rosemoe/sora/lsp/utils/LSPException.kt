@@ -21,10 +21,9 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
+/* Modified by Raj Dave (aka LazyRaj) */
 package io.github.rosemoe.sora.lsp.utils
 
-class LSPException : RuntimeException {
-    constructor(msg: String) : super(msg)
-    constructor(msg: String, cause: Throwable?) : super(msg, cause)
-    constructor(cause: Throwable?) : super(cause)
+class LSPException(message: String? = null, cause: Throwable? = null) : RuntimeException(message, cause) {
+    constructor(cause: Throwable?) : this(null, cause)
 }

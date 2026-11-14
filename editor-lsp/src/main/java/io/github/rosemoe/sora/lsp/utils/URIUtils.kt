@@ -21,7 +21,7 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  ******************************************************************************/
-
+/* Modified by Raj Dave (aka LazyRaj) */
 package io.github.rosemoe.sora.lsp.utils
 
 import android.net.Uri
@@ -50,11 +50,13 @@ fun URI.toFileUri(): FileUri {
 value class FileUri(
     val path: String
 ) {
-    fun toFile(): File {
-        return File(path)
-    }
+    val file: File
+        get() = File(path)
 
-    fun toUri(): Uri {
-        return Uri.fromFile(toFile())
-    }
+    val uri: Uri
+        get() = Uri.fromFile(file)
+
+    fun toFile(): File = file
+
+    fun toUri(): Uri = uri
 }
