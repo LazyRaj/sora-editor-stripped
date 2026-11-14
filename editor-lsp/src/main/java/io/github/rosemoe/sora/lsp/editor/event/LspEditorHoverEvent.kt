@@ -20,6 +20,8 @@
  *
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
+ *
+ *     Modified by Raj Dave (aka LazyRaj)
  ******************************************************************************/
 
 package io.github.rosemoe.sora.lsp.editor.event
@@ -44,7 +46,7 @@ class LspEditorHoverEvent(private val editor: LspEditor) :
 
     private var hoverPosition: CharPosition? = null
 
-    override fun onReceive(e: HoverEvent, unsubscribe: Unsubscribe) {
+    override fun onReceive(event: HoverEvent, unsubscribe: Unsubscribe) {
         if (!editor.isConnected) {
             return
         }
@@ -63,9 +65,9 @@ class LspEditorHoverEvent(private val editor: LspEditor) :
 
         if (originEditor.isInMouseMode) {
             fun updateLastHover() {
-                lastHoverPos = e.x to e.y
+                lastHoverPos = event.x to event.y
             }
-            when (e.causingEvent.action) {
+            when (event.causingEvent.action) {
                 MotionEvent.ACTION_HOVER_ENTER -> {
                     originEditor.removeCallbacks(callback)
                     updateHoverPosition(hoverPosition)
@@ -77,13 +79,13 @@ class LspEditorHoverEvent(private val editor: LspEditor) :
                 }
 
                 MotionEvent.ACTION_HOVER_MOVE -> {
-                    if (originEditor.isScreenPointOnText(e.x, e.y)) {
-                        if (abs(e.x - lastHoverPos.first) > ViewUtils.HOVER_TAP_SLOP || abs(
-                                e.y - lastHoverPos.second
+                    if (originEditor.isScreenPointOnText(event.x, event.y)) {
+                        if (abs(event.x - lastHoverPos.first) > ViewUtils.HOVER_TAP_SLOP || abs(
+                                event.y - lastHoverPos.second
                             ) > ViewUtils.HOVER_TAP_SLOP
                         ) {
                             updateLastHover()
-                            val pos = originEditor.getPointPositionOnScreen(e.x, e.y)
+                            val pos = originEditor.getPointPositionOnScreen(event.x, event.y)
                             hoverPosition = originEditor.text.indexer.getCharPosition(
                                 IntPair.getFirst(pos),
                                 IntPair.getSecond(pos)

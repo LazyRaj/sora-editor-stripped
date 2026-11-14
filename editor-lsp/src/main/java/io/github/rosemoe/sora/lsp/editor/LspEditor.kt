@@ -20,6 +20,8 @@
  *
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
+ *
+ *     Modified by Raj Dave (aka LazyRaj)
  ******************************************************************************/
 
 package io.github.rosemoe.sora.lsp.editor
@@ -150,7 +152,7 @@ class LspEditor(
         get() = status == LspEditorStatus.CONNECTED
 
     val languageServerWrapper: LanguageServerWrapper
-        get() = delegate.getPrimaryWrapper()
+        get() = delegate.primaryWrapper
             ?: throw IllegalStateException("No language server wrapper for language ${languageId ?: fileExt}")
 
     var diagnostics
@@ -218,8 +220,6 @@ class LspEditor(
      *
      * @see io.github.rosemoe.sora.lsp.requests.Timeout
      */
-
-    @Throws(TimeoutException::class)
     suspend fun connect(throwException: Boolean = true): Boolean = withContext(Dispatchers.IO) {
         status = LspEditorStatus.CONNECTING
         eventManager.init()
@@ -265,7 +265,6 @@ class LspEditor(
      *
      * @see io.github.rosemoe.sora.lsp.requests.Timeout
      */
-    @Throws(InterruptedException::class, TimeoutException::class)
     suspend fun connectWithTimeout() {
         var isConnected = false
 
@@ -279,7 +278,7 @@ class LspEditor(
                 isConnected = true
                 break
             } catch (exception: java.lang.Exception) {
-                exception.printStackTrace();
+                exception.printStackTrace()
             }
             start = System.currentTimeMillis()
             delay((retryTime / 200).toLong())
@@ -302,7 +301,6 @@ class LspEditor(
      * disconnect to the language server
      */
     @WorkerThread
-    @Throws(RuntimeException::class)
     fun disconnect() {
         uiDelegate.detachEditor()
         runCatching {
@@ -375,7 +373,10 @@ class LspEditor(
     /**
      * Request the references of the symbol at the given position
      */
-    suspend fun requestReferences(position: Position?, includeDeclaration: Boolean = true): List<Location?>? {
+    suspend fun requestReferences(
+        position: Position?,
+        includeDeclaration: Boolean = true
+    ): List<Location?>? {
         return eventManager.emitAsync(EventType.references) {
             put(position)
             put("includeDeclaration", includeDeclaration)
@@ -385,7 +386,10 @@ class LspEditor(
     /**
      * Request the references of the symbol at the given position
      */
-    suspend fun requestReferences(position: CharPosition, includeDeclaration: Boolean = true): List<Location?>? {
+    suspend fun requestReferences(
+        position: CharPosition,
+        includeDeclaration: Boolean = true
+    ): List<Location?>? {
         return eventManager.emitAsync(EventType.references) {
             put(position)
             put("includeDeclaration", includeDeclaration)
@@ -521,9 +525,8 @@ class LspEditor(
         uiDelegate.showDocumentColors(documentColors)
     }
 
-    fun getAllColorOccurrences(): List<ColorInformation> {
-        return uiDelegate.cachedDocumentColors ?: return emptyList()
-    }
+    val allColorOccurrences: List<ColorInformation>
+        get() = uiDelegate.cachedDocumentColors ?: emptyList()
 
     fun hitReTrigger(eventText: CharSequence): Boolean {
         for (trigger in signatureHelpReTriggers) {

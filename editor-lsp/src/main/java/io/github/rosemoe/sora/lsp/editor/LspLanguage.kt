@@ -20,6 +20,8 @@
  *
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
+ *
+ *     Modified by Raj Dave (aka LazyRaj)
  ******************************************************************************/
 
 package io.github.rosemoe.sora.lsp.editor
@@ -78,7 +80,6 @@ class LspLanguage(var editor: LspEditor) : Language {
     override val interruptionLevel: Int
         get() = wrapperLanguage?.interruptionLevel ?: 0
 
-    @Throws(CompletionCancelledException::class)
     override fun requireAutoComplete(
         content: ContentReference,
         position: CharPosition,

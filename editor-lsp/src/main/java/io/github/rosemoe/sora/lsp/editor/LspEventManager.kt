@@ -20,6 +20,8 @@
  *
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
+ *
+ *     Modified by Raj Dave (aka LazyRaj)
  ******************************************************************************/
 
 package io.github.rosemoe.sora.lsp.editor
@@ -31,7 +33,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.eclipse.lsp4j.FormattingOptions
-import java.util.function.Supplier
 
 
 class LspEventManager(
@@ -42,9 +43,8 @@ class LspEventManager(
     private val eventEmitter = project.eventEmitter
     private val options = arrayListOf<Any>()
 
-    fun addEventListener(eventListenerSupplier: Supplier<EventListener>) {
-        val eventListener = eventListenerSupplier.get()
-        addEventListener(eventListener)
+    fun addEventListener(supplier: () -> EventListener) {
+        addEventListener(supplier())
     }
 
     /**
@@ -57,9 +57,8 @@ class LspEventManager(
     /**
      * Add multiple providers
      */
-    @SafeVarargs
-    fun addEventListeners(vararg eventListenerSupplier: Supplier<EventListener>) {
-        eventListenerSupplier.forEach { addEventListener(it) }
+    fun addEventListeners(vararg suppliers: () -> EventListener) {
+        suppliers.forEach { addEventListener(it) }
     }
 
     /**
@@ -149,6 +148,10 @@ class LspEventManager(
 
 inline fun <reified T : EventListener> LspEventManager.getEventListener(): T? {
     return getEventListener(T::class.java)
+}
+
+inline fun <reified T : EventListener> LspEventManager.removeEventListener() {
+    removeEventListener(T::class.java)
 }
 
 inline fun <reified T> LspEventManager.getOption(): T? {
