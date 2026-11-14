@@ -21,27 +21,23 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  ******************************************************************************/
-
+/* Modified by Raj Dave (aka LazyRaj) */
 package io.github.rosemoe.sora.lsp.client.connection
 
-
-import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.InetSocketAddress
 import java.net.Socket
 
-
 /**
  * Socket-based language server connection. Use for cross host connections.
  */
 class SocketStreamConnectionProvider(
-    private val port:Int,
-    private val host:String? = null
+    private val port: Int,
+    private val host: String? = null
 ) : StreamConnectionProvider {
     private var socket: Socket? = null
 
-    @Throws(IOException::class)
     override fun start() {
         socket?.let { runCatching { it.close() } }
         socket = Socket().also {

@@ -21,15 +21,13 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  ******************************************************************************/
-
+/* Modified by Raj Dave (aka LazyRaj) */
 package io.github.rosemoe.sora.lsp.client.connection
 
-import android.util.Pair
 import androidx.annotation.WorkerThread
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
-
 
 /**
  * A customizable connection provider, where callers provide the input and output streams.
@@ -40,9 +38,9 @@ class CustomConnectProvider(private val streamProvider: StreamProvider) : Stream
     private var closed = true
 
     override fun start() {
-        val streams = streamProvider.getStreams()
-        _inputStream = streams.first
-        _outputStream = streams.second
+        val (input, output) = streamProvider.getStreams()
+        _inputStream = input
+        _outputStream = output
         closed = false
     }
 

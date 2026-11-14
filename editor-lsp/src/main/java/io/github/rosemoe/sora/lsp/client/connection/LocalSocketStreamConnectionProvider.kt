@@ -21,16 +21,13 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  ******************************************************************************/
-
+/* Modified by Raj Dave (aka LazyRaj) */
 package io.github.rosemoe.sora.lsp.client.connection
-
 
 import android.net.LocalSocket
 import android.net.LocalSocketAddress
-import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
-
 
 /**
  * LocalSocket-based language server connection. Recommend for local connections.
@@ -40,7 +37,6 @@ class LocalSocketStreamConnectionProvider(
 ) : StreamConnectionProvider {
     private var socket: LocalSocket? = null
 
-    @Throws(IOException::class)
     override fun start() {
         socket?.let { runCatching { it.close() } }
         socket = LocalSocket().also {

@@ -21,21 +21,18 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  ******************************************************************************/
-
+/* Modified by Raj Dave (aka LazyRaj) */
 package io.github.rosemoe.sora.lsp.client.connection
 
 import androidx.annotation.WorkerThread
 import java.io.Closeable
-import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
-
 
 interface StreamConnectionProvider : Closeable {
     /**
      * Connect to the server.
      */
-    @Throws(IOException::class)
     @WorkerThread
     fun start()
 
