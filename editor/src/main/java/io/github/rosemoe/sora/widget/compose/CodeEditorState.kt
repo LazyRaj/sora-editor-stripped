@@ -29,6 +29,7 @@ package io.github.rosemoe.sora.widget.compose
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
@@ -41,6 +42,7 @@ import io.github.rosemoe.sora.event.ContentChangeEvent
 import io.github.rosemoe.sora.event.EditorLanguageChangeEvent
 import io.github.rosemoe.sora.event.EditorPropertyChangeEvent
 import io.github.rosemoe.sora.event.EditorReleaseEvent
+import io.github.rosemoe.sora.event.ScrollEvent
 import io.github.rosemoe.sora.event.SelectionChangeEvent
 import io.github.rosemoe.sora.event.SubscriptionReceipt
 import io.github.rosemoe.sora.event.TextSizeChangeEvent
@@ -193,7 +195,7 @@ class CodeEditorState(
             }
         }
 
-    private var _textSizeSp by mutableStateOf(14f)
+    private var _textSizeSp by mutableFloatStateOf(14f)
 
     /** Editor font size in SP units. */
     var textSizeSp: Float
@@ -206,6 +208,23 @@ class CodeEditorState(
                 _textSizeSp = value
                 _editor?.let { ed ->
                     if (ed.textSize != value) ed.textSize = value
+                }
+            }
+        }
+
+    private var _isScalable by mutableStateOf(true)
+
+    /** Whether pinch-to-zoom text scaling is enabled. */
+    var isScalable: Boolean
+        get() {
+            val snap = _isScalable
+            return _editor?.isScalable ?: snap
+        }
+        set(value) {
+            if (_isScalable != value) {
+                _isScalable = value
+                _editor?.let { ed ->
+                    if (ed.isScalable != value) ed.isScalable = value
                 }
             }
         }
@@ -364,6 +383,42 @@ class CodeEditorState(
             }
         }
 
+    private var _scrollX by mutableIntStateOf(0)
+
+    /**
+     * Viewport horizontal scroll offset in pixels.
+     */
+    var scrollX: Int
+        get() = _editor?.offsetX ?: _scrollX
+        set(value) {
+            if (_scrollX != value) {
+                _scrollX = value
+                _editor?.let { ed ->
+                    if (ed.offsetX != value) {
+                        ed.scrollTo(value, ed.offsetY)
+                    }
+                }
+            }
+        }
+
+    private var _scrollY by mutableIntStateOf(0)
+
+    /**
+     * Viewport vertical scroll offset in pixels.
+     */
+    var scrollY: Int
+        get() = _editor?.offsetY ?: _scrollY
+        set(value) {
+            if (_scrollY != value) {
+                _scrollY = value
+                _editor?.let { ed ->
+                    if (ed.offsetY != value) {
+                        ed.scrollTo(ed.offsetX, value)
+                    }
+                }
+            }
+        }
+
     // -----------------------------------------------------------------------------------------
     // Read-Only Observable States
     // -----------------------------------------------------------------------------------------
@@ -511,6 +566,7 @@ class CodeEditorState(
         editor.isLineNumberEnabled = lineNumbersEnabled
         editor.isLineNumberPinned = pinLineNumbers
         editor.textSize = textSizeSp
+        editor.isScalable = isScalable
         editor.tabWidth = tabWidth
         editor.isUndoEnabled = isUndoEnabled
         editor.cursorBlinkPeriod = if (cursorBlinkEnabled) 500 else 0
@@ -533,12 +589,35 @@ class CodeEditorState(
             applySelectionToEditor(editor, _selection)
         }
 
+        if (_scrollX != 0 || _scrollY != 0) {
+            val targetX = _scrollX
+            val targetY = _scrollY
+            editor.scrollTo(targetX, targetY)
+            editor.post {
+                if (_editor === editor) {
+                    editor.scrollTo(targetX, targetY)
+                }
+            }
+        } else if (_selection != TextRange.Zero) {
+            editor.post {
+                if (_editor === editor) {
+                    editor.ensureSelectionVisible()
+                }
+            }
+        }
+
         lineCount = editor.lineCount
         canUndo = editor.canUndo()
         canRedo = editor.canRedo()
         cursorPosition = CharPosition(editor.cursor.leftLine, editor.cursor.leftColumn)
 
         // Subscribe to editor events
+        unsubscribes.add(
+            editor.subscribeEvent(ScrollEvent::class.java) { event, _ ->
+                _scrollX = event.endX
+                _scrollY = event.endY
+            }
+        )
         unsubscribes.add(
             editor.subscribeEvent(ContentChangeEvent::class.java) { _, _ ->
                 if (isUpdatingFromState) return@subscribeEvent
@@ -575,22 +654,35 @@ class CodeEditorState(
                 when (event.propertyName) {
                     "isWordwrap" -> (event.value as? Boolean)?.let { _isWordwrap = it }
                     "isEditable" -> (event.value as? Boolean)?.let { _isEditable = it }
-                    "lineNumbersEnabled" -> (event.value as? Boolean)?.let { _lineNumbersEnabled = it }
+                    "lineNumbersEnabled" -> (event.value as? Boolean)?.let {
+                        _lineNumbersEnabled = it
+                    }
+
                     "pinLineNumbers" -> (event.value as? Boolean)?.let { _pinLineNumbers = it }
-                    "highlightCurrentLine" -> (event.value as? Boolean)?.let { _highlightCurrentLine = it }
+                    "highlightCurrentLine" -> (event.value as? Boolean)?.let {
+                        _highlightCurrentLine = it
+                    }
+
                     "dividerEnabled" -> (event.value as? Boolean)?.let { _dividerEnabled = it }
                     "isUndoEnabled" -> (event.value as? Boolean)?.let { _isUndoEnabled = it }
                     "tabWidth" -> (event.value as? Int)?.let { _tabWidth = it }
-                    "cursorBlinkPeriod" -> (event.value as? Int)?.let { _cursorBlinkEnabled = it > 0 }
-                    "autoCompletionEnabled" -> (event.value as? Boolean)?.let { _autoCompletionEnabled = it }
+                    "cursorBlinkPeriod" -> (event.value as? Int)?.let {
+                        _cursorBlinkEnabled = it > 0
+                    }
+
+                    "autoCompletionEnabled" -> (event.value as? Boolean)?.let {
+                        _autoCompletionEnabled = it
+                    }
+
                     "magnifierEnabled" -> (event.value as? Boolean)?.let { _magnifierEnabled = it }
+                    "isScalable" -> (event.value as? Boolean)?.let { _isScalable = it }
                 }
             }
         )
 
         unsubscribes.add(
             editor.subscribeEvent(TextSizeChangeEvent::class.java) { event, _ ->
-                _textSizeSp = event.newTextSize
+                _textSizeSp = event.newTextSizeSp
             }
         )
 
@@ -616,12 +708,15 @@ class CodeEditorState(
     fun updateEditor(editor: CodeEditor) {
         if (editor.isEditable != isEditable) editor.isEditable = isEditable
         if (editor.isWordwrap != isWordwrap) editor.isWordwrap = isWordwrap
-        if (editor.isLineNumberEnabled != lineNumbersEnabled) editor.isLineNumberEnabled = lineNumbersEnabled
+        if (editor.isLineNumberEnabled != lineNumbersEnabled) editor.isLineNumberEnabled =
+            lineNumbersEnabled
         if (editor.isLineNumberPinned != pinLineNumbers) editor.isLineNumberPinned = pinLineNumbers
-        if (editor.textSize != textSizeSp) editor.textSize = textSizeSp
+        if (kotlin.math.abs(editor.textSize - textSizeSp) > 0.05f) editor.textSize = textSizeSp
+        if (editor.isScalable != isScalable) editor.isScalable = isScalable
         if (editor.tabWidth != tabWidth) editor.tabWidth = tabWidth
         if (editor.isUndoEnabled != isUndoEnabled) editor.isUndoEnabled = isUndoEnabled
-        if (editor.isHighlightCurrentLine != highlightCurrentLine) editor.isHighlightCurrentLine = highlightCurrentLine
+        if (editor.isHighlightCurrentLine != highlightCurrentLine) editor.isHighlightCurrentLine =
+            highlightCurrentLine
         if (editor.isDividerEnabled != dividerEnabled) editor.isDividerEnabled = dividerEnabled
         if (editor.colorScheme !== colorScheme) editor.colorScheme = colorScheme
         if (editor.editorLanguage !== language) editor.setEditorLanguage(language)
@@ -646,13 +741,21 @@ class CodeEditorState(
     }
 
     fun detachEditor(editor: CodeEditor? = null) {
-        for (u in unsubscribes) {
-            try {
-                u.unsubscribe()
-            } catch (_: Throwable) {}
-        }
-        unsubscribes.clear()
-        if (editor == null || _editor === editor) {
+        val currentEditor = _editor
+        if (editor == null || currentEditor === editor) {
+            currentEditor?.let { ed ->
+                _text = ed.text.toString()
+                _selection = TextRange(ed.cursor.left, ed.cursor.right)
+                _scrollX = ed.offsetX
+                _scrollY = ed.offsetY
+            }
+            for (u in unsubscribes) {
+                try {
+                    u.unsubscribe()
+                } catch (_: Throwable) {
+                }
+            }
+            unsubscribes.clear()
             _editor = null
             isAttached = false
         }
@@ -679,19 +782,22 @@ class CodeEditorState(
         val Saver: Saver<CodeEditorState, Any> = listSaver(
             save = { state ->
                 listOf(
-                    state.text,
+                    state.editor?.text?.toString() ?: state.text,
                     state.selection.start,
                     state.selection.end,
-                    state.isEditable,
-                    state.isWordwrap,
+                    state.editor?.isEditable ?: state.isEditable,
+                    state.editor?.isWordwrap ?: state.isWordwrap,
                     state.lineNumbersEnabled,
                     state.pinLineNumbers,
                     state.textSizeSp,
-                    state.tabWidth,
-                    state.isUndoEnabled,
+                    state.editor?.tabWidth ?: state.tabWidth,
+                    state.editor?.isUndoEnabled ?: state.isUndoEnabled,
                     state.cursorBlinkEnabled,
                     state.highlightCurrentLine,
-                    state.dividerEnabled
+                    state.dividerEnabled,
+                    state.editor?.isScalable ?: state.isScalable,
+                    state.scrollX,
+                    state.scrollY
                 )
             },
             restore = { savedList ->
@@ -709,6 +815,9 @@ class CodeEditorState(
                     if (savedList.size > 10) cursorBlinkEnabled = savedList[10] as Boolean
                     if (savedList.size > 11) highlightCurrentLine = savedList[11] as Boolean
                     if (savedList.size > 12) dividerEnabled = savedList[12] as Boolean
+                    if (savedList.size > 13) isScalable = savedList[13] as Boolean
+                    if (savedList.size > 14) scrollX = savedList[14] as Int
+                    if (savedList.size > 15) scrollY = savedList[15] as Int
                 }
             }
         )

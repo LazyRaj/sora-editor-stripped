@@ -144,7 +144,15 @@ class TextSizeChangeEvent(
     editor: CodeEditor,
     val oldTextSize: Float,
     val newTextSize: Float
-) : Event(editor)
+) : Event(editor) {
+
+    /**
+     * The new text size in **SP** units.
+     */
+    val newTextSizeSp: Float
+        get() = editor.textSize
+
+}
 
 /**
  * Event when search result is available in main thread.

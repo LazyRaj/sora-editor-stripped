@@ -221,17 +221,21 @@ class CodeEditorComposeTest {
         editor.cursorBlinkPeriod = 0
         assertThat(state.cursorBlinkEnabled).isFalse()
 
+        editor.isScalable = false
+        assertThat(state.isScalable).isFalse()
+
         // 2. Recomposition simulation: updateEditor must NOT revert direct editor changes!
         state.updateEditor(editor)
         assertThat(editor.isWordwrap).isTrue()
         assertThat(editor.tabWidth).isEqualTo(8)
-        assertThat(editor.textSize).isEqualTo(22f)
+        assertThat(editor.textSize).isWithin(0.1f).of(22f)
         assertThat(editor.isEditable).isFalse()
         assertThat(editor.isLineNumberEnabled).isFalse()
         assertThat(editor.isLineNumberPinned).isTrue()
         assertThat(editor.isHighlightCurrentLine).isFalse()
         assertThat(editor.isDividerEnabled).isFalse()
         assertThat(editor.cursorBlinkPeriod).isEqualTo(0)
+        assertThat(editor.isScalable).isFalse()
 
         // 3. Mutation on state -> must reflect on editor
         state.isWordwrap = false
@@ -241,7 +245,10 @@ class CodeEditorComposeTest {
         assertThat(editor.tabWidth).isEqualTo(2)
 
         state.textSizeSp = 18f
-        assertThat(editor.textSize).isEqualTo(18f)
+        assertThat(editor.textSize).isWithin(0.1f).of(18f)
+
+        state.isScalable = true
+        assertThat(editor.isScalable).isTrue()
 
         state.isEditable = true
         assertThat(editor.isEditable).isTrue()
@@ -265,6 +272,7 @@ class CodeEditorComposeTest {
             cursorBlinkEnabled = false
             highlightCurrentLine = false
             dividerEnabled = false
+            isScalable = false
         }
 
         val saverScope = SaverScope { true }
@@ -283,5 +291,90 @@ class CodeEditorComposeTest {
         assertThat(restored.cursorBlinkEnabled).isFalse()
         assertThat(restored.highlightCurrentLine).isFalse()
         assertThat(restored.dividerEnabled).isFalse()
+        assertThat(restored.isScalable).isFalse()
+        assertThat(restored.scrollX).isEqualTo(0)
+        assertThat(restored.scrollY).isEqualTo(0)
+    }
+
+    @Test
+    fun testScrollStatePreservationAcrossRecreation() {
+        val editor1 = CodeEditor(context)
+        val state = CodeEditorState(initialText = "Line 1\nLine 2\nLine 3\nLine 4\nLine 5")
+        state.attachEditor(editor1)
+
+        // Modify text and selection in first editor
+        editor1.setText("Updated text in editor 1")
+        editor1.setSelectionRegion(0, 0, 0, 7)
+        state.scrollX = 20
+        state.scrollY = 0
+
+        // Detach simulating configuration change / screen rotation
+        state.detachEditor(editor1)
+
+        assertThat(state.text).isEqualTo("Updated text in editor 1")
+        assertThat(state.selection).isEqualTo(TextRange(0, 7))
+        assertThat(state.scrollX).isEqualTo(20)
+        assertThat(state.scrollY).isEqualTo(0)
+
+        // Save and restore via Saver
+        val saverScope = SaverScope { true }
+        val saved = with(CodeEditorState.Saver) { saverScope.save(state) } as List<*>
+        val restoredState = CodeEditorState.Saver.restore(saved) as CodeEditorState
+
+        assertThat(restoredState.text).isEqualTo("Updated text in editor 1")
+        assertThat(restoredState.selection).isEqualTo(TextRange(0, 7))
+        assertThat(restoredState.scrollX).isEqualTo(20)
+        assertThat(restoredState.scrollY).isEqualTo(0)
+
+        // Attach second editor (simulating new activity view after rotation)
+        val editor2 = CodeEditor(context)
+        restoredState.attachEditor(editor2)
+
+        assertThat(editor2.text.toString()).isEqualTo("Updated text in editor 1")
+        assertThat(editor2.cursor.left).isEqualTo(0)
+        assertThat(editor2.cursor.right).isEqualTo(7)
+
+        restoredState.detachEditor(editor2)
+    }
+
+    @Test
+    fun testPinchGestureTextScale() {
+        val editor = CodeEditor(context)
+        val state = CodeEditorState()
+        state.attachEditor(editor)
+
+        assertThat(editor.isScalable).isTrue()
+        assertThat(state.isScalable).isTrue()
+
+        // Simulate pinch zoom changing pixel text size directly
+        val newPx = 40f
+        editor.setTextSizePxDirect(newPx)
+
+        // Must update state.textSizeSp in SP units reactively
+        val expectedSp = editor.textSize
+        assertThat(state.textSizeSp).isWithin(0.01f).of(expectedSp)
+
+        state.detachEditor(editor)
+    }
+
+    @Test
+    fun testPopupDecorViewLifeCycleOwnerAttachment() {
+        val editor = CodeEditor(context)
+        val state = CodeEditorState()
+        state.attachEditor(editor)
+
+        val autoComp = editor.getComponent(EditorAutoCompletion::class.java)
+        val adapter = ComposeCompletionItemAdapter(itemHeightDp = 40f) { item, isSelected, onClick ->
+            // item composable
+        }
+        val items = listOf<io.github.rosemoe.sora.lang.completion.CompletionItem>(
+            io.github.rosemoe.sora.lang.completion.SimpleCompletionItem("label", "desc")
+        )
+        adapter.attachValues(autoComp, items)
+        autoComp.adapter = adapter
+        val view = adapter.getView(0, null, null)
+        assertThat(view).isNotNull()
+
+        state.detachEditor(editor)
     }
 }

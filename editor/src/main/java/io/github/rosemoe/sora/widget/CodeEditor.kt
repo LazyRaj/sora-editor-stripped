@@ -40,6 +40,7 @@ import android.graphics.Paint.FontMetricsInt
 import android.graphics.Rect
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.Bundle
 import android.os.TransactionTooLargeException
 import android.text.InputType
@@ -88,9 +89,9 @@ import io.github.rosemoe.sora.event.ContentChangeEvent
 import io.github.rosemoe.sora.event.CreateContextMenuEvent
 import io.github.rosemoe.sora.event.EditorAttachStateChangeEvent
 import io.github.rosemoe.sora.event.EditorFocusChangeEvent
+import io.github.rosemoe.sora.event.EditorFormatEvent
 import io.github.rosemoe.sora.event.EditorLanguageChangeEvent
 import io.github.rosemoe.sora.event.EditorPropertyChangeEvent
-import io.github.rosemoe.sora.event.EditorFormatEvent
 import io.github.rosemoe.sora.event.EditorReleaseEvent
 import io.github.rosemoe.sora.event.Event
 import io.github.rosemoe.sora.event.EventManager
@@ -137,8 +138,6 @@ import io.github.rosemoe.sora.text.TextUtils.getOffsetForBackspaceKey
 import io.github.rosemoe.sora.text.TextUtils.trimToSize
 import io.github.rosemoe.sora.text.method.KeyMetaStates
 import io.github.rosemoe.sora.util.Chars.getWordRange
-import io.github.rosemoe.sora.util.ClipDataUtils.clipDataToString
-import io.github.rosemoe.sora.util.toPlainText
 import io.github.rosemoe.sora.util.EditorHandler
 import io.github.rosemoe.sora.util.Floats.withinDelta
 import io.github.rosemoe.sora.util.IntPair.getFirst
@@ -152,6 +151,7 @@ import io.github.rosemoe.sora.util.TemporaryFloatBuffer.obtain
 import io.github.rosemoe.sora.util.TemporaryFloatBuffer.recycle
 import io.github.rosemoe.sora.util.ThemeUtils
 import io.github.rosemoe.sora.util.ViewUtils.getVerticalScrollFactor
+import io.github.rosemoe.sora.util.toPlainText
 import io.github.rosemoe.sora.widget.EditorSearcher.SearchOptions
 import io.github.rosemoe.sora.widget.SelectionMovement.MovingBasePosition
 import io.github.rosemoe.sora.widget.SymbolPairMatch.SymbolPair
@@ -211,8 +211,18 @@ open class CodeEditor(
     InlayHintRendererProvider {
 
     constructor(context: Context) : this(context, null)
-    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, R.attr.codeEditorStyle)
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(context, attrs, defStyleAttr, 0)
+    constructor(context: Context, attrs: AttributeSet?) : this(
+        context,
+        attrs,
+        R.attr.codeEditorStyle
+    )
+
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(
+        context,
+        attrs,
+        defStyleAttr,
+        0
+    )
 
     val keyEventHandler: EditorKeyEventHandler = EditorKeyEventHandler(this)
     var languageSymbolPairs: SymbolPairMatch? = null
@@ -357,11 +367,15 @@ open class CodeEditor(
      * @see CodeEditor.setScalable
      */
     /**
-     * Allow scale text size by thumb
-     * 
-     * @param scale Whether allow
+     * Allow scale text size by thumb (pinch-to-zoom).
      */
-    var isScalable: Boolean = false
+    var isScalable: Boolean = true
+        set(value) {
+            if (field != value) {
+                field = value
+                dispatchEvent(EditorPropertyChangeEvent(this, "isScalable", value))
+            }
+        }
     private var editable = false
     private var wordwrap = false
 
@@ -473,7 +487,13 @@ open class CodeEditor(
                 }
                 field = lineNumberEnabled
                 invalidate()
-                dispatchEvent(EditorPropertyChangeEvent(this, "lineNumbersEnabled", lineNumberEnabled))
+                dispatchEvent(
+                    EditorPropertyChangeEvent(
+                        this,
+                        "lineNumbersEnabled",
+                        lineNumberEnabled
+                    )
+                )
             }
         }
     private var blockLineEnabled = false
@@ -497,7 +517,13 @@ open class CodeEditor(
             if (field != highlightCurrentLine) {
                 field = highlightCurrentLine
                 invalidate()
-                dispatchEvent(EditorPropertyChangeEvent(this, "highlightCurrentLine", highlightCurrentLine))
+                dispatchEvent(
+                    EditorPropertyChangeEvent(
+                        this,
+                        "highlightCurrentLine",
+                        highlightCurrentLine
+                    )
+                )
             }
         }
     private var verticalScrollBarEnabled = false
@@ -1119,7 +1145,6 @@ open class CodeEditor(
 
         array.recycle()
     }
-
 
 
     /**
@@ -3316,7 +3341,6 @@ open class CodeEditor(
     }
 
 
-
     var isBlockLineEnabled: Boolean
         get() = blockLineEnabled
         set(enabled) {
@@ -4056,7 +4080,21 @@ open class CodeEditor(
      * Editor text size in **SP** units.
      */
     var textSize: Float
-        get() = textSizePx
+        get() {
+            val context = getContext()
+            val res = context?.resources ?: Resources.getSystem()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                return TypedValue.deriveDimension(
+                    TypedValue.COMPLEX_UNIT_SP,
+                    textSizePx,
+                    res.displayMetrics
+                )
+            }
+            val fontScale = res.configuration.fontScale
+            val density = res.displayMetrics.density
+            val scale = if (fontScale > 0f) density * fontScale else density
+            return if (scale > 0f) textSizePx / scale else textSizePx
+        }
         set(textSize) {
             val context = getContext()
             val res = context?.resources ?: Resources.getSystem()
@@ -4911,7 +4949,7 @@ open class CodeEditor(
         val handling = eventHandler.handlingMotions()
         var res2 = false
         val res3 = scaleDetector!!.onTouchEvent(event)
-        if (!handling && !handlingBefore) {
+        if (!handling && !handlingBefore && !scaleDetector!!.isInProgress) {
             res2 = basicDetector!!.onTouchEvent(event)
         }
         if (event.action == MotionEvent.ACTION_UP) {
@@ -5163,6 +5201,49 @@ open class CodeEditor(
             }
             postInvalidateOnAnimation()
         }
+    }
+
+    private var inScrollTo = false
+
+    override fun scrollTo(x: Int, y: Int) {
+        if (inScrollTo) {
+            super.scrollTo(x, y)
+            return
+        }
+        val maxX = scrollMaxX
+        val maxY = scrollMaxY
+        val targetX = if (maxX > 0) x.coerceIn(0, maxX) else max(0, x)
+        val targetY = if (maxY > 0) y.coerceIn(0, maxY) else max(0, y)
+        val scroller = eventHandler.scroller
+        val startX = scroller.currX
+        val startY = scroller.currY
+        if (startX == targetX && startY == targetY) {
+            super.scrollTo(x, y)
+            return
+        }
+        inScrollTo = true
+        try {
+            scroller.startScroll(startX, startY, targetX - startX, targetY - startY, 0)
+            scroller.abortAnimation()
+            super.scrollTo(targetX, targetY)
+        } finally {
+            inScrollTo = false
+        }
+        dispatchEvent(
+            ScrollEvent(
+                this,
+                startX,
+                startY,
+                targetX,
+                targetY,
+                ScrollEvent.CAUSE_MAKE_POSITION_VISIBLE
+            )
+        )
+        invalidate()
+    }
+
+    override fun scrollBy(x: Int, y: Int) {
+        eventHandler.scrollBy(x.toFloat(), y.toFloat(), false)
     }
 
     override fun computeVerticalScrollRange(): Int {

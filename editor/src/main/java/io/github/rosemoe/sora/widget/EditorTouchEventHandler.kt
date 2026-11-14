@@ -1065,6 +1065,9 @@ class EditorTouchEventHandler(private val editor: CodeEditor) :
         distanceX: Float,
         distanceY: Float
     ): Boolean {
+        if (isScaling) {
+            return false
+        }
         var dx = distanceX
         var dy = distanceY
         if (editor.props.singleDirectionDragging) {
@@ -1231,8 +1234,8 @@ class EditorTouchEventHandler(private val editor: CodeEditor) :
             return true
         }
         if (editor.isScalable) {
-            val newSize = editor.textSizePx * detector.scaleFactor
-            if (newSize < scaleMinSize || newSize > scaleMaxSize) {
+            val newSize = (editor.textSizePx * detector.scaleFactor).coerceIn(scaleMinSize, scaleMaxSize)
+            if (abs(newSize - editor.textSizePx) < 0.1f) {
                 return true
             }
             val focusX = detector.focusX
@@ -1282,6 +1285,7 @@ class EditorTouchEventHandler(private val editor: CodeEditor) :
         } else {
             positionNotApplied = false
         }
+        editor.createLayout()
         editor.renderContext.invalidateRenderNodes()
         editor.renderer.updateTimestamp()
         editor.invalidate()

@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCompositionContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import io.github.rosemoe.sora.lang.completion.CompletionItem
@@ -197,8 +198,11 @@ fun CodeEditorCompose(
     selectionActionContent: (@Composable (TextActionScope) -> Unit)? = null,
     diagnosticTooltipContent: (@Composable (DiagnosticTooltipScope) -> Unit)? = null,
     overlayContent: (@Composable BoxScope.(state: CodeEditorState) -> Unit)? = null,
-    onEditorCreated: ((CodeEditor) -> Unit)? = null
+    onEditorCreated: ((CodeEditor) -> Unit)? = null,
+    onEditorUpdated: ((CodeEditor) -> Unit)? = null
 ) {
+    val compositionContext = rememberCompositionContext()
+
     Box(modifier = modifier) {
         AndroidView(
             modifier = Modifier.fillMaxSize(),
@@ -207,17 +211,27 @@ fun CodeEditorCompose(
 
                 if (completionItemContent != null) {
                     editor.getComponent(EditorAutoCompletion::class.java).adapter =
-                        ComposeCompletionItemAdapter(itemContent = completionItemContent)
+                        ComposeCompletionItemAdapter(
+                            itemContent = completionItemContent,
+                            parentCompositionContext = compositionContext
+                        )
                 }
 
                 if (selectionActionContent != null) {
-                    val composeActionWindow = ComposeTextActionWindow(editor, selectionActionContent)
+                    val composeActionWindow = ComposeTextActionWindow(
+                        editor = editor,
+                        actionContent = selectionActionContent,
+                        parentCompositionContext = compositionContext
+                    )
                     editor.replaceComponent(EditorTextActionWindow::class.java, composeActionWindow)
                 }
 
                 if (diagnosticTooltipContent != null) {
                     editor.diagnosticTooltip?.layout =
-                        ComposeDiagnosticTooltipLayout(diagnosticTooltipContent)
+                        ComposeDiagnosticTooltipLayout(
+                            tooltipContent = diagnosticTooltipContent,
+                            parentCompositionContext = compositionContext
+                        )
                 }
 
                 state.attachEditor(editor)
@@ -226,12 +240,20 @@ fun CodeEditorCompose(
             },
             update = { editor ->
                 if (selectionActionContent != null) {
-                    val currentActionWindow = editor.getComponent(EditorTextActionWindow::class.java)
+                    val currentActionWindow =
+                        editor.getComponent(EditorTextActionWindow::class.java)
                     if (currentActionWindow is ComposeTextActionWindow) {
                         currentActionWindow.actionContent = selectionActionContent
                     } else {
-                        val composeActionWindow = ComposeTextActionWindow(editor, selectionActionContent)
-                        editor.replaceComponent(EditorTextActionWindow::class.java, composeActionWindow)
+                        val composeActionWindow = ComposeTextActionWindow(
+                            editor = editor,
+                            actionContent = selectionActionContent,
+                            parentCompositionContext = compositionContext
+                        )
+                        editor.replaceComponent(
+                            EditorTextActionWindow::class.java,
+                            composeActionWindow
+                        )
                     }
                 }
 
@@ -239,7 +261,10 @@ fun CodeEditorCompose(
                     val autoComp = editor.getComponent(EditorAutoCompletion::class.java)
                     if (autoComp.adapter !is ComposeCompletionItemAdapter) {
                         autoComp.adapter =
-                            ComposeCompletionItemAdapter(itemContent = completionItemContent)
+                            ComposeCompletionItemAdapter(
+                                itemContent = completionItemContent,
+                                parentCompositionContext = compositionContext
+                            )
                     }
                 }
 
@@ -249,11 +274,16 @@ fun CodeEditorCompose(
                         currentLayout.tooltipContent = diagnosticTooltipContent
                     } else {
                         editor.diagnosticTooltip?.layout =
-                            ComposeDiagnosticTooltipLayout(diagnosticTooltipContent)
+                            ComposeDiagnosticTooltipLayout(
+                                tooltipContent = diagnosticTooltipContent,
+                                parentCompositionContext = compositionContext
+                            )
                     }
                 }
 
                 state.updateEditor(editor)
+
+                onEditorUpdated?.invoke(editor)
             },
             onRelease = { editor ->
                 state.detachEditor(editor)

@@ -26,9 +26,19 @@
  */
 package io.github.rosemoe.sora.widget.base
 
+import android.content.ContextWrapper
 import android.view.Gravity
 import android.view.View
 import android.widget.PopupWindow
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.findViewTreeViewModelStoreOwner
+import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.lifecycle.setViewTreeViewModelStoreOwner
+import androidx.savedstate.SavedStateRegistryOwner
+import androidx.savedstate.findViewTreeSavedStateRegistryOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import io.github.rosemoe.sora.event.EventReceiver
 import io.github.rosemoe.sora.event.ScrollEvent
 import io.github.rosemoe.sora.widget.CodeEditor
@@ -171,6 +181,14 @@ open class EditorPopupWindow(
      */
     open fun setContentView(view: View) {
         window.contentView = view
+        attachViewTreeOwners(view)
+        view.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(v: View) {
+                attachViewTreeOwners(v)
+            }
+
+            override fun onViewDetachedFromWindow(v: View) {}
+        })
     }
 
     private fun wrapHorizontal(horizontal: Int): Int {
@@ -215,6 +233,53 @@ open class EditorPopupWindow(
             window.height = h
             window.width = w
             window.showAtLocation(parentView, Gravity.START or Gravity.TOP, left, top)
+            attachViewTreeOwners(window.contentView)
+        }
+    }
+
+    /**
+     * Propagates [ViewTreeLifecycleOwner], [ViewTreeViewModelStoreOwner], and
+     * [ViewTreeSavedStateRegistryOwner] from the hosting [CodeEditor] to the popup view hierarchy,
+     * allowing embedded ComposeViews to resolve lifecycle and composition contexts without crashing.
+     */
+    protected fun attachViewTreeOwners(target: View?) {
+        val view = target ?: return
+        val decorView = view.rootView ?: view
+
+        val lifecycleOwner = editor.findViewTreeLifecycleOwner()
+            ?: (editor.context as? LifecycleOwner)
+            ?: ((editor.context as? ContextWrapper)?.baseContext as? LifecycleOwner)
+        if (lifecycleOwner != null) {
+            if (decorView.findViewTreeLifecycleOwner() == null) {
+                decorView.setViewTreeLifecycleOwner(lifecycleOwner)
+            }
+            if (view.findViewTreeLifecycleOwner() == null) {
+                view.setViewTreeLifecycleOwner(lifecycleOwner)
+            }
+        }
+
+        val viewModelStoreOwner = editor.findViewTreeViewModelStoreOwner()
+            ?: (editor.context as? ViewModelStoreOwner)
+            ?: ((editor.context as? ContextWrapper)?.baseContext as? ViewModelStoreOwner)
+        if (viewModelStoreOwner != null) {
+            if (decorView.findViewTreeViewModelStoreOwner() == null) {
+                decorView.setViewTreeViewModelStoreOwner(viewModelStoreOwner)
+            }
+            if (view.findViewTreeViewModelStoreOwner() == null) {
+                view.setViewTreeViewModelStoreOwner(viewModelStoreOwner)
+            }
+        }
+
+        val savedStateRegistryOwner = editor.findViewTreeSavedStateRegistryOwner()
+            ?: (editor.context as? SavedStateRegistryOwner)
+            ?: ((editor.context as? ContextWrapper)?.baseContext as? SavedStateRegistryOwner)
+        if (savedStateRegistryOwner != null) {
+            if (decorView.findViewTreeSavedStateRegistryOwner() == null) {
+                decorView.setViewTreeSavedStateRegistryOwner(savedStateRegistryOwner)
+            }
+            if (view.findViewTreeSavedStateRegistryOwner() == null) {
+                view.setViewTreeSavedStateRegistryOwner(savedStateRegistryOwner)
+            }
         }
     }
 
