@@ -33,5 +33,5 @@ object Floats {
     }
 }
 
-inline fun Float.isCloseTo(other: Float, delta: Float): Boolean = Floats.withinDelta(this, other, delta)
+fun Float.isCloseTo(other: Float, delta: Float): Boolean = Floats.withinDelta(this, other, delta)
 

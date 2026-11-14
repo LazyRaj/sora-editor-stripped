@@ -94,7 +94,7 @@ inline val Long.second: Int get() = this.toInt()
 
 inline val Long.secondFloat: Float get() = Float.fromBits(toInt())
 
-inline operator fun Long.component1(): Int = first
+operator fun Long.component1(): Int = first
 
-inline operator fun Long.component2(): Int = second
+operator fun Long.component2(): Int = second
 

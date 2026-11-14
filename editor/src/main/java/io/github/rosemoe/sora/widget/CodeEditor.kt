@@ -60,6 +60,7 @@ import android.view.PointerIcon
 import android.view.ScaleGestureDetector
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowInsets
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.inputmethod.CursorAnchorInfo
@@ -135,6 +136,7 @@ import io.github.rosemoe.sora.text.TextUtils.trimToSize
 import io.github.rosemoe.sora.text.method.KeyMetaStates
 import io.github.rosemoe.sora.util.Chars.getWordRange
 import io.github.rosemoe.sora.util.ClipDataUtils.clipDataToString
+import io.github.rosemoe.sora.util.toPlainText
 import io.github.rosemoe.sora.util.EditorHandler
 import io.github.rosemoe.sora.util.Floats.withinDelta
 import io.github.rosemoe.sora.util.IntPair.getFirst
@@ -1215,14 +1217,12 @@ open class CodeEditor(
 
         // Destroy old one
         val old: Language = _editorLanguage
-        if (old != null) {
-            val formatter = this.formatter
-            formatter.setReceiver(null)
-            formatter.destroy()
-            old.analyzeManager.setReceiver(null)
-            old.analyzeManager.destroy()
-            old.destroy()
-        }
+        val formatter = this.formatter
+        formatter.setReceiver(null)
+        formatter.destroy()
+        old.analyzeManager.setReceiver(null)
+        old.analyzeManager.destroy()
+        old.destroy()
 
         styleDelegate.reset()
         this._editorLanguage = newLang
@@ -1797,9 +1797,7 @@ open class CodeEditor(
         } else {
             layout = LineBreakLayout(this, text)
         }
-        if (this.eventHandler != null) {
-            eventHandler.scrollBy(0f, 0f)
-        }
+        eventHandler.scrollBy(0f, 0f)
     }
 
     /**
@@ -1917,7 +1915,7 @@ open class CodeEditor(
      * Commit a tab to cursor
      */
     protected fun commitTab() {
-        if (inputConnection != null && isEditable) {
+        if (isEditable) {
             if (inputConnection.composingText.isComposing) {
                 // This external change will damage the composing text (#784)
                 restartInput()
@@ -2812,9 +2810,7 @@ open class CodeEditor(
      */
     fun setUndoEnabled(enabled: Boolean) {
         undoEnabled = enabled
-        if (text != null) {
-            text.isUndoEnabled = enabled
-        }
+        text.isUndoEnabled = enabled
     }
 
     var diagnosticIndicatorStyle: DiagnosticIndicatorStyle
@@ -3707,7 +3703,7 @@ open class CodeEditor(
     fun pasteText() {
         try {
             val clip = clipboardManager?.primaryClip ?: return
-            pasteText(clipDataToString(clip))
+            pasteText(clip.toPlainText())
         } catch (e: Exception) {
             Log.w(LOG_TAG, "Error pasting text to editor", e)
             Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show()
@@ -3718,7 +3714,7 @@ open class CodeEditor(
      * Paste external text into editor
      */
     fun pasteText(text: CharSequence?) {
-        if (text != null && inputConnection != null) {
+        if (text != null) {
             inputConnection.commitText(text, 1)
             if (props.formatPastedText) {
                 formatCodeAsync(lastInsertion!!.start, lastInsertion!!.end)
@@ -4004,13 +4000,11 @@ open class CodeEditor(
         renderContext.reset(this._text!!.lineCount)
         renderer.onEditorFullTextUpdate()
 
-        if (editorLanguage != null) {
-            editorLanguage.analyzeManager.reset(
-                ContentReference(this.text),
-                this.extraArguments
-            )
-            editorLanguage.formatter.cancel()
-        }
+        editorLanguage.analyzeManager.reset(
+            ContentReference(this.text),
+            this.extraArguments
+        )
+        editorLanguage.formatter.cancel()
         inlayHints = null
 
         dispatchEvent(
@@ -4181,9 +4175,7 @@ open class CodeEditor(
      * Rerun analysis forcibly
      */
     fun rerunAnalysis() {
-        if (editorLanguage != null) {
-            editorLanguage.analyzeManager.rerun()
-        }
+        editorLanguage.analyzeManager.rerun()
     }
 
     @set:UiThread
@@ -4379,7 +4371,14 @@ open class CodeEditor(
                 requestFocus()
             }
 
-            if (checkSoftInputEnabled()) inputMethodManager!!.showSoftInput(this, 0)
+            if (checkSoftInputEnabled()) {
+                val insetsController = windowInsetsController
+                if (insetsController != null) {
+                    insetsController.show(WindowInsets.Type.ime())
+                } else {
+                    inputMethodManager?.showSoftInput(this, 0)
+                }
+            }
         }
         invalidate()
     }
@@ -4388,7 +4387,12 @@ open class CodeEditor(
      * Hide soft input
      */
     fun hideSoftInput() {
-        inputMethodManager!!.hideSoftInputFromWindow(windowToken, 0)
+        val insetsController = windowInsetsController
+        if (insetsController != null) {
+            insetsController.hide(WindowInsets.Type.ime())
+        } else {
+            inputMethodManager?.hideSoftInputFromWindow(windowToken, 0)
+        }
     }
 
     /**
@@ -4559,7 +4563,7 @@ open class CodeEditor(
      * @see InputConnection
      */
     fun restartInput() {
-        if (inputConnection != null) inputConnection.reset()
+        inputConnection.reset()
         if (inputMethodManager != null) inputMethodManager!!.restartInput(this)
     }
 
@@ -4591,24 +4595,19 @@ open class CodeEditor(
             return
         }
         this.isReleased = true
-        if (editorLanguage != null) {
-            editorLanguage.analyzeManager.destroy()
-            val formatter = this.formatter
-            formatter.setReceiver(null)
-            formatter.destroy()
-            editorLanguage.destroy()
-            _editorLanguage = EmptyLanguage()
-        }
+        editorLanguage.analyzeManager.destroy()
+        val formatter = this.formatter
+        formatter.setReceiver(null)
+        formatter.destroy()
+        editorLanguage.destroy()
+        _editorLanguage = EmptyLanguage()
 
         // avoid access to language related after releasing
         textStyles = null
         diagnostics = null
         styleDelegate.reset()
 
-        val text: Content = this.text
-        if (text != null) {
-            text.removeContentListener(this)
-        }
+        this.text.removeContentListener(this)
         colorScheme.detachEditor(this)
     }
 
@@ -4978,7 +4977,7 @@ open class CodeEditor(
                 }
                 eventHandler.draggingSelection = null
                 setSelection(targetPos.line, targetPos.column)
-                pasteText(clipDataToString(event.clipData))
+                pasteText(event.clipData.toPlainText())
                 requestFocus()
                 postInvalidate()
                 // Call super for notifying listeners

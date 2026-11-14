@@ -1,7 +1,8 @@
-/*******************************************************************************
+/*
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2024  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -20,11 +21,10 @@
  *
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
- ******************************************************************************/
+ */
 
 package io.github.rosemoe.sora.widget.rendering
 
-import android.os.Build
 import io.github.rosemoe.sora.lang.analysis.StyleUpdateRange
 import io.github.rosemoe.sora.widget.CodeEditor
 
@@ -37,39 +37,27 @@ class RenderContext(val editor: CodeEditor) {
 
     val cache = RenderCache()
 
-    val renderNodeHolder: RenderNodeHolder? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        RenderNodeHolder(editor)
-    } else {
-        null
-    }
+    val renderNodeHolder: RenderNodeHolder = RenderNodeHolder(editor)
 
     val tabWidth
         get() = editor.tabWidth
 
     fun updateForRange(range: StyleUpdateRange) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            renderNodeHolder?.invalidateInRegion(range)
-        }
+        renderNodeHolder.invalidateInRegion(range)
     }
 
     fun invalidateRenderNodes() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            renderNodeHolder?.invalidate()
-        }
+        renderNodeHolder.invalidate()
     }
 
     fun updateForInsertion(startLine: Int, endLine: Int) {
         cache.updateForInsertion(startLine, endLine)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            renderNodeHolder?.afterInsert(startLine, endLine)
-        }
+        renderNodeHolder.afterInsert(startLine, endLine)
     }
 
     fun updateForDeletion(startLine: Int, endLine: Int) {
         cache.updateForDeletion(startLine, endLine)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            renderNodeHolder?.afterDelete(startLine, endLine)
-        }
+        renderNodeHolder.afterDelete(startLine, endLine)
     }
 
     fun reset(lineCount: Int) {

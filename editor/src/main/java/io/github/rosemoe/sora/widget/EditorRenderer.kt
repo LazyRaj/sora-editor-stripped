@@ -551,7 +551,7 @@ open class EditorRenderer(protected val editor: CodeEditor) {
             val currentLineBgColor = editor.colorScheme.getColor(EditorColorScheme.CURRENT_LINE)
             if (editor.cursorAnimator.isRunning() && editor.isHighlightCurrentLine && editor.isEditable) {
                 tmpRect.bottom =
-                    (editor.cursorAnimator.animatedLineBottom() - editor.offsetY).toFloat()
+                    editor.cursorAnimator.animatedLineBottom() - editor.offsetY
                 tmpRect.top = tmpRect.bottom - editor.cursorAnimator.animatedLineHeight()
                 tmpRect.left = 0f
                 tmpRect.right = (textOffset - editor.dividerMarginRight).toInt().toFloat()
@@ -615,8 +615,6 @@ open class EditorRenderer(protected val editor: CodeEditor) {
                         y,
                         paintOther
                     )
-
-                    else -> {}
                 }
             }
             for (i in 0 until postDrawLineNumbers.size()) {
@@ -670,7 +668,7 @@ open class EditorRenderer(protected val editor: CodeEditor) {
             val currentLineBgColor = editor.colorScheme.getColor(EditorColorScheme.CURRENT_LINE)
             if (editor.cursorAnimator.isRunning() && editor.isHighlightCurrentLine && editor.isEditable) {
                 tmpRect.bottom =
-                    (editor.cursorAnimator.animatedLineBottom() - editor.offsetY).toFloat()
+                    editor.cursorAnimator.animatedLineBottom() - editor.offsetY
                 tmpRect.top = tmpRect.bottom - editor.cursorAnimator.animatedLineHeight()
                 tmpRect.left = 0f
                 tmpRect.right = (textOffset - editor.dividerMarginRight).toInt().toFloat()
@@ -778,11 +776,11 @@ open class EditorRenderer(protected val editor: CodeEditor) {
                     editor.width.toFloat(),
                     editor.height.toFloat()
                 )
-                canvas.translate(0f, (endLineTop - bottomOffset).toFloat())
+                canvas.translate(0f, endLineTop - bottomOffset)
             }
             if (currentLine == line || color != 0) {
-                tmpRect.top = (editor.getRowTop(i) - offsetY).toFloat()
-                tmpRect.bottom = (editor.getRowBottom(i) - offsetY - editor.dpUnit).toFloat()
+                tmpRect.top = editor.getRowTop(i) - offsetY
+                tmpRect.bottom = editor.getRowBottom(i) - offsetY - editor.dpUnit
                 tmpRect.left = if (editor.isLineNumberPinned) 0f else offset
                 tmpRect.right = tmpRect.left + editor.measureTextRegionOffset()
                 if (currentLine == line && editor.isHighlightCurrentLine) {
@@ -826,7 +824,7 @@ open class EditorRenderer(protected val editor: CodeEditor) {
                 val shouldTranslate =
                     endLineTop < bottomOffset && endLineTop >= bottomOffset - editor.rowHeight
                 if (shouldTranslate) {
-                    bottomOffset += (endLineTop - bottomOffset).toFloat()
+                    bottomOffset += endLineTop - bottomOffset
                 }
                 previousLine = block.startLine
                 offsetLine++
@@ -864,8 +862,8 @@ open class EditorRenderer(protected val editor: CodeEditor) {
                         editor.width.toFloat(),
                         editor.height.toFloat()
                     )
-                    canvas.translate(0f, (endLineTop - tmpRect.bottom).toFloat())
-                    bottomOffset += (endLineTop - tmpRect.bottom).toFloat()
+                    canvas.translate(0f, endLineTop - tmpRect.bottom)
+                    bottomOffset += endLineTop - tmpRect.bottom
                 }
                 var colorId = EditorColorScheme.WHOLE_BACKGROUND
                 if (block.startLine == currentLine && editor.isHighlightCurrentLine) {
@@ -873,10 +871,10 @@ open class EditorRenderer(protected val editor: CodeEditor) {
                 }
                 drawColor(canvas, editor.colorScheme.getColor(colorId), tmpRect)
                 if (canvas.isHardwareAccelerated && editor.isHardwareAcceleratedDrawAllowed &&
-                    editor.renderContext.renderNodeHolder != null && !editor.eventHandler.isScaling &&
+                    !editor.eventHandler.isScaling &&
                     (editor.props.cacheRenderNodeForLongLines || getLine(block.startLine).length < 128)
                 ) {
-                    editor.renderContext.renderNodeHolder?.drawLineHardwareAccelerated(
+                    editor.renderContext.renderNodeHolder.drawLineHardwareAccelerated(
                         canvas,
                         block.startLine,
                         offset,
@@ -1095,8 +1093,6 @@ open class EditorRenderer(protected val editor: CodeEditor) {
                 y,
                 paintOther
             )
-
-            else -> {}
         }
         TemporaryCharBuffer.recycle(buffer)
     }
@@ -1303,7 +1299,7 @@ open class EditorRenderer(protected val editor: CodeEditor) {
     }
 
     protected open fun drawAnimatedCurrentLineBackground(canvas: Canvas, currentLineBgColor: Int) {
-        tmpRect.bottom = (editor.cursorAnimator.animatedLineBottom() - editor.offsetY).toFloat()
+        tmpRect.bottom = editor.cursorAnimator.animatedLineBottom() - editor.offsetY
         tmpRect.top = tmpRect.bottom - editor.cursorAnimator.animatedLineHeight()
         tmpRect.left = 0f
         tmpRect.right = viewRect.right.toFloat()
@@ -1402,7 +1398,7 @@ open class EditorRenderer(protected val editor: CodeEditor) {
             ) * RenderingConstants.NON_PRINTABLE_CIRCLE_RADIUS_FACTOR
         }
         if (!editor.isWordwrap && canvas.isHardwareAccelerated && editor.isHardwareAcceleratedDrawAllowed) {
-            editor.renderContext.renderNodeHolder?.keepCurrentInDisplay(
+            editor.renderContext.renderNodeHolder.keepCurrentInDisplay(
                 firstVis,
                 editor.lastVisibleRow,
                 stuckLines
@@ -1685,7 +1681,7 @@ open class EditorRenderer(protected val editor: CodeEditor) {
                 }
             } else {
                 paintingOffset =
-                    offset + editor.renderContext.renderNodeHolder!!.drawLineHardwareAccelerated(
+                    offset + editor.renderContext.renderNodeHolder.drawLineHardwareAccelerated(
                         canvas, line, offset, (editor.getRowTop(rowIdx) - editor.offsetY).toFloat()
                     )
                 if (rowInf.isTrailingRow && (nonPrintableFlags and CodeEditor.FLAG_DRAW_LINE_SEPARATOR) != 0) {
@@ -1990,7 +1986,7 @@ open class EditorRenderer(protected val editor: CodeEditor) {
                 }
             } else if (editor.isInMouseMode && editor.isTextSelected) {
                 val target = editor.selectingTarget
-                if (target != null && target.line == line && isInside(
+                if (target.line == line && isInside(
                         target.column,
                         rowInf.startColumn,
                         rowInf.endColumn,
@@ -2133,7 +2129,7 @@ open class EditorRenderer(protected val editor: CodeEditor) {
     protected open fun drawDiagnosticIndicators(canvas: Canvas, offset: Float) {
         val diagnosticsContainer = editor.diagnostics
         val style = editor.diagnosticIndicatorStyle
-        if (diagnosticsContainer != null && style != DiagnosticIndicatorStyle.NONE && style != null) {
+        if (diagnosticsContainer != null && style != DiagnosticIndicatorStyle.NONE) {
             val text = content
             val firstVisRow = editor.firstVisibleRow
             val lastVisRow = editor.lastVisibleRow
@@ -3098,7 +3094,7 @@ open class EditorRenderer(protected val editor: CodeEditor) {
         if (!editor.isEditable) {
             return
         }
-        tmpRect.bottom = (editor.cursorAnimator.animatedY() - editor.offsetY).toFloat()
+        tmpRect.bottom = editor.cursorAnimator.animatedY() - editor.offsetY
         tmpRect.top =
             tmpRect.bottom - (if (editor.props.textBackgroundWrapTextOnly) editor.rowHeightOfText else editor.rowHeight).toFloat()
         val centerX = editor.cursorAnimator.animatedX() - editor.offsetX
