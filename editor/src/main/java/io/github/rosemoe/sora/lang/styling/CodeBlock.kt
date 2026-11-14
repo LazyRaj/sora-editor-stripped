@@ -31,28 +31,44 @@ import java.util.Objects
  *
  * @author Rose
  */
-open class CodeBlock @JvmOverloads constructor(
+open class CodeBlock(
     /**
      * Start line of code block
      */
-    @JvmField var startLine: Int = 0,
+    var startLine: Int = 0,
     /**
      * Start column of code block
      */
-    @JvmField var startColumn: Int = 0,
+    var startColumn: Int = 0,
     /**
      * End line of code block
      */
-    @JvmField var endLine: Int = 0,
+    var endLine: Int = 0,
     /**
      * End column of code block
      */
-    @JvmField var endColumn: Int = 0,
+    var endColumn: Int = 0,
     /**
      * Indicates that this BlockLine should be drawn vertically until the bottom of its end line
      */
-    @JvmField var toBottomOfEndLine: Boolean = false
+    var toBottomOfEndLine: Boolean = false
 ) {
+
+    operator fun component1(): Int = startLine
+    operator fun component2(): Int = startColumn
+    operator fun component3(): Int = endLine
+    operator fun component4(): Int = endColumn
+    operator fun component5(): Boolean = toBottomOfEndLine
+
+    fun copy(
+        startLine: Int = this.startLine,
+        startColumn: Int = this.startColumn,
+        endLine: Int = this.endLine,
+        endColumn: Int = this.endColumn,
+        toBottomOfEndLine: Boolean = this.toBottomOfEndLine
+    ): CodeBlock = CodeBlock(startLine, startColumn, endLine, endColumn, toBottomOfEndLine)
+
+    operator fun contains(line: Int): Boolean = line in startLine..endLine
 
     fun clear() {
         startLine = 0
@@ -81,7 +97,6 @@ open class CodeBlock @JvmOverloads constructor(
     }
 
     companion object {
-        @JvmField
         val COMPARATOR_END: Comparator<CodeBlock> = Comparator { a, b ->
             val res = a.endLine.compareTo(b.endLine)
             if (res == 0) {
@@ -91,7 +106,6 @@ open class CodeBlock @JvmOverloads constructor(
             }
         }
 
-        @JvmField
         val COMPARATOR_START: Comparator<CodeBlock> = Comparator { a, b ->
             val res = a.startLine.compareTo(b.startLine)
             if (res == 0) {
@@ -114,7 +128,6 @@ open class CodeBlock @JvmOverloads constructor(
          * @return The index of the smallest code block with an end line greater than or equal to the
          * specified line. If no matching code block is found, -1 is returned.
          */
-        @JvmStatic
         fun binarySearchEndBlock(line: Int, blocks: List<CodeBlock?>?): Int {
             if (blocks.isNullOrEmpty()) {
                 return -1

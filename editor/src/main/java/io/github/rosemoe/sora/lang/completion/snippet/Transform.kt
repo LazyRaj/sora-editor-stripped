@@ -26,27 +26,8 @@ package io.github.rosemoe.sora.lang.completion.snippet
 
 import java.util.regex.Pattern
 
-open class Transform {
-
-    @JvmField
-    var regexp: Pattern? = null
-
-    @JvmField
-    var globalMode: Boolean = false
-
-    @JvmField
-    var format: List<@JvmSuppressWildcards FormatString>? = null
-
-    fun getRegexp(): Pattern? = regexp
-
-    fun setRegexp(regexp: Pattern?) {
-        this.regexp = regexp
-    }
-
-    @JvmSuppressWildcards
-    fun getFormat(): List<FormatString>? = format
-
-    fun setFormat(format: List<@JvmSuppressWildcards FormatString>?) {
-        this.format = format
-    }
-}
+open class Transform(
+    var regexp: Pattern? = null,
+    var globalMode: Boolean = false,
+    var format: List<FormatString>? = null
+)

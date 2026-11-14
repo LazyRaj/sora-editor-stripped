@@ -94,7 +94,7 @@ class MappedSpans private constructor(
     /**
      * Allow you to build a span map linearly.
      */
-    class Builder @JvmOverloads constructor(lineCapacity: Int = 128) {
+    class Builder(lineCapacity: Int = 128) {
 
         private val spans: MutableList<MutableList<Span>> = ArrayList(lineCapacity)
         private var last: Span? = null

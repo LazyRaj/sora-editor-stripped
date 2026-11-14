@@ -47,12 +47,11 @@ fun interface QuickQuoteHandler {
         style: Styles?
     ): HandleResult
 
-    class HandleResult(
+    data class HandleResult(
         var isConsumed: Boolean,
         var newCursorRange: TextRange?
     ) {
         companion object {
-            @JvmField
             val NOT_CONSUMED = HandleResult(false, null)
         }
     }

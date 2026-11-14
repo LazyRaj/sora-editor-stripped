@@ -149,7 +149,6 @@ interface Span {
          * Get an available [Span] object from either cache or new instance.
          * The result object will be initialized with the given arguments.
          */
-        @JvmStatic
         fun obtain(column: Int, style: Long): Span {
             return SpanFactory.obtain(column, style)
         }
@@ -157,7 +156,6 @@ interface Span {
         /**
          * Recycle all spans in the given collection
          */
-        @JvmStatic
         fun recycleAll(spans: Collection<Span>) {
             SpanFactory.recycleAll(spans)
         }

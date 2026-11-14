@@ -2484,7 +2484,7 @@ open class EditorRenderer(protected val editor: CodeEditor) {
     protected open fun drawBlockLines(canvas: Canvas, offsetX: Float) {
         val styles = editor.styles
         val blocks = styles?.blocks
-        val indentMode = styles != null && styles.isIndentCountMode()
+        val indentMode = styles?.indentCountMode == true
         if (blocks == null || blocks.isEmpty()) {
             return
         }

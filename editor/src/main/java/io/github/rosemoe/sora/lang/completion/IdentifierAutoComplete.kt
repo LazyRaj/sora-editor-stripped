@@ -75,7 +75,6 @@ class IdentifierAutoComplete {
         setKeywords(keywords, true)
     }
 
-    @JvmOverloads
     fun setKeywords(keywords: Array<String>?, lowCase: Boolean = true) {
         this.keywords = keywords
         this.keywordsAreLowCase = lowCase

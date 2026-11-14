@@ -25,10 +25,14 @@
 package io.github.rosemoe.sora.lang.completion.snippet.parser
 
 open class Token(
-    @JvmField var index: Int,
-    @JvmField var length: Int,
-    @JvmField var type: TokenType
+    var index: Int,
+    var length: Int,
+    var type: TokenType
 ) {
+
+    operator fun component1(): Int = index
+    operator fun component2(): Int = length
+    operator fun component3(): TokenType = type
 
     override fun toString(): String {
         return "Token{" +

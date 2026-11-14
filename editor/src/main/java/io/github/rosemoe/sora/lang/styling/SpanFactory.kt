@@ -36,7 +36,6 @@ object SpanFactory {
      * Get an available [Span] object from either cache or new instance.
      * The result object will be initialized with the given arguments.
      */
-    @JvmStatic
     fun obtain(column: Int, style: Long): Span {
         return SpanImpl.obtain(column, style)
     }
@@ -47,7 +46,6 @@ object SpanFactory {
      *
      * Note that the span can not have additional fields beside style and column.
      */
-    @JvmStatic
     fun obtainNoExt(column: Int, style: Long): Span {
         return NoExtSpanImpl.obtain(column, style)
     }
@@ -55,7 +53,6 @@ object SpanFactory {
     /**
      * Recycle all spans in the given collection
      */
-    @JvmStatic
     fun recycleAll(spans: Collection<Span>) {
         for (span in spans) {
             if (!span.recycle()) {
@@ -63,4 +60,8 @@ object SpanFactory {
             }
         }
     }
+}
+
+fun Collection<Span>.recycleAll() {
+    SpanFactory.recycleAll(this)
 }

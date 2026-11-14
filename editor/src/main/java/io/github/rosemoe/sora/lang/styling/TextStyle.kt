@@ -56,44 +56,6 @@ object TextStyle {
     const val NO_COMPLETION_BIT: Long = STRIKETHROUGH_BIT shl 1
 
     /**
-     * Convenient method
-     *
-     * @see makeStyle
-     */
-    @JvmStatic
-    fun makeStyle(foregroundColorId: Int): Long {
-        checkColorId(foregroundColorId)
-        return foregroundColorId.toLong()
-    }
-
-    /**
-     * Convenient method
-     *
-     * @see makeStyle
-     */
-    @JvmStatic
-    fun makeStyle(foregroundColorId: Int, noCompletion: Boolean): Long {
-        checkColorId(foregroundColorId)
-        return foregroundColorId.toLong() or (if (noCompletion) NO_COMPLETION_BIT else 0L)
-    }
-
-    /**
-     * Convenient method
-     *
-     * @see makeStyle
-     */
-    @JvmStatic
-    fun makeStyle(
-        foregroundColorId: Int,
-        backgroundColorId: Int,
-        bold: Boolean,
-        italic: Boolean,
-        strikeThrough: Boolean
-    ): Long {
-        return makeStyle(foregroundColorId, backgroundColorId, bold, italic, strikeThrough, false)
-    }
-
-    /**
      * Make a TextStyle with the given style arguments
      *
      * Note: colorId must be less than 20 bits
@@ -103,17 +65,18 @@ object TextStyle {
      * @see STRIKETHROUGH_BIT
      * @see NO_COMPLETION_BIT
      */
-    @JvmStatic
     fun makeStyle(
         foregroundColorId: Int,
-        backgroundColorId: Int,
-        bold: Boolean,
-        italic: Boolean,
-        strikeThrough: Boolean,
-        noCompletion: Boolean
+        backgroundColorId: Int = 0,
+        bold: Boolean = false,
+        italic: Boolean = false,
+        strikeThrough: Boolean = false,
+        noCompletion: Boolean = false
     ): Long {
         checkColorId(foregroundColorId)
-        checkColorId(backgroundColorId)
+        if (backgroundColorId != 0) {
+            checkColorId(backgroundColorId)
+        }
         return foregroundColorId.toLong() +
                 (backgroundColorId.toLong() shl COLOR_ID_BIT_COUNT) or
                 (if (bold) BOLD_BIT else 0L) or
@@ -122,45 +85,62 @@ object TextStyle {
                 (if (noCompletion) NO_COMPLETION_BIT else 0L)
     }
 
-    @JvmStatic
+    /**
+     * Convenient method
+     *
+     * @see makeStyle
+     */
+    fun makeStyle(foregroundColorId: Int, noCompletion: Boolean): Long {
+        return makeStyle(
+            foregroundColorId = foregroundColorId,
+            backgroundColorId = 0,
+            bold = false,
+            italic = false,
+            strikeThrough = false,
+            noCompletion = noCompletion
+        )
+    }
+
     fun getForegroundColorId(style: Long): Int {
         return (style and FOREGROUND_BITS).toInt()
     }
 
-    @JvmStatic
     fun getBackgroundColorId(style: Long): Int {
         return ((style and BACKGROUND_BITS) shr COLOR_ID_BIT_COUNT).toInt()
     }
 
-    @JvmStatic
     fun isBold(style: Long): Boolean {
         return (style and BOLD_BIT) != 0L
     }
 
-    @JvmStatic
     fun isItalics(style: Long): Boolean {
         return (style and ITALICS_BIT) != 0L
     }
 
-    @JvmStatic
     fun isStrikeThrough(style: Long): Boolean {
         return (style and STRIKETHROUGH_BIT) != 0L
     }
 
-    @JvmStatic
     fun isNoCompletion(style: Long): Boolean {
         return (style and NO_COMPLETION_BIT) != 0L
     }
 
-    @JvmStatic
     fun getStyleBits(style: Long): Long {
         return style and (BOLD_BIT + ITALICS_BIT + STRIKETHROUGH_BIT)
     }
 
-    @JvmStatic
     fun checkColorId(colorId: Int) {
         if (colorId > (1 shl COLOR_ID_BIT_COUNT) - 1 || colorId < 0) {
             throw IllegalArgumentException("color id must be positive and bit count is less than $COLOR_ID_BIT_COUNT")
         }
     }
 }
+
+inline val Long.foregroundColorId: Int get() = TextStyle.getForegroundColorId(this)
+inline val Long.backgroundColorId: Int get() = TextStyle.getBackgroundColorId(this)
+inline val Long.isBold: Boolean get() = TextStyle.isBold(this)
+inline val Long.isItalics: Boolean get() = TextStyle.isItalics(this)
+inline val Long.isStrikeThrough: Boolean get() = TextStyle.isStrikeThrough(this)
+inline val Long.isNoCompletion: Boolean get() = TextStyle.isNoCompletion(this)
+inline val Long.styleBits: Long get() = TextStyle.getStyleBits(this)
+

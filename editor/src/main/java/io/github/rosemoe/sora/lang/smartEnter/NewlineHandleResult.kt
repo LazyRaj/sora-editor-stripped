@@ -22,6 +22,7 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
+// Modified by Raj Dave (aka LazyRaj)
 package io.github.rosemoe.sora.lang.smartEnter
 
 /**
@@ -31,8 +32,8 @@ package io.github.rosemoe.sora.lang.smartEnter
  * @param shiftLeft Count to shift left from the end of [text]
  */
 data class NewlineHandleResult(
-    @JvmField val text: CharSequence,
-    @JvmField val shiftLeft: Int
+    val text: CharSequence,
+    val shiftLeft: Int
 ) {
     init {
         require(shiftLeft in 0..text.length) { "invalid shiftLeft" }

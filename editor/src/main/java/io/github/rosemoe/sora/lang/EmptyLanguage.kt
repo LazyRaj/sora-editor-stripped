@@ -45,7 +45,6 @@ import io.github.rosemoe.sora.widget.SymbolPairMatch
 open class EmptyLanguage : Language {
 
     companion object {
-        @JvmField
         val EMPTY_SYMBOL_PAIRS = SymbolPairMatch()
     }
 
@@ -84,7 +83,6 @@ open class EmptyLanguage : Language {
 
     open class EmptyFormatter : Formatter {
         companion object {
-            @JvmField
             val INSTANCE = EmptyFormatter()
         }
 
@@ -105,7 +103,6 @@ open class EmptyLanguage : Language {
 
     open class EmptyAnalyzeManager : BaseAnalyzeManager() {
         companion object {
-            @JvmField
             val INSTANCE = EmptyAnalyzeManager()
         }
 

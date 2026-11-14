@@ -97,7 +97,6 @@ open class NoExtSpanImpl internal constructor(
         private val pool: SpanPool<NoExtSpanImpl> =
             SpanPool { column, style -> NoExtSpanImpl(column, style) }
 
-        @JvmStatic
         fun obtain(column: Int, style: Long): NoExtSpanImpl {
             return pool.obtain(column, style)
         }

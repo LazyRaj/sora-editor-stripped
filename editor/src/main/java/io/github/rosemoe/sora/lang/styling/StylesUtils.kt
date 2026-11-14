@@ -35,7 +35,6 @@ object StylesUtils {
      * Check given position's span.
      * If [io.github.rosemoe.sora.lang.styling.TextStyle.NO_COMPLETION_BIT] is set, true is returned.
      */
-    @JvmStatic
     fun checkNoCompletion(styles: Styles?, pos: CharPosition): Boolean {
         val span = getSpanForPosition(styles, pos)
         return styles != null && (span == null || TextStyle.isNoCompletion(span.style))
@@ -44,7 +43,6 @@ object StylesUtils {
     /**
      * Get [Span] for the given position.
      */
-    @JvmStatic
     fun getSpanForPosition(styles: Styles?, pos: CharPosition): Span? {
         return getSpanForPositionImpl(styles, pos, 0)
     }
@@ -52,7 +50,6 @@ object StylesUtils {
     /**
      * Get following [Span] for the given position.
      */
-    @JvmStatic
     fun getFollowingSpanForPosition(styles: Styles?, pos: CharPosition): Span? {
         return getSpanForPositionImpl(styles, pos, 1)
     }
@@ -105,3 +102,11 @@ object StylesUtils {
         }
     }
 }
+
+fun Styles?.checkNoCompletion(pos: CharPosition): Boolean = StylesUtils.checkNoCompletion(this, pos)
+
+fun Styles?.getSpanForPosition(pos: CharPosition): Span? = StylesUtils.getSpanForPosition(this, pos)
+
+fun Styles?.getFollowingSpanForPosition(pos: CharPosition): Span? =
+    StylesUtils.getFollowingSpanForPosition(this, pos)
+

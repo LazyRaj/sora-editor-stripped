@@ -51,7 +51,7 @@ import java.util.concurrent.locks.ReentrantLock
  *
  * @author Rosemoe
  */
-abstract class AsyncIncrementalAnalyzeManager<S, T> @JvmOverloads constructor(
+abstract class AsyncIncrementalAnalyzeManager<S, T>(
     private val useShallowCopy: Boolean = isUseShallowCopyByDefault
 ) : BaseAnalyzeManager(), IncrementalAnalyzeManager<S, T> {
 
@@ -416,7 +416,7 @@ abstract class AsyncIncrementalAnalyzeManager<S, T> @JvmOverloads constructor(
                 }
             }
             localStyles.blocks = computeBlocks(currentContent, delegate)
-            localStyles.setSuppressSwitch(delegate.suppressSwitch)
+            localStyles.suppressSwitch = delegate.suppressSwitch
             localStyles.finishBuilding()
 
             if (!abort) {
@@ -545,7 +545,7 @@ abstract class AsyncIncrementalAnalyzeManager<S, T> @JvmOverloads constructor(
                             if (delegate.isNotCancelled) {
                                 currentStyles.blocks = blocks
                                 currentStyles.finishBuilding()
-                                currentStyles.setSuppressSwitch(delegate.suppressSwitch)
+                                currentStyles.suppressSwitch = delegate.suppressSwitch
                             }
                             if (!abort) {
                                 sendUpdate(currentStyles, updateStart, updateEnd)
@@ -589,11 +589,9 @@ abstract class AsyncIncrementalAnalyzeManager<S, T> @JvmOverloads constructor(
         private const val MSG_MOD = MSG_BASE + 2
         private val threadIdCounter = AtomicInteger(0)
 
-        @JvmStatic
         @set:Experimental
         var isUseShallowCopyByDefault: Boolean = false
 
-        @JvmStatic
         var isUpdateStylesDuringAnalysis: Boolean = true
     }
 }

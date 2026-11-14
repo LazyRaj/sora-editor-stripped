@@ -29,13 +29,29 @@ package io.github.rosemoe.sora.lang.diagnostic
  *
  * @author Rosemoe
  */
-class DiagnosticRegion @JvmOverloads constructor(
-    @JvmField var startIndex: Int,
-    @JvmField var endIndex: Int,
-    @JvmField var severity: Short,
-    @JvmField var id: Long = 0L,
-    @JvmField var detail: DiagnosticDetail? = null
+class DiagnosticRegion(
+    var startIndex: Int,
+    var endIndex: Int,
+    var severity: Short,
+    var id: Long = 0L,
+    var detail: DiagnosticDetail? = null
 ) : Comparable<DiagnosticRegion> {
+
+    operator fun component1(): Int = startIndex
+    operator fun component2(): Int = endIndex
+    operator fun component3(): Short = severity
+    operator fun component4(): Long = id
+    operator fun component5(): DiagnosticDetail? = detail
+
+    operator fun contains(index: Int): Boolean = index in startIndex until endIndex
+
+    fun copy(
+        startIndex: Int = this.startIndex,
+        endIndex: Int = this.endIndex,
+        severity: Short = this.severity,
+        id: Long = this.id,
+        detail: DiagnosticDetail? = this.detail
+    ): DiagnosticRegion = DiagnosticRegion(startIndex, endIndex, severity, id, detail)
 
     companion object {
         const val SEVERITY_NONE: Short = 0

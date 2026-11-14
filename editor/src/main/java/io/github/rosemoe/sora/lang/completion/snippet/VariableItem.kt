@@ -24,7 +24,7 @@
 // Modified by Raj Dave (aka LazyRaj)
 package io.github.rosemoe.sora.lang.completion.snippet
 
-open class VariableItem @JvmOverloads constructor(
+open class VariableItem(
     index: Int,
     var name: String,
     var defaultValue: String? = null,

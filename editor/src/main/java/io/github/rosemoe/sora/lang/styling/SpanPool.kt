@@ -36,7 +36,7 @@ import java.util.concurrent.ArrayBlockingQueue
  * @property factory A factory method to create new instances of [SpanT].
  * @author Akash Yadav
  */
-open class SpanPool<SpanT : Span> @JvmOverloads constructor(
+open class SpanPool<SpanT : Span>(
     capacity: Int = DEFAULT_CAPACITY,
     private val factory: (column: Int, style: Long) -> SpanT
 ) {

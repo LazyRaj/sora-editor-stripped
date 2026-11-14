@@ -39,7 +39,6 @@ object CompletionHelper {
      * Searches backward on the line, with the given checker to check chars.
      * Returns the longest text that matches the requirement
      */
-    @JvmStatic
     fun computePrefix(ref: ContentReference, pos: CharPosition, checker: PrefixChecker): String {
         var begin = pos.column
         val line = ref.getLine(pos.line)
@@ -56,7 +55,6 @@ object CompletionHelper {
      * Check whether the thread is abandoned by editor.
      * Return true if it is cancelled by editor.
      */
-    @JvmStatic
     fun checkCancelled(): Boolean {
         val thread = Thread.currentThread()
         return thread is EditorAutoCompletion.CompletionThread && thread.isCancelled
@@ -66,3 +64,7 @@ object CompletionHelper {
         fun check(ch: Char): Boolean
     }
 }
+
+fun ContentReference.computePrefix(pos: CharPosition, checker: CompletionHelper.PrefixChecker): String =
+    CompletionHelper.computePrefix(this, pos, checker)
+

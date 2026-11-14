@@ -166,7 +166,7 @@ class TextMateAnalyzer(
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        managedStyles?.setIndentCountMode(true)
+        managedStyles?.indentCountMode = true
     }
 
     @Synchronized

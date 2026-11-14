@@ -39,13 +39,11 @@ open class MatchHelper {
     /**
      * Color for matched text highlighting
      */
-    @JvmField
     var highlightColor: Int = -0xc0ae4b // 0xff3f51b5.toInt()
 
     /**
      * Case in-sensitive
      */
-    @JvmField
     var ignoreCase: Boolean = false
 
     /**
@@ -53,7 +51,6 @@ open class MatchHelper {
      *
      * for [startsWith] only
      */
-    @JvmField
     var matchFirstCase: Boolean = false
 
     open fun startsWith(name: CharSequence, pattern: CharSequence): Spanned? {

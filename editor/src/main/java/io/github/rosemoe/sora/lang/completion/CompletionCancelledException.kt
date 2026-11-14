@@ -33,6 +33,6 @@ package io.github.rosemoe.sora.lang.completion
  *
  * @author Rosemoe
  */
-class CompletionCancelledException @JvmOverloads constructor(
+class CompletionCancelledException(
     message: String? = null
 ) : RuntimeException(message)

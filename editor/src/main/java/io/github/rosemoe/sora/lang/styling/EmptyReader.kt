@@ -49,7 +49,6 @@ open class EmptyReader : Spans.Reader {
     companion object {
         private val INSTANCE: EmptyReader = EmptyReader()
 
-        @JvmStatic
         fun getInstance(): EmptyReader = INSTANCE
     }
 }

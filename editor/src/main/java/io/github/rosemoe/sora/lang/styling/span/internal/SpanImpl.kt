@@ -113,7 +113,6 @@ open class SpanImpl internal constructor(
     companion object {
         private val pool: SpanPool<SpanImpl> = SpanPool { column, style -> SpanImpl(column, style) }
 
-        @JvmStatic
         fun obtain(column: Int, style: Long): SpanImpl {
             return pool.obtain(column, style)
         }

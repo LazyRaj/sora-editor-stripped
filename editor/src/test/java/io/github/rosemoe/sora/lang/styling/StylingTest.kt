@@ -328,13 +328,13 @@ class StylingTest {
         assertEquals(1, styles.blocks?.size)
 
         styles.suppressSwitch = 50
-        assertEquals(50, styles.getSuppressSwitch())
-        styles.setSuppressSwitch(100)
+        assertEquals(50, styles.suppressSwitch)
+        styles.suppressSwitch = 100
         assertEquals(100, styles.suppressSwitch)
 
         styles.indentCountMode = true
-        assertTrue(styles.isIndentCountMode())
-        styles.setIndentCountMode(false)
+        assertTrue(styles.indentCountMode)
+        styles.indentCountMode = false
         assertFalse(styles.indentCountMode)
 
         val anchorStyle = object : LineAnchorStyle(2) {}
@@ -349,13 +349,13 @@ class StylingTest {
         val builder = MappedSpans.Builder()
         builder.add(0, SpanFactory.obtainNoExt(0, TextStyle.makeStyle(1, noCompletion = true)))
         styles.spans = builder.build()
-        assertEquals(styles.spans, styles.getSpans())
+        assertNotNull(styles.spans)
 
         styles.finishBuilding()
 
         val pos0 = io.github.rosemoe.sora.text.CharPosition(0, 0, 0)
-        assertTrue(StylesUtils.checkNoCompletion(styles, pos0))
-        val span = StylesUtils.getSpanForPosition(styles, pos0)
+        assertTrue(styles.checkNoCompletion(pos0))
+        val span = styles.getSpanForPosition(pos0)
         assertNotNull(span)
         assertEquals(0, span?.column)
         assertNull(StylesUtils.getFollowingSpanForPosition(styles, pos0))
@@ -382,5 +382,37 @@ class StylingTest {
         val emptyUpper = emptyList<Span>()
         val mergedEmpty = SpanMerger.merge(lower, emptyUpper)
         assertEquals(2, mergedEmpty.size)
+    }
+
+    @Test
+    fun testCodeBlockExtensionsAndDestructuring() {
+        val block = CodeBlock(1, 2, 10, 5, true)
+        val (startLine, startCol, endLine, endCol, toBottom) = block
+        assertEquals(1, startLine)
+        assertEquals(2, startCol)
+        assertEquals(10, endLine)
+        assertEquals(5, endCol)
+        assertTrue(toBottom)
+
+        assertTrue(5 in block)
+        assertTrue(1 in block)
+        assertTrue(10 in block)
+        assertFalse(0 in block)
+        assertFalse(11 in block)
+
+        val copied = block.copy(startLine = 3)
+        assertEquals(3, copied.startLine)
+        assertEquals(2, copied.startColumn)
+    }
+
+    @Test
+    fun testTextStyleExtensions() {
+        val style = TextStyle.makeStyle(7, 3, bold = true, italic = true, strikeThrough = true, noCompletion = true)
+        assertEquals(7, style.foregroundColorId)
+        assertEquals(3, style.backgroundColorId)
+        assertTrue(style.isBold)
+        assertTrue(style.isItalics)
+        assertTrue(style.isStrikeThrough)
+        assertTrue(style.isNoCompletion)
     }
 }

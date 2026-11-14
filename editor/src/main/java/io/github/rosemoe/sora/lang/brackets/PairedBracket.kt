@@ -34,10 +34,10 @@ package io.github.rosemoe.sora.lang.brackets
  * @author Rosemoe
  */
 data class PairedBracket(
-    @JvmField val leftIndex: Int,
-    @JvmField val leftLength: Int,
-    @JvmField val rightIndex: Int,
-    @JvmField val rightLength: Int
+    val leftIndex: Int,
+    val leftLength: Int,
+    val rightIndex: Int,
+    val rightLength: Int
 ) {
     /**
      * Currently length is always 1.

@@ -527,4 +527,41 @@ class LangFeaturesTest {
         assertEquals("analyzed: 11", manager.data)
         manager.destroy()
     }
+
+    @Test
+    fun testDiagnosticRegionExtensionsAndDestructuring() {
+        val region = DiagnosticRegion(5, 15, DiagnosticRegion.SEVERITY_ERROR, 42L)
+        val (start, end, sev, id, detail) = region
+        assertEquals(5, start)
+        assertEquals(15, end)
+        assertEquals(DiagnosticRegion.SEVERITY_ERROR, sev)
+        assertEquals(42L, id)
+        assertNull(detail)
+
+        assertTrue(5 in region)
+        assertTrue(10 in region)
+        assertFalse(15 in region) // endIndex is exclusive
+        assertFalse(4 in region)
+
+        val copied = region.copy(endIndex = 20)
+        assertEquals(5, copied.startIndex)
+        assertEquals(20, copied.endIndex)
+    }
+
+    @Test
+    fun testSnippetAndTokenDestructuring() {
+        val token = io.github.rosemoe.sora.lang.completion.snippet.parser.Token(
+            0,
+            5,
+            io.github.rosemoe.sora.lang.completion.snippet.parser.TokenType.VariableName
+        )
+        val (idx, len, type) = token
+        assertEquals(0, idx)
+        assertEquals(5, len)
+        assertEquals(io.github.rosemoe.sora.lang.completion.snippet.parser.TokenType.VariableName, type)
+
+        val snippet = io.github.rosemoe.sora.lang.completion.snippet.parser.CodeSnippetParser.parse("for (int i = 0; i < \${1:count}; i++) {\n\t\$0\n}")
+        assertNotNull(snippet)
+        assertFalse(snippet.items.isEmpty())
+    }
 }

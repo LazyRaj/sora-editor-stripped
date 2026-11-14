@@ -1687,7 +1687,7 @@ open class CodeEditor @JvmOverloads constructor(
         var invalidCount = 0
         var maxCount = Int.MAX_VALUE
         if (textStyles != null) {
-            maxCount = textStyles!!.getSuppressSwitch()
+            maxCount = textStyles!!.suppressSwitch
         }
         for (i in min..max) {
             val block = blocks.get(i)

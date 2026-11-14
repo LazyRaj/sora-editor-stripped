@@ -47,7 +47,6 @@ object SpanExtAttrs {
      */
     const val EXT_UNDERLINE_COLOR: Int = 3
 
-    @JvmStatic
     fun checkType(extType: Int, ext: SpanExt?): Boolean {
         return ext == null || when (extType) {
             EXT_COLOR_RESOLVER -> ext is SpanColorResolver

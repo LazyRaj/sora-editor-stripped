@@ -41,47 +41,43 @@ import io.github.rosemoe.sora.widget.CodeEditor
  * @author Rosemoe
  * @see SimpleCompletionItem
  */
-abstract class CompletionItem @JvmOverloads constructor(
+abstract class CompletionItem(
     /**
      * Text to display as title in adapter
      */
-    @JvmField var label: CharSequence,
+    var label: CharSequence,
 
     /**
      * Text to display as description in adapter
      */
-    @JvmField var desc: CharSequence? = null,
+    var desc: CharSequence? = null,
 
     /**
      * Icon for displaying in adapter
      */
-    @JvmField var icon: Drawable? = null
+    var icon: Drawable? = null
 ) {
 
     /**
      * Text to display less prominently directly after label, without any spacing.
      */
-    @JvmField
     var detail: CharSequence? = null
 
     /**
      * Indicates whether this completion item is deprecated.
      * When true, the item is typically rendered using strike-through text.
      */
-    @JvmField
     var deprecated: Boolean = false
 
     /**
      * The kind of this completion item. Based on the kind
      * an icon is chosen by the editor.
      */
-    @JvmField
     var kind: CompletionItemKind? = null
 
     /**
      * Use for default sort
      */
-    @JvmField
     var prefixLength: Int = 0
 
     /**
@@ -89,7 +85,6 @@ abstract class CompletionItem @JvmOverloads constructor(
      * with other items. When null the [label]
      * is used.
      */
-    @JvmField
     var sortText: String? = null
 
     /**
@@ -97,10 +92,8 @@ abstract class CompletionItem @JvmOverloads constructor(
      * with other items. When null the [sortText]
      * is used.
      */
-    @JvmField
     var filterText: String? = null
 
-    @JvmField
     var extra: Any? = null
 
     open fun label(label: CharSequence): CompletionItem {

@@ -44,8 +44,6 @@ interface FileIconProvider {
 object SimpleCompletionIconDrawer {
     var globalFileIconProvider: FileIconProvider? = null
 
-    @JvmStatic
-    @JvmOverloads
     fun draw(kind: CompletionItemKind, circle: Boolean = true): Drawable {
         return CircleDrawable(kind, circle)
     }

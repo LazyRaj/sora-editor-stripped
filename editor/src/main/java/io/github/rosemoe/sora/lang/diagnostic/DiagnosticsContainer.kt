@@ -34,7 +34,7 @@ import java.lang.ref.WeakReference
  *
  * @author Rosemoe
  */
-open class DiagnosticsContainer @JvmOverloads constructor(
+open class DiagnosticsContainer(
     private val shiftEnabled: Boolean = true
 ) {
 

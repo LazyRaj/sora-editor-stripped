@@ -41,10 +41,10 @@ import io.github.rosemoe.sora.widget.CodeEditor
  */
 open class SimpleCompletionItem(
     label: CharSequence,
-    desc: CharSequence?,
-    icon: Drawable?,
-    prefixLength: Int,
-    @JvmField var commitText: String?
+    desc: CharSequence? = null,
+    icon: Drawable? = null,
+    prefixLength: Int = 0,
+    var commitText: String? = null
 ) : CompletionItem(label, desc, icon) {
 
     init {

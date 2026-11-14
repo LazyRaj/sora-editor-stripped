@@ -138,7 +138,6 @@ object Arrow {
     val LeftLeft = 3
 }
 
-@JvmOverloads
 fun isPatternInWord(
     patternLow: String,
     patternPos: Int,
@@ -242,10 +241,8 @@ class FuzzyScore(
         /**
          * No matches and value `-100`
          */
-        @JvmStatic
         val default: FuzzyScore = FuzzyScore(-100, 0)
 
-        @JvmStatic
         fun isDefault(score: FuzzyScore?): Boolean {
             return score?.score == -100 && score.wordStart == 0
         }
@@ -259,7 +256,6 @@ data class FuzzyScoreOptions(
 ) {
 
     companion object {
-        @JvmStatic
         val default = FuzzyScoreOptions(boostFullMatch = true, firstMatchCanBeWeak = true)
     }
 
@@ -301,8 +297,6 @@ fun anyScore(
     return FuzzyScore(0, wordPos)
 }
 
-
-@JvmOverloads
 fun fuzzyScore(
     pattern: String,
     patternLow: String,

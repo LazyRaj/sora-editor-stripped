@@ -25,6 +25,8 @@
 package io.github.rosemoe.sora.lang.folding
 
 import io.github.rosemoe.sora.util.IntPair
+import io.github.rosemoe.sora.util.first
+import io.github.rosemoe.sora.util.second
 
 /**
  * Indicates a folding region
@@ -54,16 +56,16 @@ open class FoldingRegion {
     }
 
     val startLine: Int
-        get() = IntPair.getFirst(start)
+        get() = start.first
 
     val startColumn: Int
-        get() = IntPair.getSecond(start)
+        get() = start.second
 
     val endLine: Int
-        get() = IntPair.getFirst(end)
+        get() = end.first
 
     val endColumn: Int
-        get() = IntPair.getSecond(end)
+        get() = end.second
 
     open fun createChild(
         startLine: Int,

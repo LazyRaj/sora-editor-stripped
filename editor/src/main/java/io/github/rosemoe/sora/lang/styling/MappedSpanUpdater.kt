@@ -34,8 +34,6 @@ import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
  */
 object MappedSpanUpdater {
 
-    @JvmStatic
-    @JvmSuppressWildcards
     fun shiftSpansOnMultiLineDelete(
         map: MutableList<MutableList<Span>>,
         startLine: Int,
@@ -78,8 +76,6 @@ object MappedSpanUpdater {
         startLineSpans.addAll(endLineSpans)
     }
 
-    @JvmStatic
-    @JvmSuppressWildcards
     fun shiftSpansOnSingleLineDelete(
         map: MutableList<MutableList<Span>>?,
         line: Int,
@@ -126,8 +122,6 @@ object MappedSpanUpdater {
         }
     }
 
-    @JvmStatic
-    @JvmSuppressWildcards
     fun shiftSpansOnSingleLineInsert(
         map: MutableList<MutableList<Span>>?,
         line: Int,
@@ -159,8 +153,6 @@ object MappedSpanUpdater {
         }
     }
 
-    @JvmStatic
-    @JvmSuppressWildcards
     fun shiftSpansOnMultiLineInsert(
         map: MutableList<MutableList<Span>>,
         startLine: Int,

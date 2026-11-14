@@ -36,7 +36,6 @@ object BlocksUpdater {
      * @param restrict Min line to update
      * @param delta    Delta for line index
      */
-    @JvmStatic
     fun update(blocks: MutableList<CodeBlock>, restrict: Int, delta: Int) {
         if (delta == 0) {
             return
@@ -55,4 +54,8 @@ object BlocksUpdater {
             }
         }
     }
+}
+
+fun MutableList<CodeBlock>.updateOffsets(restrict: Int, delta: Int) {
+    BlocksUpdater.update(this, restrict, delta)
 }

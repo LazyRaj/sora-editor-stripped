@@ -39,35 +39,24 @@ import java.util.concurrent.ConcurrentHashMap
  *
  * If you are going to extend this class, please read the source code carefully in advance
  */
-@JvmSuppressWildcards
-open class Styles @JvmOverloads constructor(
-    @JvmField var spans: Spans? = null,
+open class Styles(
+    var spans: Spans? = null,
     initCodeBlocks: Boolean = true
 ) {
 
     /**
      * **Sorted** list of LineStyles
      */
-    @JvmField
     var lineStyles: MutableList<LineStyles>? = null
 
-    @JvmField
     var styleTypeCount: MutableMap<Class<*>, MutableInt>? = null
 
-    @JvmField
-    var blocks: (@JvmSuppressWildcards List<CodeBlock>)? =
+    var blocks: List<CodeBlock>? =
         if (initCodeBlocks) ArrayList(128) else null
 
-    @JvmField
     var suppressSwitch: Int = Int.MAX_VALUE
 
-    @JvmField
     var indentCountMode: Boolean = false
-
-    /**
-     * Get analyzed spans
-     */
-    fun getSpans(): Spans? = spans
 
     /**
      * Add a new code block info
@@ -75,34 +64,9 @@ open class Styles @JvmOverloads constructor(
      * @param block Info of code block
      */
     fun addCodeBlock(block: CodeBlock) {
-        val list =
-            (blocks as? MutableList<CodeBlock>) ?: ArrayList<CodeBlock>(128).also { blocks = it }
+        val list = (blocks as? MutableList<CodeBlock>) ?: ArrayList<CodeBlock>(128).also { blocks = it }
         list.add(block)
     }
-
-    /**
-     * Returns suppress switch
-     */
-    fun getSuppressSwitch(): Int = suppressSwitch
-
-    /**
-     * Set suppress switch for editor
-     */
-    fun setSuppressSwitch(suppressSwitch: Int) {
-        this.suppressSwitch = suppressSwitch
-    }
-
-    /**
-     * Set indent count mode
-     */
-    fun setIndentCountMode(indentCountMode: Boolean) {
-        this.indentCountMode = indentCountMode
-    }
-
-    /**
-     * Check if indent count mode is enabled
-     */
-    fun isIndentCountMode(): Boolean = indentCountMode
 
     /**
      * Adjust styles on insert.
@@ -113,10 +77,8 @@ open class Styles @JvmOverloads constructor(
         if (delta == 0) {
             return
         }
-        blocks?.let {
-            if (it is MutableList<CodeBlock>) {
-                BlocksUpdater.update(it, start.line, delta)
-            }
+        (blocks as? MutableList<CodeBlock>)?.let {
+            BlocksUpdater.update(it, start.line, delta)
         }
         lineStyles?.let { stylesList ->
             for (styles in stylesList) {
@@ -137,10 +99,8 @@ open class Styles @JvmOverloads constructor(
         if (delta == 0) {
             return
         }
-        blocks?.let {
-            if (it is MutableList<CodeBlock>) {
-                BlocksUpdater.update(it, start.line, delta)
-            }
+        (blocks as? MutableList<CodeBlock>)?.let {
+            BlocksUpdater.update(it, start.line, delta)
         }
         lineStyles?.let { stylesList ->
             val itr = stylesList.iterator()

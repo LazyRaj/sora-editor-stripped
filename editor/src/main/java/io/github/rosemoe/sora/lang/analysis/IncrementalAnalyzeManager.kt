@@ -75,11 +75,15 @@ interface IncrementalAnalyzeManager<S, T> : AnalyzeManager {
     /**
      * Saved state
      */
-    class LineTokenizeResult<S_, T_> @JvmOverloads constructor(
-        @JvmField var state: S_,
-        @JvmField var tokens: List<T_>? = null,
-        @JvmField var spans: List<Span>? = null
+    class LineTokenizeResult<S_, T_>(
+        var state: S_,
+        var tokens: List<T_>? = null,
+        var spans: List<Span>? = null
     ) {
+        operator fun component1(): S_ = state
+        operator fun component2(): List<T_>? = tokens
+        operator fun component3(): List<Span>? = spans
+
         fun clearSpans(): LineTokenizeResult<S_, T_> {
             spans = null
             return this

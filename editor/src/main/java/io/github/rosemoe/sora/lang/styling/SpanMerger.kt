@@ -47,7 +47,6 @@ import java.util.Collections
  */
 object SpanMerger {
 
-    @JvmStatic
     fun merge(layerLower: List<Span>, layerUpper: List<Span>): List<Span> {
         checkColumns(layerLower, true)
         checkColumns(layerUpper, false)

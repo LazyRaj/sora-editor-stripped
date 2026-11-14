@@ -566,8 +566,6 @@ class CodeSnippetParser private constructor(
             elements.add(PlainPlaceholderElement(t))
         }
 
-        @JvmStatic
-        @JvmOverloads
         fun parse(
             snippet: String,
             definitions: List<PlaceholderDefinition> = ArrayList()
@@ -578,3 +576,7 @@ class CodeSnippetParser private constructor(
         }
     }
 }
+
+fun String.parseAsSnippet(definitions: List<PlaceholderDefinition> = emptyList()): CodeSnippet =
+    CodeSnippetParser.parse(this, definitions)
+
