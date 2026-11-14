@@ -40,8 +40,8 @@ import io.github.rosemoe.sora.widget.CodeEditor
 class ContentChangeEvent(
     editor: CodeEditor,
     val action: Int,
-    changeStart: CharPosition,
-    changeEnd: CharPosition,
+    val changeStart: CharPosition,
+    val changeEnd: CharPosition,
     val changedText: CharSequence,
     val isCausedByUndoManager: Boolean
 ) : Event(editor) {
@@ -62,7 +62,4 @@ class ContentChangeEvent(
          */
         const val ACTION_DELETE: Int = 3
     }
-
-    val changeStart: CharPosition = changeStart
-    val changeEnd: CharPosition = changeEnd
 }

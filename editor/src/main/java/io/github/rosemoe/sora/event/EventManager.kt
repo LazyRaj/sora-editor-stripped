@@ -46,7 +46,7 @@ import kotlin.concurrent.write
  *
  * @author Rosemoe
  */
-class EventManager @JvmOverloads constructor(
+class EventManager(
     private val parent: EventManager? = null
 ) {
 

@@ -33,7 +33,7 @@ import io.github.rosemoe.sora.widget.CodeEditor
  *
  * @author Rosemoe
  */
-abstract class Event @JvmOverloads constructor(
+abstract class Event(
     val editor: CodeEditor,
     open val eventTime: Long = System.currentTimeMillis()
 ) {

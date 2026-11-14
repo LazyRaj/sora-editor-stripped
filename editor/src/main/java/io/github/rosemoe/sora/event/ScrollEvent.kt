@@ -33,7 +33,7 @@ import io.github.rosemoe.sora.widget.CodeEditor
  * The returned x,y positions are usually positive when over-scrolling is disabled. They represent
  * the left-top position's pixel in editor.
  */
-class ScrollEvent @JvmOverloads constructor(
+class ScrollEvent(
     editor: CodeEditor,
     val startX: Int,
     val startY: Int,

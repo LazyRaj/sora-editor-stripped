@@ -132,6 +132,28 @@ class EventManagerTest {
     }
 
     @Test
+    fun testSubscribeAlwaysAndReifiedSubscribe() {
+        var alwaysCount = 0
+        val receipt1 = eventManager.subscribeAlways<TestCustomEvent> { _ ->
+            alwaysCount++
+        }
+        var subCount = 0
+        val receipt2 = eventManager.subscribe<TestCustomEvent> { _, _ ->
+            subCount++
+        }
+
+        eventManager.dispatchEvent(TestCustomEvent(editor, "A"))
+        assertEquals(1, alwaysCount)
+        assertEquals(1, subCount)
+
+        receipt1.unsubscribe()
+        receipt2.unsubscribe()
+        eventManager.dispatchEvent(TestCustomEvent(editor, "B"))
+        assertEquals(1, alwaysCount)
+        assertEquals(1, subCount)
+    }
+
+    @Test
     fun testResultedEvent() {
         val event = TestResultEvent(editor)
         assertFalse(event.isResultSet)

@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2024  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -25,6 +26,9 @@
 package io.github.rosemoe.sora.event
 
 fun ResultedEvent<Boolean>.getResultBoolean(): Boolean = isResultSet && result!!
+
+inline fun <reified T : Event> EventManager.subscribe(receiver: EventReceiver<T>) =
+    subscribe(T::class.java, receiver)
 
 inline fun <reified T : Event> EventManager.subscribeEvent(receiver: EventReceiver<T>) =
     subscribeEvent(T::class.java, receiver)

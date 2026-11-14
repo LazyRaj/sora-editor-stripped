@@ -76,7 +76,8 @@ abstract class EditorMotionEvent(
     val index: Int
         get() = pos.index
 
-    fun getCharPosition(): CharPosition = pos.fromThis()
+    val charPosition: CharPosition
+        get() = pos.fromThis()
 
     val x: Float
         get() = event.x

@@ -49,6 +49,12 @@ class KeyBindingEvent(
     private val editorAbleToHandle: Boolean
 ) : EditorKeyEvent(editor, src, type) {
 
+    val canEditorHandle: Boolean
+        get() = editorAbleToHandle
+
+    val isEditorAbleToHandle: Boolean
+        get() = editorAbleToHandle
+
     /**
      * Is the editor capable of handling this key binding event?
      *
