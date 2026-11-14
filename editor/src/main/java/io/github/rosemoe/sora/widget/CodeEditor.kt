@@ -26,11 +26,9 @@
 package io.github.rosemoe.sora.widget
 
 import android.annotation.SuppressLint
-import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.DialogInterface
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Canvas
@@ -62,6 +60,7 @@ import android.view.ScaleGestureDetector
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
+import android.view.WindowInsetsAnimation
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.inputmethod.CursorAnchorInfo
@@ -1049,6 +1048,7 @@ open class CodeEditor(
         registerInlayHintProvider(styleDelegate)
         registerDiagnosticProvider(styleDelegate)
         registerHighlightTextProvider(styleDelegate)
+        setupWindowInsetsAnimation()
     }
 
     /**
@@ -1228,6 +1228,96 @@ open class CodeEditor(
     fun setSelectionHandleStyle(style: SelectionHandleStyle) {
         handleStyle = Objects.requireNonNull<SelectionHandleStyle>(style)
         invalidate()
+    }
+
+    /**
+     * Current bottom inset of IME in pixels during window insets animation.
+     */
+    var currentImeBottomInset: Int = 0
+        private set
+
+    protected fun setupWindowInsetsAnimation() {
+        setWindowInsetsAnimationCallback(object : WindowInsetsAnimation.Callback(DISPATCH_MODE_STOP) {
+            override fun onProgress(
+                insets: WindowInsets,
+                runningAnimations: MutableList<WindowInsetsAnimation>
+            ): WindowInsets {
+                val imeType = WindowInsets.Type.ime()
+                val hasImeAnimation = runningAnimations.any { (it.typeMask and imeType) != 0 }
+                if (hasImeAnimation) {
+                    val imeInsets = insets.getInsets(imeType)
+                    currentImeBottomInset = imeInsets.bottom
+                    dispatchImeAnimationProgress(currentImeBottomInset)
+                }
+                return insets
+            }
+
+            override fun onEnd(animation: WindowInsetsAnimation) {
+                super.onEnd(animation)
+                if ((animation.typeMask and WindowInsets.Type.ime()) != 0) {
+                    currentImeBottomInset = 0
+                    dispatchImeAnimationProgress(0)
+                }
+            }
+        })
+    }
+
+    internal fun dispatchImeAnimationProgress(imeBottom: Int) {
+        completionWindow?.onImeAnimationProgress(imeBottom)
+        diagnosticTooltip?.onImeAnimationProgress(imeBottom)
+        textActionWindow?.onImeAnimationProgress(imeBottom)
+    }
+
+    private var _ghostText: String? = null
+    private var ghostTextPosition: Int = -1
+
+    /**
+     * Ghost text (virtual suggestion text) displayed inline at the cursor.
+     */
+    var ghostText: String?
+        get() = _ghostText
+        set(value) {
+            if (_ghostText != value) {
+                _ghostText = value
+                ghostTextPosition = if (value != null) cursor.left else -1
+                dispatchEvent(EditorPropertyChangeEvent(this, "ghostText", value))
+                postInvalidate()
+            }
+        }
+
+    /**
+     * Check whether inline ghost text is currently active.
+     */
+    fun hasGhostText(): Boolean = !_ghostText.isNullOrEmpty()
+
+    /**
+     * Clear the active ghost text without inserting it.
+     */
+    fun clearGhostText() {
+        if (_ghostText != null) {
+            _ghostText = null
+            ghostTextPosition = -1
+            dispatchEvent(EditorPropertyChangeEvent(this, "ghostText", null))
+            postInvalidate()
+        }
+    }
+
+    /**
+     * Commit the current ghost text into the document at the cursor position.
+     * @return true if ghost text was present and committed, false otherwise
+     */
+    fun commitGhostText(): Boolean {
+        val text = _ghostText
+        if (!text.isNullOrEmpty() && isEditable && !cursor.isSelected) {
+            _ghostText = null
+            ghostTextPosition = -1
+            dispatchEvent(EditorPropertyChangeEvent(this, "ghostText", null))
+            commitText(text)
+            notifyIMEExternalCursorChange()
+            postInvalidate()
+            return true
+        }
+        return false
     }
 
     /**
@@ -2978,6 +3068,10 @@ open class CodeEditor(
     /**
      * Start search action mode
      */
+    @Deprecated(
+        message = "Legacy View-based search ActionMode. Host applications should drive search directly via EditorSearcher or Compose overlays.",
+        level = DeprecationLevel.WARNING
+    )
     fun beginSearchMode() {
         class SearchActionMode : ActionMode.Callback {
             override fun onCreateActionMode(p1: ActionMode, p2: Menu): Boolean {
@@ -3032,26 +3126,12 @@ open class CodeEditor(
                     0 -> searcher.gotoNext()
                     2, 3 -> {
                         val replaceAll = p2.itemId == 3
-                        val et = EditText(context)
-                        et.setHint(getResourceId(R.string.sora_editor_replacement))
-                        AlertDialog.Builder(context)
-                            .setTitle(getResourceId(if (replaceAll) R.string.sora_editor_replaceAll else R.string.sora_editor_replace))
-                            .setView(et)
-                            .setNegativeButton(android.R.string.cancel, null)
-                            .setPositiveButton(
-                                getResourceId(R.string.sora_editor_replace)
-                            ) { dialog: DialogInterface?, which: Int ->
-                                if (replaceAll) {
-                                    searcher.replaceAll(
-                                        et.getText().toString()
-                                    ) { am.finish() }
-                                } else {
-                                    searcher.replaceCurrentMatch(et.getText().toString())
-                                    am.finish()
-                                }
-                                dialog!!.dismiss()
-                            }
-                            .show()
+                        if (replaceAll) {
+                            searcher.replaceAll("") { am.finish() }
+                        } else {
+                            searcher.replaceCurrentMatch("")
+                            am.finish()
+                        }
                     }
                 }
                 return false

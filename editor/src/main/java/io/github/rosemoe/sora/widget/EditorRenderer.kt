@@ -652,6 +652,10 @@ open class EditorRenderer(protected val editor: CodeEditor) {
             drawSelectionOnAnimation(canvas)
         }
 
+        if (editor.hasGhostText()) {
+            drawGhostText(canvas)
+        }
+
         drawStuckLines(canvas, stuckLines, textOffset)
 
         if (editor.isLineNumberEnabled && !lineNumberNotPinned) {
@@ -3209,6 +3213,55 @@ open class EditorRenderer(protected val editor: CodeEditor) {
                 editor.insertHandleDescriptor
             )
         }
+    }
+
+    protected open fun drawGhostText(canvas: Canvas) {
+        val text = editor.ghostText
+        if (text.isNullOrEmpty() || cursor.isSelected || editor.isInLongSelect || !editor.isEditable) {
+            return
+        }
+        val line = cursor.leftLine
+        val column = cursor.leftColumn
+        val row = editor.layout.getRowIndexForPosition(cursor.left)
+        if (row < editor.firstVisibleRow - 1 || row > editor.lastVisibleRow + 2) {
+            return
+        }
+
+        val charOffset = editor.layout.getCharLayoutOffset(line, column)
+        val textStartOffset = editor.measureTextRegionOffset()
+        val cursorX = textStartOffset + charOffset[1] - editor.offsetX
+        val baseline = (editor.getRowBaseline(row) - editor.offsetY).toFloat()
+
+        canvas.save()
+        canvas.clipRect(
+            textStartOffset,
+            0f,
+            editor.width.toFloat(),
+            editor.height.toFloat()
+        )
+
+        paintOther.set(editor.textPaint)
+        paintOther.style = AndroidPaint.Style.FILL
+        paintOther.pathEffect = null
+        var ghostColor = editor.colorScheme.getColor(EditorColorScheme.GHOST_TEXT)
+        if (ghostColor == 0) {
+            ghostColor = if (editor.colorScheme.isDark()) 0x80aaaaaa.toInt() else 0x80757575.toInt()
+        }
+        paintOther.color = ghostColor
+        val prevSkew = paintOther.textSkewX
+        paintOther.textSkewX = -0.2f
+
+        val lines = text.split('\n')
+        for (i in lines.indices) {
+            val lineStr = lines[i]
+            val x = if (i == 0) cursorX else (textStartOffset - editor.offsetX)
+            val y = baseline + (i * editor.rowHeight)
+            if (y >= 0 && y <= editor.height + editor.rowHeight) {
+                canvas.drawText(lineStr, x, y, paintOther)
+            }
+        }
+        paintOther.textSkewX = prevSkew
+        canvas.restore()
     }
 
     protected open fun drawScrollBarHorizontal(canvas: Canvas) {

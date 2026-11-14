@@ -369,6 +369,27 @@ class CodeEditorState(
 
     private var _colorScheme: EditorColorScheme by mutableStateOf(initialColorScheme)
 
+    private var _ghostText: String? by mutableStateOf(null)
+
+    /** Inline ghost text (AI completion suggestion) displayed at the cursor. */
+    var ghostText: String?
+        get() = _editor?.ghostText ?: _ghostText
+        set(value) {
+            _ghostText = value
+            _editor?.ghostText = value
+        }
+
+    fun clearGhostText() {
+        _ghostText = null
+        _editor?.clearGhostText()
+    }
+
+    fun commitGhostText(): Boolean {
+        val res = _editor?.commitGhostText() ?: false
+        _ghostText = null
+        return res
+    }
+
     /** The active editor color scheme. */
     var colorScheme: EditorColorScheme
         get() {
@@ -825,6 +846,7 @@ class CodeEditorState(
 
                     "magnifierEnabled" -> (event.value as? Boolean)?.let { _magnifierEnabled = it }
                     "isScalable" -> (event.value as? Boolean)?.let { _isScalable = it }
+                    "ghostText" -> { _ghostText = event.value as? String }
                 }
             }
         )
@@ -878,6 +900,14 @@ class CodeEditorState(
 
         val magnifier = editor.getComponent(Magnifier::class.java)
         if (magnifier.isEnabled() != magnifierEnabled) magnifier.setEnabled(magnifierEnabled)
+
+        if (editor.ghostText != _ghostText) {
+            if (_ghostText != null) {
+                editor.ghostText = _ghostText
+            } else if (editor.ghostText != null) {
+                _ghostText = editor.ghostText
+            }
+        }
 
         if (!isUpdatingFromEditor && editor.text.toString() != _text) {
             isUpdatingFromState = true

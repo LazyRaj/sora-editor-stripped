@@ -37,7 +37,7 @@ import androidx.collection.MutableIntList
 class RenderCache {
     private val lines = MutableIntList()
     private val cache = mutableListOf<MeasureCacheItem>()
-    private var maxCacheCount = 75
+    private var maxCacheCount = 128
 
     fun getOrCreateMeasureCache(line: Int): MeasureCacheItem {
         return queryMeasureCache(line) ?: run {
@@ -96,9 +96,7 @@ class RenderCache {
         if (lines.size > lineCount) {
             lines.removeRange(lineCount, lines.size)
         } else if (lines.size < lineCount) {
-            repeat(lineCount - lines.size) {
-                lines.add(0)
-            }
+            lines.addAll(lines.size, IntArray(lineCount - lines.size))
         }
         lines.indices.forEach { lines[it] = 0 }
         cache.clear()

@@ -185,28 +185,20 @@ open class WordwrapLayout(
 
     private fun breakLines(startLine: Int, endLine: Int) {
         val table = rowTable ?: return
-        var insertPosition = 0
-        while (insertPosition < table.size) {
-            if (table[insertPosition].line < startLine) {
-                insertPosition++
-            } else {
-                break
-            }
+        val startIndex = findRow(startLine)
+        var endIndex = startIndex
+        while (endIndex < table.size && table[endIndex].line <= endLine) {
+            endIndex++
         }
-        while (insertPosition < table.size) {
-            val line = table[insertPosition].line
-            if (line in startLine..endLine) {
-                table.removeAt(insertPosition)
-            } else {
-                break
-            }
+        if (endIndex > startIndex) {
+            table.subList(startIndex, endIndex).clear()
         }
         val content = text ?: return
         val newRegions = ArrayList<RowRegion>()
         for (i in startLine..endLine) {
             newRegions.addAll(breakLine(i, content.getLine(i), null))
         }
-        table.addAll(insertPosition, newRegions)
+        table.addAll(startIndex, newRegions)
     }
 
     /**
@@ -297,16 +289,15 @@ open class WordwrapLayout(
         val table = rowTable ?: return
         val delta = endLine - startLine
         if (delta != 0) {
-            var startRow = findRow(startLine)
-            while (startRow < table.size) {
-                val line = table[startRow].line
-                if (line in startLine..endLine) {
-                    table.removeAt(startRow)
-                } else {
-                    break
-                }
+            val startRow = findRow(startLine)
+            var endRow = startRow
+            while (endRow < table.size && table[endRow].line in startLine..endLine) {
+                endRow++
             }
-            for (row in findRow(endLine + 1) until table.size) {
+            if (endRow > startRow) {
+                table.subList(startRow, endRow).clear()
+            }
+            for (row in startRow until table.size) {
                 val region = table[row]
                 if (region.line >= endLine) {
                     region.line -= delta

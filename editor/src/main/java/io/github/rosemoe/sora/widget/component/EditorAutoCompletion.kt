@@ -352,7 +352,8 @@ open class EditorAutoCompletion(
         val cursorRowTop = cursorRowBottom - rowHeight
         val margin = dp * 2f
 
-        val spaceBelow = editor.height - (cursorRowBottom + margin)
+        val effectiveEditorHeight = editor.height - (if (parentView === editor) editor.currentImeBottomInset else 0)
+        val spaceBelow = effectiveEditorHeight - (cursorRowBottom + margin)
         val spaceAbove = cursorRowTop - margin
         val targetMaxHeight = dp * 200
         val minThreshold = dp * 100
@@ -416,7 +417,7 @@ open class EditorAutoCompletion(
         } else {
             isPositionedAbove = false
             var candidatePanelY = cursorRowBottom + margin
-            var restY = editor.height - candidatePanelY
+            var restY = effectiveEditorHeight - candidatePanelY
             if (restY > targetMaxHeight) {
                 restY = targetMaxHeight
             } else if (restY < minThreshold && scrollEditor) {
@@ -457,6 +458,12 @@ open class EditorAutoCompletion(
             setLocation(windowX, panelY.toInt() + editor.offsetY)
         }
         super.setSize(width, height)
+    }
+
+    override fun onImeAnimationProgress(imeBottom: Int) {
+        if (isShowing) {
+            updateCompletionWindowPosition(false)
+        }
     }
 
     open fun setLayout(layout: CompletionLayout) {

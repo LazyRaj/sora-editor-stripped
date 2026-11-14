@@ -42,7 +42,7 @@ import java.util.Stack
  */
 @RequiresApi(Build.VERSION_CODES.Q)
 class RenderNodeHolder(private val editor: CodeEditor) {
-    private val cache: ArrayList<TextRenderNode> = ArrayList(64)
+    private val cache: ArrayList<TextRenderNode> = ArrayList(96)
     private val pool = Stack<TextRenderNode>()
 
     fun shouldUpdateCache(): Boolean {
@@ -86,16 +86,24 @@ class RenderNodeHolder(private val editor: CodeEditor) {
         node.line = line
         node.isDirty = true
         cache.add(0, node)
+        while (cache.size > 96) {
+            val last = cache.removeAt(cache.size - 1)
+            last.renderNode.discardDisplayList()
+            pool.push(last)
+        }
         return node
     }
 
     fun keepCurrentInDisplay(start: Int, end: Int, stuckLines: List<CodeBlock>?) {
         val stuckLineNumbers =
             if (stuckLines.isNullOrEmpty()) emptySet() else stuckLines.map { it.startLine }.toSet()
+        val prefetch = 16
+        val minLine = (start - prefetch).coerceAtLeast(0)
+        val maxLine = end + prefetch
         val itr = cache.iterator()
         while (itr.hasNext()) {
             val node = itr.next()
-            if (node.line !in start..end && !stuckLineNumbers.contains(node.line)) {
+            if (node.line !in minLine..maxLine && !stuckLineNumbers.contains(node.line)) {
                 itr.remove()
                 node.renderNode.discardDisplayList()
                 pool.push(node)

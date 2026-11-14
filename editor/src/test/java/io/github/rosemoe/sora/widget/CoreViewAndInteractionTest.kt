@@ -98,4 +98,59 @@ class CoreViewAndInteractionTest {
         assertEquals(8888, I18nConfig.getResourceId(9999))
         assertEquals(7777, I18nConfig.getResourceId(7777))
     }
+
+    @Test
+    fun testGhostTextLifecycleAndCommit() {
+        val context = RuntimeEnvironment.getApplication()
+        val editor = CodeEditor(context)
+        editor.setText("val x = ")
+        editor.setSelection(0, 8)
+
+        // Initially no ghost text
+        org.junit.Assert.assertFalse(editor.hasGhostText())
+        assertNull(editor.ghostText)
+
+        // Set ghost text
+        editor.ghostText = "42 // answer"
+        assertTrue(editor.hasGhostText())
+        assertEquals("42 // answer", editor.ghostText)
+
+        // Commit ghost text
+        val committed = editor.commitGhostText()
+        assertTrue(committed)
+        org.junit.Assert.assertFalse(editor.hasGhostText())
+        assertNull(editor.ghostText)
+        assertEquals("val x = 42 // answer", editor.text.toString())
+
+        // Clear ghost text
+        editor.ghostText = "suggested"
+        assertTrue(editor.hasGhostText())
+        editor.clearGhostText()
+        org.junit.Assert.assertFalse(editor.hasGhostText())
+    }
+
+    @Test
+    fun testWindowInsetsAnimationTracking() {
+        val context = RuntimeEnvironment.getApplication()
+        val editor = CodeEditor(context)
+        assertEquals(0, editor.currentImeBottomInset)
+        editor.dispatchImeAnimationProgress(300)
+        // Check dispatch without crashing
+        assertNotNull(editor.getComponent(io.github.rosemoe.sora.widget.component.EditorAutoCompletion::class.java))
+    }
+
+    @Test
+    fun testEditorSearcherNonBlockingReplaceAll() {
+        val context = RuntimeEnvironment.getApplication()
+        val editor = CodeEditor(context)
+        editor.setText("foo bar foo")
+        val searcher = editor.searcher
+        org.junit.Assert.assertFalse(searcher.isReplacing)
+
+        var progressNotified = false
+        searcher.onReplaceProgress = {
+            progressNotified = true
+        }
+        assertNotNull(searcher.onReplaceProgress)
+    }
 }

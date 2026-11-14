@@ -174,6 +174,10 @@ class TextMateColorScheme(
             setColor(COMPLETION_WND_ITEM_CURRENT, ColorUtils.parseRGBAToARGB(it))
         }
 
+        (rawTheme.get("editorGhostText.foreground") as? String)?.let {
+            setColor(GHOST_TEXT, ColorUtils.parseRGBAToARGB(it))
+        }
+
         val editorIndentGuideBackground = rawTheme.get("editorIndentGuide.background") as? String
         val blockLineColor = ((getColor(WHOLE_BACKGROUND) + getColor(TEXT_NORMAL)) / 2) and 0x00FFFFFF or 0x88000000.toInt()
         val blockLineColorCur = blockLineColor or 0xFF000000.toInt()

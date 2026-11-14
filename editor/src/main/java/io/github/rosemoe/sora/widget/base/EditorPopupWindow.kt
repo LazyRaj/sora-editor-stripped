@@ -197,7 +197,17 @@ open class EditorPopupWindow(
     }
 
     private fun wrapVertical(vertical: Int): Int {
-        return max(0, min(vertical, editor.height))
+        val maxH = if (parentView === editor) editor.height - editor.currentImeBottomInset else editor.height
+        return max(0, min(vertical, maxH))
+    }
+
+    /**
+     * Called on each frame of the soft keyboard insets animation to adjust popup positions smoothly.
+     */
+    open fun onImeAnimationProgress(imeBottom: Int) {
+        if (isShowing) {
+            applyWindowAttributes(false)
+        }
     }
 
     protected open fun applyWindowAttributes(show: Boolean) {

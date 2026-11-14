@@ -26,7 +26,6 @@
  */
 package io.github.rosemoe.sora.widget
 
-import android.app.ProgressDialog
 import android.widget.Toast
 import androidx.annotation.IntRange
 import io.github.rosemoe.sora.I18nConfig
@@ -270,7 +269,17 @@ open class EditorSearcher(
         }
     }
 
-    @Suppress("DEPRECATION")
+    /**
+     * Whether a replace-all operation is currently executing.
+     */
+    var isReplacing: Boolean = false
+        private set
+
+    /**
+     * Optional callback for replace-all progress updates.
+     */
+    var onReplaceProgress: ((isReplacing: Boolean) -> Unit)? = null
+
     open fun replaceAll(replacement: String, whenSucceeded: Runnable? = null) {
         if (!editor.isEditable) {
             return
@@ -284,17 +293,11 @@ open class EditorSearcher(
             ).show()
             return
         }
-        val context = editor.context
-        val dialog = ProgressDialog.show(
-            context,
-            I18nConfig.getString(context, R.string.sora_editor_replaceAll),
-            I18nConfig.getString(context, R.string.sora_editor_editor_search_replacing),
-            true,
-            false
-        )
         val res = lastResults ?: return
         val options = searchOptions ?: return
         val pattern = currentPattern ?: return
+        isReplacing = true
+        onReplaceProgress?.invoke(true)
         Thread {
             try {
                 val sb = editor.text.toStringBuilder()
@@ -368,13 +371,15 @@ open class EditorSearcher(
                         sb
                     )
                     editor.setSelectionAround(pos.line, pos.column)
-                    dialog.dismiss()
+                    isReplacing = false
+                    onReplaceProgress?.invoke(false)
                     whenSucceeded?.run()
                 }
             } catch (e: Exception) {
                 editor.postInLifecycle {
+                    isReplacing = false
+                    onReplaceProgress?.invoke(false)
                     Toast.makeText(editor.context, "Replace failed:$e", Toast.LENGTH_SHORT).show()
-                    dialog.dismiss()
                 }
             }
         }.start()

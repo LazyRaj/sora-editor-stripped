@@ -226,6 +226,7 @@ open class EditorColorScheme(
                 if (isDark()) 0xB8004972.toInt() else 0x400e639c
 
             TEXT_HIGHLIGHT_BACKGROUND -> color = if (isDark()) 0xB8575757.toInt() else 0x40575757
+            GHOST_TEXT -> color = if (isDark()) 0x80aaaaaa.toInt() else 0x80757575.toInt()
         }
         setColor(type, color)
     }
@@ -387,6 +388,7 @@ open class EditorColorScheme(
 
         const val SCROLL_BAR_BORDER = 84
         const val LINE_NUMBER_PANEL_BORDER = 85
+        const val GHOST_TEXT = 86
 
         /**
          * Min pre-defined color id
@@ -396,7 +398,7 @@ open class EditorColorScheme(
         /**
          * Max pre-defined color id
          */
-        const val END_COLOR_ID = 85
+        const val END_COLOR_ID = 86
 
         private const val PRIMARY_TEXT_COLOR_DEFAULT_LIGHT = 0xff424242.toInt()
         private const val PRIMARY_TEXT_COLOR_DEFAULT_DARK = 0xfff5f5f5.toInt()

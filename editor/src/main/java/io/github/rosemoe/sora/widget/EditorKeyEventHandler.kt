@@ -377,7 +377,10 @@ open class EditorKeyEventHandler(
             KeyEvent.KEYCODE_TAB -> {
                 if (editor.isEditable) {
                     if (!isAltPressed && !isCtrlPressed) {
-                        if (editor.snippetController.isInSnippet()) {
+                        if (editor.hasGhostText() && !isShiftPressed && !editor.isTextSelected) {
+                            editor.commitGhostText()
+                            return editorKeyEvent.result(true)
+                        } else if (editor.snippetController.isInSnippet()) {
                             if (isShiftPressed) {
                                 editor.snippetController.shiftToPreviousTabStop()
                             } else {
@@ -418,6 +421,10 @@ open class EditorKeyEventHandler(
             }
 
             KeyEvent.KEYCODE_ESCAPE -> {
+                if (editor.hasGhostText()) {
+                    editor.clearGhostText()
+                    return editorKeyEvent.result(true)
+                }
                 if (editorCursor.isSelected) {
                     val newPosition =
                         if (editor.props.positionOfCursorWhenExitSelecting) editorCursor.right() else editorCursor.left()
