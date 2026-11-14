@@ -34,50 +34,52 @@ import io.github.rosemoe.sora.lang.styling.inlayHint.InlayHint
  *
  * @author Rosemoe
  */
-class Row {
-
+class Row(
     /**
      * The index in lines
      * But not row index
      */
-    @JvmField
-    var lineIndex: Int = 0
+    var lineIndex: Int = 0,
 
     /**
      * Whether this row is the first one of a line.
      * Editor will draw line number to left of this row to indicate this
      */
-    @JvmField
-    var isLeadingRow: Boolean = false
+    var isLeadingRow: Boolean = false,
 
     /**
      * Whether this row is the last one of a line.
      * Editor will draw soft-wrap or line-break indicator according to this
      */
-    @JvmField
-    var isTrailingRow: Boolean = false
+    var isTrailingRow: Boolean = false,
 
     /**
      * Start index in target line
      */
-    @JvmField
-    var startColumn: Int = 0
+    var startColumn: Int = 0,
 
     /**
      * End index in target line
      */
-    @JvmField
-    var endColumn: Int = 0
+    var endColumn: Int = 0,
 
     /**
      * Inlay hints on the row
      */
-    @JvmField
-    var inlayHints: (@JvmSuppressWildcards List<InlayHint>)? = null
+    var inlayHints: List<InlayHint>? = null,
 
     /**
      * Extra translation when rendering
      */
-    @JvmField
     var renderTranslateX: Float = 0f
+) {
+    operator fun component1(): Int = lineIndex
+    operator fun component2(): Boolean = isLeadingRow
+    operator fun component3(): Boolean = isTrailingRow
+    operator fun component4(): Int = startColumn
+    operator fun component5(): Int = endColumn
+
+    operator fun contains(column: Int): Boolean = column in startColumn..endColumn
+
+    val length: Int get() = endColumn - startColumn
 }

@@ -64,6 +64,53 @@ class WordwrapLayoutTest {
         }
     }
 
+    @Test
+    fun `row model destructuring and operators`() {
+        val row = Row(
+            lineIndex = 3,
+            isLeadingRow = true,
+            isTrailingRow = false,
+            startColumn = 10,
+            endColumn = 35
+        )
+        val (line, isLeading, isTrailing, startCol, endCol) = row
+        assertThat(line).isEqualTo(3)
+        assertThat(isLeading).isTrue()
+        assertThat(isTrailing).isFalse()
+        assertThat(startCol).isEqualTo(10)
+        assertThat(endCol).isEqualTo(35)
+        assertThat(row.length).isEqualTo(25)
+        assertThat(15 in row).isTrue()
+        assertThat(10 in row).isTrue()
+        assertThat(35 in row).isTrue()
+        assertThat(9 in row).isFalse()
+        assertThat(36 in row).isFalse()
+    }
+
+    @Test
+    fun `row element model and visual location destructuring`() {
+        val elem = RowElement(
+            type = RowElementTypes.TEXT,
+            startColumn = 0,
+            endColumn = 10,
+            isRtlText = false
+        )
+        val (type, start, end, isRtl) = elem
+        assertThat(type).isEqualTo(RowElementTypes.TEXT)
+        assertThat(start).isEqualTo(0)
+        assertThat(end).isEqualTo(10)
+        assertThat(isRtl).isFalse()
+        assertThat(elem.isText).isTrue()
+        assertThat(elem.isInlayHint).isFalse()
+
+        val loc = Layout.VisualLocation(2, 5, elem, true)
+        val (locLine, locCol, locElem, inBounds) = loc
+        assertThat(locLine).isEqualTo(2)
+        assertThat(locCol).isEqualTo(5)
+        assertThat(locElem).isSameInstanceAs(elem)
+        assertThat(inBounds).isTrue()
+    }
+
     private fun runPendingTasks() {
         val tasks = pendingTasks.toList()
         pendingTasks.clear()

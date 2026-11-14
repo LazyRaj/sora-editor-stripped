@@ -42,8 +42,8 @@ import kotlin.math.max
  * @author Rosemoe
  */
 abstract class AbstractLayout(
-    @JvmField protected var editor: CodeEditor?,
-    @JvmField protected var text: Content?
+    protected var editor: CodeEditor?,
+    protected var text: Content?
 ) : Layout {
 
     companion object {

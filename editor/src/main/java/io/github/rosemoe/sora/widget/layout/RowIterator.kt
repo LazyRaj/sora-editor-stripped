@@ -33,7 +33,7 @@ package io.github.rosemoe.sora.widget.layout
  *
  * @author Rose
  */
-interface RowIterator {
+interface RowIterator : Iterator<Row> {
 
     /**
      * Return next Row object
@@ -44,14 +44,14 @@ interface RowIterator {
      * @return Row object contains the information about a row
      * @throws NoSuchElementException If no more row available
      */
-    fun next(): Row
+    override fun next(): Row
 
     /**
      * Whether there is more Row object
      *
      * @return Whether more row available
      */
-    fun hasNext(): Boolean
+    override fun hasNext(): Boolean
 
     /**
      * Reset the position to its original position.

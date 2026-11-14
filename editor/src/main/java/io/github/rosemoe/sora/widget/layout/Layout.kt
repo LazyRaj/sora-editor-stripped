@@ -80,6 +80,10 @@ interface Layout : ContentListener {
      */
     fun getRowAt(rowIndex: Int): Row
 
+    operator fun get(rowIndex: Int): Row = getRowAt(rowIndex)
+
+    operator fun contains(rowIndex: Int): Boolean = rowIndex in 0 until rowCount
+
     /**
      * Get the width of this layout
      * Editor will use this to compute scroll range
@@ -167,10 +171,15 @@ interface Layout : ContentListener {
      */
     fun invalidateLines(range: StyleUpdateRange)
 
-    class VisualLocation @JvmOverloads constructor(
-        @JvmField val line: Int,
-        @JvmField val column: Int,
-        @JvmField val element: RowElement? = null,
-        @JvmField var isInElementBounds: Boolean = false
-    )
+    class VisualLocation(
+        val line: Int,
+        val column: Int,
+        val element: RowElement? = null,
+        var isInElementBounds: Boolean = false
+    ) {
+        operator fun component1(): Int = line
+        operator fun component2(): Int = column
+        operator fun component3(): RowElement? = element
+        operator fun component4(): Boolean = isInElementBounds
+    }
 }

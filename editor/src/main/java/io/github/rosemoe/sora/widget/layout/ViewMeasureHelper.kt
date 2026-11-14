@@ -41,7 +41,6 @@ object ViewMeasureHelper {
     /**
      * Get desired view size for the given arguments
      */
-    @JvmStatic
     fun getDesiredSize(
         widthMeasureSpec: Int,
         heightMeasureSpec: Int,

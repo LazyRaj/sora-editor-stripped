@@ -33,47 +33,48 @@ import io.github.rosemoe.sora.lang.styling.inlayHint.InlayHint
  *
  * @author Rosemoe
  */
-class RowElement {
-
+class RowElement(
     /**
      * Type of element.
      *
      * @see RowElementTypes
      */
-    @JvmField
-    var type: Int = 0
+    var type: Int = 0,
 
     /* Fields for type TEXT */
 
     /**
      * Start column of text
      */
-    @JvmField
-    var startColumn: Int = 0
+    var startColumn: Int = 0,
 
     /**
      * End column of text
      */
-    @JvmField
-    var endColumn: Int = 0
+    var endColumn: Int = 0,
 
     /**
      * Direction of the text run
      */
-    @JvmField
-    var isRtlText: Boolean = false
+    var isRtlText: Boolean = false,
 
     /* Fields for type INLAY_HINT */
 
     /**
      * The inlay hint
      */
-    @JvmField
-    var inlayHint: InlayHint? = null
+    var inlayHint: InlayHint? = null,
 
     /**
      * The expected column position to display after
      */
-    @JvmField
     var displayColumnPosition: Int = 0
+) {
+    operator fun component1(): Int = type
+    operator fun component2(): Int = startColumn
+    operator fun component3(): Int = endColumn
+    operator fun component4(): Boolean = isRtlText
+
+    val isText: Boolean get() = type == RowElementTypes.TEXT
+    val isInlayHint: Boolean get() = type == RowElementTypes.INLAY_HINT
 }

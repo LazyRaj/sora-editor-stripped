@@ -592,24 +592,23 @@ open class WordwrapLayout(
         }
 
     internal class RowRegion(
-        @JvmField var line: Int,
-        @JvmField val startColumn: Int,
-        @JvmField val endColumn: Int,
-        @JvmField var inlayHints: List<InlayHint>?,
-        @JvmField var rowWidth: Float,
-        @JvmField var displayFromRight: Boolean
+        var line: Int,
+        val startColumn: Int,
+        val endColumn: Int,
+        var inlayHints: List<InlayHint>?,
+        var rowWidth: Float,
+        var displayFromRight: Boolean
     ) {
-        fun toRow(isLeadingRow: Boolean, isTrailingRow: Boolean, layoutWidth: Float): Row {
-            val row = Row()
-            row.isLeadingRow = isLeadingRow
-            row.isTrailingRow = isTrailingRow
-            row.startColumn = startColumn
-            row.endColumn = endColumn
-            row.lineIndex = line
-            row.inlayHints = inlayHints ?: emptyList()
-            row.renderTranslateX = getRenderTranslateX(layoutWidth)
-            return row
-        }
+        fun toRow(isLeadingRow: Boolean, isTrailingRow: Boolean, layoutWidth: Float): Row =
+            Row(
+                lineIndex = line,
+                isLeadingRow = isLeadingRow,
+                isTrailingRow = isTrailingRow,
+                startColumn = startColumn,
+                endColumn = endColumn,
+                inlayHints = inlayHints ?: emptyList(),
+                renderTranslateX = getRenderTranslateX(layoutWidth)
+            )
 
         fun getRenderTranslateX(layoutWidth: Float): Float {
             return if (displayFromRight && layoutWidth > rowWidth) layoutWidth - rowWidth else 0f
