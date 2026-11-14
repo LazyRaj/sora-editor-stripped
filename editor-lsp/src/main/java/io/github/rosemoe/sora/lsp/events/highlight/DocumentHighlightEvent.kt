@@ -20,6 +20,8 @@
  *
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
+ *
+ *     Modified by Raj Dave (aka LazyRaj)
  ******************************************************************************/
 
 package io.github.rosemoe.sora.lsp.events.highlight
@@ -47,9 +49,7 @@ import java.util.concurrent.CompletableFuture
 class DocumentHighlightEvent : AsyncEventListener() {
     override val eventName: String = EventType.documentHighlight
 
-    var future: CompletableFuture<*>? = null
-
-    override val isAsync = true
+    private var future: CompletableFuture<*>? = null
 
     data class DocumentHighlightRequest(
         val selectionStart: CharPosition,

@@ -20,6 +20,8 @@
  *
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
+ *
+ *     Modified by Raj Dave (aka LazyRaj)
  ******************************************************************************/
 
 package io.github.rosemoe.sora.lsp.events.inlayhint
@@ -57,9 +59,7 @@ import kotlin.math.min
 class InlayHintEvent : AsyncEventListener() {
     override val eventName: String = EventType.inlayHint
 
-    var future: CompletableFuture<*>? = null
-
-    override val isAsync = true
+    private var future: CompletableFuture<*>? = null
 
     private val requestFlows = ConcurrentHashMap<String, MutableSharedFlow<InlayHintRequest>>()
 

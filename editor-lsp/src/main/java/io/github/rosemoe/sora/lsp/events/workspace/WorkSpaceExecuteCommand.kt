@@ -20,6 +20,8 @@
  *
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
+ *
+ *     Modified by Raj Dave (aka LazyRaj)
  ******************************************************************************/
 
 package io.github.rosemoe.sora.lsp.events.workspace
@@ -38,9 +40,7 @@ import java.util.concurrent.CompletableFuture
 class WorkSpaceExecuteCommand : AsyncEventListener() {
     override val eventName: String = EventType.workSpaceExecuteCommand
 
-    override val isAsync = true
-
-    var future: CompletableFuture<*>? = null
+    private var future: CompletableFuture<*>? = null
 
     override suspend fun doHandleAsync(context: EventContext) {
         val command = context.get<String>("command")

@@ -20,6 +20,8 @@
  *
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
+ *
+ *     Modified by Raj Dave (aka LazyRaj)
  ******************************************************************************/
 
 package io.github.rosemoe.sora.lsp.events.document
@@ -35,7 +37,7 @@ import java.util.concurrent.CompletableFuture
 class DocumentOpenEvent : AsyncEventListener() {
     override val eventName = EventType.documentOpen
 
-    var future: CompletableFuture<Void>? = null
+    private var future: CompletableFuture<Void>? = null
 
     override suspend fun doHandleAsync(context: EventContext) {
         val editor = context.get<LspEditor>("lsp-editor")

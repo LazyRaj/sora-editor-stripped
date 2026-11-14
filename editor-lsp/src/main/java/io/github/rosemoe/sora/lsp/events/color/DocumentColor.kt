@@ -20,6 +20,8 @@
  *
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
+ *
+ *     Modified by Raj Dave (aka LazyRaj)
  ******************************************************************************/
 
 package io.github.rosemoe.sora.lsp.events.color
@@ -54,9 +56,7 @@ import kotlin.time.Duration.Companion.milliseconds
 class DocumentColorEvent : AsyncEventListener() {
     override val eventName: String = EventType.documentColor
 
-    var future: CompletableFuture<*>? = null
-
-    override val isAsync = true
+    private var future: CompletableFuture<*>? = null
 
     private val requestFlows = ConcurrentHashMap<FileUri, MutableSharedFlow<DocumentColorRequest>>()
 
