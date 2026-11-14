@@ -91,10 +91,10 @@ open class EditorPopupWindow(
     private var layoutChangeListenerRegistered = false
     var parentView: View = editor
 
-    private var offsetX = 0
-    private var offsetY = 0
-    private var windowX = 0
-    private var windowY = 0
+    protected var offsetX = 0
+    protected var offsetY = 0
+    protected var windowX = 0
+    protected var windowY = 0
     var width: Int = 0
         private set
     var height: Int = 0
@@ -282,13 +282,13 @@ open class EditorPopupWindow(
     }
 
 
-    fun setSize(width: Int, height: Int) {
+    open fun setSize(width: Int, height: Int) {
         this.width = width
         this.height = height
         applyWindowAttributes(false)
     }
 
-    fun setLocation(x: Int, y: Int) {
+    open fun setLocation(x: Int, y: Int) {
         windowX = x
         windowY = y
         offsetY = editor.offsetY

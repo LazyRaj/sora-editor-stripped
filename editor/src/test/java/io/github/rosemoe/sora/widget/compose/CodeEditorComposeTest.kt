@@ -476,4 +476,41 @@ class CodeEditorComposeTest {
 
         state.detachEditor(editor)
     }
+
+    @Test
+    fun testAutoCompletionPositionAboveAndBelow() {
+        val editor = CodeEditor(context)
+        val textBuilder = StringBuilder()
+        for (i in 1..50) {
+            textBuilder.append("Line $i\n")
+        }
+        editor.setText(textBuilder.toString())
+        editor.layout(0, 0, 1080, 1920)
+
+        val autoComp = editor.getComponent(EditorAutoCompletion::class.java)
+        assertThat(autoComp).isNotNull()
+
+        // 1. Cursor at line 0 (top of view): plenty of space below
+        editor.setSelectionRegion(0, 0, 0, 0)
+        autoComp.updateCompletionWindowPosition(false)
+        assertThat(autoComp.isPositionedAbove).isFalse()
+        assertThat(autoComp.maxHeight).isGreaterThan(0)
+
+        // 2. Cursor at the last visible line just above bottom
+        // With height = 800 and rowHeight ~ 35, line 20 is around 700-750px
+        editor.layout(0, 0, 1080, 800)
+        editor.setSelectionRegion(20, 0, 20, 0)
+        autoComp.updateCompletionWindowPosition(false)
+
+        // Since space below is < 100dp (~275px on mdpi/xxhdpi) and space above is > 600px,
+        // it must position above the current line
+        assertThat(autoComp.isPositionedAbove).isTrue()
+        assertThat(autoComp.maxHeight).isGreaterThan(0)
+
+        // 3. View expands (keyboard closed): height = 1920
+        editor.layout(0, 0, 1080, 1920)
+        autoComp.updateCompletionWindowPosition(false)
+        // Now space below line 20 is abundant (> 1000px), it should position below again
+        assertThat(autoComp.isPositionedAbove).isFalse()
+    }
 }

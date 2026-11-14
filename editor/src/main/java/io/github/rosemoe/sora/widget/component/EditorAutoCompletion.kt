@@ -30,6 +30,7 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
+import android.view.View
 import io.github.rosemoe.sora.event.ClickEvent
 import io.github.rosemoe.sora.event.ColorSchemeUpdateEvent
 import io.github.rosemoe.sora.event.ContentChangeEvent
@@ -59,6 +60,7 @@ import io.github.rosemoe.sora.widget.CodeEditor
 import io.github.rosemoe.sora.widget.base.EditorPopupWindow
 import java.lang.ref.WeakReference
 import kotlin.math.abs
+import kotlin.math.max
 import kotlin.math.min
 
 /**
@@ -96,6 +98,13 @@ open class EditorAutoCompletion(
     protected var requestTime: Long = 0L
 
     open var maxHeight: Int = 0
+
+    /**
+     * Whether the completion window is currently positioned above the active cursor line
+     * (e.g. when typing near the bottom of the editor or above the soft keyboard).
+     */
+    open var isPositionedAbove: Boolean = false
+        protected set
 
     protected var completionThread: CompletionThread? = null
 
@@ -145,17 +154,26 @@ open class EditorAutoCompletion(
     private var requestHide: Long = -1L
     private var _enabled: Boolean = true
     private var loading: Boolean = false
+    private val editorLayoutChangeListener = View.OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+        if (isShowing) {
+            updateCompletionWindowPosition(false)
+        }
+    }
 
     init {
         adapter = DefaultCompletionItemAdapter()
         setLayout(DefaultCompletionLayout())
+        editor.addOnLayoutChangeListener(editorLayoutChangeListener)
         eventManager = editor.createSubEventManager()
         eventManager.subscribeEvent(ColorSchemeUpdateEvent::class.java, this::onColorSchemeUpdate)
         eventManager.subscribeEvent(ContentChangeEvent::class.java, this::onContentChange)
         eventManager.subscribeEvent(ScrollEvent::class.java, this::onEditorScroll)
         eventManager.subscribeEvent(EditorKeyEvent::class.java, this::onKeyEvent)
         eventManager.subscribeEvent(SelectionChangeEvent::class.java, this::onSelectionChange)
-        eventManager.subscribeEvent(EditorReleaseEvent::class.java) { _, _ -> isEnabled = false }
+        eventManager.subscribeEvent(EditorReleaseEvent::class.java) { _, _ ->
+            editor.removeOnLayoutChangeListener(editorLayoutChangeListener)
+            isEnabled = false
+        }
         subscribeEventForHide(EditorFormatEvent::class.java) { it.isSuccess }
         subscribeEventForHide(ClickEvent::class.java, null)
         subscribeEventForHide(EditorLanguageChangeEvent::class.java, null)
@@ -296,40 +314,113 @@ open class EditorAutoCompletion(
     }
 
     open fun updateCompletionWindowPosition() {
-        updateCompletionWindowPosition(true)
+        updateCompletionWindowPosition(true, -1)
     }
 
     open fun updateCompletionWindowPosition(scrollEditor: Boolean) {
+        updateCompletionWindowPosition(scrollEditor, -1)
+    }
+
+    open fun updateCompletionWindowPosition(scrollEditor: Boolean, expectedHeight: Int) {
         val dp = editor.dpUnit
         val cursor = editor.cursor
-        var panelX = editor.updateCursorAnchor() + dp * 20
         val rowHeight = editor.rowHeight
         val rightLayoutOffset =
             editor.layout.getCharLayoutOffset(cursor.rightLine, cursor.rightColumn)
-        var panelY = rightLayoutOffset[0] - editor.offsetY + rowHeight / 2f
-        var restY = editor.height - panelY
-        if (restY > dp * 200) {
-            restY = dp * 200
-        } else if (restY < dp * 100 && scrollEditor) {
-            var offset = 0f
-            while (restY < dp * 100 && editor.offsetY + offset + rowHeight <= editor.scrollMaxY) {
-                restY += rowHeight
-                panelY -= rowHeight
-                offset += rowHeight
-            }
-            editor.scroller.startScroll(editor.offsetX, editor.offsetY, 0, offset.toInt(), 0)
+
+        val cursorRowBottom = rightLayoutOffset[0] - editor.offsetY
+        val cursorRowTop = cursorRowBottom - rowHeight
+        val margin = dp * 2f
+
+        val spaceBelow = editor.height - (cursorRowBottom + margin)
+        val spaceAbove = cursorRowTop - margin
+        val targetMaxHeight = dp * 200
+        val minThreshold = dp * 100
+
+        val canScrollDown = scrollEditor && (editor.offsetY + rowHeight <= editor.scrollMaxY)
+        val shouldShowAbove = if (spaceBelow >= minThreshold) {
+            false
+        } else if (spaceAbove >= minThreshold) {
+            true
+        } else if (canScrollDown && (spaceBelow + (editor.scrollMaxY - editor.offsetY) >= minThreshold)) {
+            false
+        } else {
+            spaceAbove > spaceBelow
         }
+
         val width =
             if ((editor.width < 500 * dp && completionWndPositionMode == WINDOW_POS_MODE_AUTO) || completionWndPositionMode == WINDOW_POS_MODE_FULL_WIDTH_ALWAYS) {
-                panelX = editor.width / 8f / 2f
-                editor.width * 7 / 8
+                (editor.width * 7 / 8)
             } else {
                 min(300 * dp, editor.width / 2f).toInt()
             }
-        val currentH = height
-        maxHeight = restY.toInt()
+        var panelX =
+            if ((editor.width < 500 * dp && completionWndPositionMode == WINDOW_POS_MODE_AUTO) || completionWndPositionMode == WINDOW_POS_MODE_FULL_WIDTH_ALWAYS) {
+                editor.width / 8f / 2f
+            } else {
+                editor.updateCursorAnchor() + dp * 20
+            }
+        if (panelX + width > editor.width) {
+            panelX = (editor.width - width).toFloat().coerceAtLeast(0f)
+        }
+
+        val h: Int
+        val panelY: Float
+
+        if (shouldShowAbove) {
+            isPositionedAbove = true
+            maxHeight = min(targetMaxHeight, spaceAbove.coerceAtLeast(0f)).toInt()
+            h = when {
+                expectedHeight > 0 -> min(expectedHeight, maxHeight)
+                height > 0 -> min(height, maxHeight)
+                adapter.count > 0 -> min(adapter.getItemHeight() * adapter.count, maxHeight)
+                else -> maxHeight
+            }
+            panelY = (cursorRowTop - margin - h).coerceAtLeast(0f)
+        } else {
+            isPositionedAbove = false
+            var candidatePanelY = cursorRowBottom + margin
+            var restY = editor.height - candidatePanelY
+            if (restY > targetMaxHeight) {
+                restY = targetMaxHeight
+            } else if (restY < minThreshold && scrollEditor) {
+                var offset = 0f
+                while (restY < minThreshold && editor.offsetY + offset + rowHeight <= editor.scrollMaxY) {
+                    restY += rowHeight
+                    candidatePanelY -= rowHeight
+                    offset += rowHeight
+                }
+                if (offset > 0f) {
+                    editor.scroller.startScroll(editor.offsetX, editor.offsetY, 0, offset.toInt(), 0)
+                }
+            }
+            maxHeight = restY.coerceAtLeast(0f).toInt()
+            h = when {
+                expectedHeight > 0 -> min(expectedHeight, maxHeight)
+                height > 0 -> min(height, maxHeight)
+                adapter.count > 0 -> min(adapter.getItemHeight() * adapter.count, maxHeight)
+                else -> maxHeight
+            }
+            panelY = candidatePanelY
+        }
+
         setLocation(panelX.toInt() + editor.offsetX, panelY.toInt() + editor.offsetY)
-        setSize(width, currentH)
+        super.setSize(width, h)
+    }
+
+    override fun setSize(width: Int, height: Int) {
+        if (isPositionedAbove && this.height != height && height > 0) {
+            val dp = editor.dpUnit
+            val margin = dp * 2f
+            val cursor = editor.cursor
+            val rightLayoutOffset =
+                editor.layout.getCharLayoutOffset(cursor.rightLine, cursor.rightColumn)
+            val cursorRowBottom = rightLayoutOffset[0] - editor.offsetY
+            val cursorRowTop = cursorRowBottom - editor.rowHeight
+            val panelY = (cursorRowTop - margin - height).coerceAtLeast(0f)
+            setLocation(windowX, panelY.toInt() + editor.offsetY)
+        }
+        super.setSize(width, height)
     }
 
     open fun setLayout(layout: CompletionLayout) {
@@ -507,7 +598,7 @@ open class EditorAutoCompletion(
             if (newHeight == 0) {
                 hide()
             }
-            updateCompletionWindowPosition()
+            updateCompletionWindowPosition(true, newHeight)
             setSize(width, min(newHeight, maxHeight))
             resetScrollPosition()
             if (!isShowing) {

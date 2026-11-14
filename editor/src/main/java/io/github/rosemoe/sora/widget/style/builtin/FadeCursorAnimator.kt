@@ -37,7 +37,7 @@ import io.github.rosemoe.sora.widget.style.CursorAnimator
 open class FadeCursorAnimator(private val editor: CodeEditor) : CursorAnimator,
     ValueAnimator.AnimatorUpdateListener {
 
-    private val duration: Long = 200
+    private val duration: Long = 400
 
     private var fadeInAnimator: ValueAnimator = ValueAnimator()
     private var fadeOutAnimator: ValueAnimator = ValueAnimator()
