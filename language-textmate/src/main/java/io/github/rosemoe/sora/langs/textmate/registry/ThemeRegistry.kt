@@ -21,6 +21,7 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
+/* Modified by Raj Dave (aka LazyRaj) */
 package io.github.rosemoe.sora.langs.textmate.registry
 
 import io.github.rosemoe.sora.langs.textmate.registry.model.ThemeModel
@@ -39,14 +40,10 @@ class ThemeRegistry {
     var currentThemeModel: ThemeModel = ThemeModel.EMPTY
         private set
 
-    @Throws(Exception::class)
-    @JvmOverloads
     fun loadTheme(themeSource: IThemeSource, isCurrentTheme: Boolean = true) {
         loadTheme(ThemeModel(themeSource), isCurrentTheme)
     }
 
-    @Throws(Exception::class)
-    @JvmOverloads
     @Synchronized
     fun loadTheme(themeModel: ThemeModel, isCurrentTheme: Boolean = true) {
         if (!themeModel.isLoaded) {
@@ -124,7 +121,6 @@ class ThemeRegistry {
         @Volatile
         private var instance: ThemeRegistry? = null
 
-        @JvmStatic
         @Synchronized
         fun getInstance(): ThemeRegistry {
             return instance ?: ThemeRegistry().also { instance = it }

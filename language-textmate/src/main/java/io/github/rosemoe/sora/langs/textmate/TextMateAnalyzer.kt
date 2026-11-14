@@ -21,6 +21,7 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
+/* Modified by Raj Dave (aka LazyRaj) */
 package io.github.rosemoe.sora.langs.textmate
 
 import android.graphics.Color
@@ -141,8 +142,8 @@ class TextMateAnalyzer(
         val regExp = cachedRegExp ?: return
         try {
             val foldingRegions = IndentRange.computeRanges(model, language.tabSize, foldingOffside, this, regExp, delegate)
-            blocks.ensureCapacity(foldingRegions.length())
-            for (i in 0 until foldingRegions.length()) {
+            blocks.ensureCapacity(foldingRegions.size)
+            for (i in 0 until foldingRegions.size) {
                 if (!delegate.isNotCancelled) break
                 val startLine = foldingRegions.getStartLineNumber(i)
                 val endLine = foldingRegions.getEndLineNumber(i)

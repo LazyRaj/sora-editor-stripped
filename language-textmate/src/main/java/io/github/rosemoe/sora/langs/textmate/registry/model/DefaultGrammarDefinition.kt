@@ -21,6 +21,7 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
+/* Modified by Raj Dave (aka LazyRaj) */
 package io.github.rosemoe.sora.langs.textmate.registry.model
 
 import io.github.rosemoe.sora.langs.textmate.utils.StringUtils
@@ -48,13 +49,11 @@ class DefaultGrammarDefinition(
     }
 
     companion object {
-        @JvmStatic
         fun withGrammarSource(grammarSource: IGrammarSource): DefaultGrammarDefinition {
             val languageNameByPath = StringUtils.getFileNameWithoutExtension(grammarSource.filePath)
             return withGrammarSource(grammarSource, languageNameByPath, "source.$languageNameByPath")
         }
 
-        @JvmStatic
         fun withLanguageConfiguration(
             grammarSource: IGrammarSource,
             languageConfigurationPath: String
@@ -68,7 +67,6 @@ class DefaultGrammarDefinition(
             )
         }
 
-        @JvmStatic
         fun withLanguageConfiguration(
             grammarSource: IGrammarSource,
             languageConfigurationPath: String?,
@@ -78,7 +76,6 @@ class DefaultGrammarDefinition(
             return DefaultGrammarDefinition(languageName, scopeName, grammarSource, languageConfigurationPath)
         }
 
-        @JvmStatic
         fun withGrammarSource(
             grammarSource: IGrammarSource,
             languageName: String,

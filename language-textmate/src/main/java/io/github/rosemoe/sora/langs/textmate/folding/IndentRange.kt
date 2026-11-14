@@ -21,6 +21,7 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
+/* Modified by Raj Dave (aka LazyRaj) */
 package io.github.rosemoe.sora.langs.textmate.folding
 
 import io.github.rosemoe.sora.lang.analysis.AsyncIncrementalAnalyzeManager
@@ -33,7 +34,6 @@ object IndentRange {
     const val MAX_FOLDING_REGIONS = 0xFFFF
     const val MASK_INDENT = -0x1000000 // 0xFF000000.toInt()
 
-    @JvmStatic
     fun computeStartColumn(line: CharSequence, len: Int, tabSize: Int): Int {
         var column = 0
         var i = 0
@@ -56,7 +56,6 @@ object IndentRange {
         return column
     }
 
-    @JvmStatic
     fun computeIndentLevel(line: CharSequence, len: Int, tabSize: Int): Int {
         var indent = 0
         var i = 0
@@ -79,8 +78,6 @@ object IndentRange {
         return indent
     }
 
-    @Throws(Exception::class)
-    @JvmStatic
     fun computeRanges(
         model: Content,
         tabSize: Int,
@@ -97,7 +94,7 @@ object IndentRange {
         line = model.lineCount - 1
         while (line >= 0 && delegate.isNotCancelled) {
             val indent = helper.getIndentFor(line)
-            var previous = previousRegions[previousRegions.size - 1]
+            var previous = previousRegions.last()
             if (indent == -1) {
                 if (offSide) {
                     previous.endAbove = line
@@ -131,7 +128,7 @@ object IndentRange {
             if (previous.indent > indent) {
                 do {
                     previousRegions.removeAt(previousRegions.size - 1)
-                    previous = previousRegions[previousRegions.size - 1]
+                    previous = previousRegions.last()
                 } while (previous.indent > indent)
 
                 val endLineNumber = previous.endAbove - 1

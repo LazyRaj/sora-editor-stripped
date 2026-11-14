@@ -21,13 +21,13 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
+/* Modified by Raj Dave (aka LazyRaj) */
 package io.github.rosemoe.sora.langs.textmate.utils
 
 import java.util.regex.Pattern
 
 object StringUtils {
 
-    @JvmStatic
     fun checkSurrogate(text: String): Boolean {
         for (i in 0 until text.length) {
             if (Character.isSurrogate(text[i])) {
@@ -37,7 +37,6 @@ object StringUtils {
         return false
     }
 
-    @JvmStatic
     fun convertUnicodeOffsetToUtf16(text: String, offset: Int, hasSurrogate: Boolean): Int {
         if (hasSurrogate) {
             var j = 0
@@ -59,7 +58,6 @@ object StringUtils {
 
     private val MATCH_PATTERN: Pattern = Pattern.compile(".*/|\\..*")
 
-    @JvmStatic
     fun getFileNameWithoutExtension(filePath: String): String {
         return MATCH_PATTERN.matcher(filePath).replaceAll("")
     }

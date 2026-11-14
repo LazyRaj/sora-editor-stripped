@@ -21,6 +21,7 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
+/* Modified by Raj Dave (aka LazyRaj) */
 package io.github.rosemoe.sora.langs.textmate.utils
 
 import android.graphics.Color
@@ -34,7 +35,6 @@ object ColorUtils {
      * @param colorString The color string to be parsed (#RRGGBB, #RRGGBBAA, or named color).
      * @return The 32-bit integer color in ARGB format.
      */
-    @JvmStatic
     fun parseRGBAToARGB(colorString: String): Int {
         if (!colorString.startsWith('#')) {
             return Color.parseColor(colorString)

@@ -21,10 +21,11 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
+/* Modified by Raj Dave (aka LazyRaj) */
 package io.github.rosemoe.sora.langs.textmate.folding
 
 class PreviousRegion(
-    @JvmField var indent: Int,
-    @JvmField var endAbove: Int,
-    @JvmField var line: Int
+    var indent: Int,
+    var endAbove: Int,
+    var line: Int
 )

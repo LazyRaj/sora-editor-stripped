@@ -21,6 +21,7 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
+/* Modified by Raj Dave (aka LazyRaj) */
 package io.github.rosemoe.sora.langs.textmate.registry
 
 import io.github.rosemoe.sora.langs.textmate.registry.dsl.LanguageDefinitionListBuilder
@@ -33,21 +34,14 @@ import org.eclipse.tm4e.languageconfiguration.internal.model.LanguageConfigurati
 import java.io.InputStreamReader
 import java.util.LinkedHashMap
 
-class GrammarRegistry {
+class GrammarRegistry(private var parent: GrammarRegistry? = null) {
 
     private var registry: Registry? = Registry()
-    private var parent: GrammarRegistry? = null
 
     private val languageConfigurationMap = LinkedHashMap<String, LanguageConfiguration>()
     private val scopeName2GrammarId = LinkedHashMap<String, Int>()
     private val grammarFileName2ScopeName = LinkedHashMap<String, String>()
     private val scopeName2GrammarDefinition = LinkedHashMap<String, GrammarDefinition>()
-
-    constructor()
-
-    constructor(parent: GrammarRegistry?) {
-        this.parent = parent
-    }
 
     private fun initThemeListener() {
         val themeRegistry = ThemeRegistry.getInstance()
@@ -63,7 +57,6 @@ class GrammarRegistry {
         }
     }
 
-    @JvmOverloads
     fun findGrammar(scopeName: String, findInParent: Boolean = true): IGrammar? {
         val grammar = registry?.grammarForScopeName(scopeName)
         if (grammar != null) {
@@ -75,7 +68,6 @@ class GrammarRegistry {
         return parent?.findGrammar(scopeName, true)
     }
 
-    @JvmOverloads
     fun findLanguageConfiguration(scopeName: String, findInParent: Boolean = true): LanguageConfiguration? {
         val languageConfiguration = languageConfigurationMap[scopeName]
         if (languageConfiguration != null) {
@@ -173,7 +165,6 @@ class GrammarRegistry {
         }
     }
 
-    @Throws(Exception::class)
     @Synchronized
     fun setTheme(themeModel: ThemeModel) {
         val reg = registry ?: return
@@ -209,7 +200,6 @@ class GrammarRegistry {
         return grammarFileName2ScopeName[name] ?: name
     }
 
-    @JvmOverloads
     @Synchronized
     fun dispose(closeParent: Boolean = false) {
         registry = null
@@ -227,7 +217,6 @@ class GrammarRegistry {
         @Volatile
         private var instance: GrammarRegistry? = null
 
-        @JvmStatic
         @Synchronized
         fun getInstance(): GrammarRegistry {
             return instance ?: GrammarRegistry().also {

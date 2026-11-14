@@ -21,6 +21,7 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
+/* Modified by Raj Dave (aka LazyRaj) */
 package io.github.rosemoe.sora.langs.textmate
 
 import io.github.rosemoe.sora.lang.smartEnter.NewlineHandleResult
@@ -363,9 +364,7 @@ class TextMateNewlineHandler(private val language: TextMateLanguage) : NewlineHa
         }
 
         if (language.useTab()) {
-            val chars = CharArray(language.tabSize)
-            Arrays.fill(chars, ' ')
-            val spaces = String(chars)
+            val spaces = " ".repeat(language.tabSize)
             if (str.startsWith(spaces)) {
                 return str.substring(spaces.length)
             }

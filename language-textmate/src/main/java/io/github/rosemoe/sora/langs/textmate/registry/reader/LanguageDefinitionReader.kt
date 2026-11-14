@@ -21,6 +21,7 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
+/* Modified by Raj Dave (aka LazyRaj) */
 package io.github.rosemoe.sora.langs.textmate.registry.reader
 
 import com.google.gson.GsonBuilder
@@ -36,7 +37,6 @@ import java.io.InputStreamReader
 
 object LanguageDefinitionReader {
 
-    @JvmStatic
     fun read(path: String): List<GrammarDefinition> {
         val stream = FileProviderRegistry.getInstance().tryGetInputStream(path) ?: return emptyList()
         return read(BufferedReader(InputStreamReader(stream, Charsets.UTF_8)))

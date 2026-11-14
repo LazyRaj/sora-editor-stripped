@@ -21,6 +21,7 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
+/* Modified by Raj Dave (aka LazyRaj) */
 package io.github.rosemoe.sora.langs.textmate.folding
 
 import android.util.SparseIntArray
@@ -34,11 +35,17 @@ class FoldingRegions(
 
     init {
         if (startIndexes.size() != endIndexes.size() || startIndexes.size() > IndentRange.MAX_FOLDING_REGIONS) {
-            throw Exception("invalid startIndexes or endIndexes size")
+            throw IllegalArgumentException("invalid startIndexes or endIndexes size")
         }
     }
 
-    fun length(): Int = startIndexes.size()
+    val size: Int
+        get() = startIndexes.size()
+
+    val length: Int
+        get() = size
+
+    fun length(): Int = size
 
     fun getStartLineNumber(index: Int): Int {
         return startIndexes.get(index) and IndentRange.MAX_LINE_NUMBER
@@ -61,7 +68,6 @@ class FoldingRegions(
         return getStartLineNumber(index) <= startLineNumber && getEndLineNumber(index) >= endLineNumber
     }
 
-    @Throws(Exception::class)
     private fun ensureParentIndices() {
         if (!parentsComputed) {
             parentsComputed = true
@@ -71,7 +77,7 @@ class FoldingRegions(
                 val startLineNumber = startIndexes.get(i)
                 val endLineNumber = endIndexes.get(i)
                 if (startLineNumber > IndentRange.MAX_LINE_NUMBER || endLineNumber > IndentRange.MAX_LINE_NUMBER) {
-                    throw Exception("startLineNumber or endLineNumber must not exceed ${IndentRange.MAX_LINE_NUMBER}")
+                    throw IllegalStateException("startLineNumber or endLineNumber must not exceed ${IndentRange.MAX_LINE_NUMBER}")
                 }
                 while (parentIndexes.isNotEmpty() && !isInsideLast(
                         parentIndexes,
@@ -89,7 +95,6 @@ class FoldingRegions(
         }
     }
 
-    @Throws(Exception::class)
     fun getParentIndex(index: Int): Int {
         ensureParentIndices()
         val parent = ((startIndexes.get(index) and IndentRange.MASK_INDENT) ushr 24) +

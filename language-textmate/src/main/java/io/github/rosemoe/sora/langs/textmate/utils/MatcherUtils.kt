@@ -21,26 +21,25 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
+/* Modified by Raj Dave (aka LazyRaj) */
 package io.github.rosemoe.sora.langs.textmate.utils
 
-import java.util.function.Function
 import java.util.regex.MatchResult
 import java.util.regex.Matcher
 
 object MatcherUtils {
 
-    @JvmStatic
     fun replaceAll(
         source: CharSequence,
         matcher: Matcher,
-        replacer: Function<MatchResult, String>
+        replacer: (MatchResult) -> String
     ): String {
         matcher.reset()
         val sb = StringBuilder()
         var appendPos = 0
         while (matcher.find()) {
             val result = matcher.toMatchResult()
-            val replacement = replacer.apply(result)
+            val replacement = replacer(result)
             sb.append(source, appendPos, result.start())
             sb.append(replacement)
             appendPos = result.end()

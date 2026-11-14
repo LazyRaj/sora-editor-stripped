@@ -21,6 +21,7 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
+/* Modified by Raj Dave (aka LazyRaj) */
 package io.github.rosemoe.sora.langs.textmate
 
 import android.graphics.Color
@@ -52,15 +53,12 @@ class TextMateColorScheme(
     }
 
     companion object {
-        @JvmStatic
         fun create(themeModel: ThemeModel): TextMateColorScheme =
             create(ThemeRegistry.getInstance(), themeModel)
 
-        @JvmStatic
-        fun create(themeRegistry: ThemeRegistry): TextMateColorScheme =
+        fun create(themeRegistry: ThemeRegistry = ThemeRegistry.getInstance()): TextMateColorScheme =
             create(themeRegistry, themeRegistry.currentThemeModel)
 
-        @JvmStatic
         fun create(themeRegistry: ThemeRegistry, themeModel: ThemeModel): TextMateColorScheme =
             TextMateColorScheme(themeRegistry, themeModel)
     }

@@ -112,7 +112,7 @@ final class RegExpSource {
 		for (final var capture : captureIndices) {
 			capturedValues.add(lineText.subSequence(capture.start, capture.end).toString());
 		}
-		return MatcherUtils.replaceAll(this.source, BACK_REFERENCING_END.matcher(this.source), (match -> {
+		return MatcherUtils.INSTANCE.replaceAll(this.source, BACK_REFERENCING_END.matcher(this.source), (match -> {
 			try {
 				final int index = Integer.parseInt(match.group(1));
 				if (index < captureIndices.length) {

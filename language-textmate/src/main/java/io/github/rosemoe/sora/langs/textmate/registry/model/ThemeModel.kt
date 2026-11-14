@@ -21,6 +21,7 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
+/* Modified by Raj Dave (aka LazyRaj) */
 package io.github.rosemoe.sora.langs.textmate.registry.model
 
 import io.github.rosemoe.sora.langs.textmate.utils.StringUtils
@@ -55,8 +56,6 @@ class ThemeModel {
         this.theme = Theme.createFromRawTheme(null, null)
     }
 
-    @Throws(Exception::class)
-    @JvmOverloads
     fun load(colorMap: List<String>? = null) {
         val raw = RawThemeReader.readTheme(themeSource)
         rawTheme = raw
@@ -67,7 +66,6 @@ class ThemeModel {
         get() = theme != null
 
     companion object {
-        @JvmField
         val EMPTY = ThemeModel("EMPTY")
     }
 }

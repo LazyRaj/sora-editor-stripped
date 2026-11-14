@@ -21,6 +21,7 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
+/* Modified by Raj Dave (aka LazyRaj) */
 package io.github.rosemoe.sora.langs.textmate.registry
 
 import io.github.rosemoe.sora.langs.textmate.registry.provider.FileResolver
@@ -68,7 +69,6 @@ class FileProviderRegistry private constructor() {
         @Volatile
         private var instance: FileProviderRegistry? = null
 
-        @JvmStatic
         @Synchronized
         fun getInstance(): FileProviderRegistry {
             return instance ?: FileProviderRegistry().also { instance = it }

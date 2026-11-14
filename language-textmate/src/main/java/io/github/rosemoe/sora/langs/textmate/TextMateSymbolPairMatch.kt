@@ -21,6 +21,7 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
+/* Modified by Raj Dave (aka LazyRaj) */
 package io.github.rosemoe.sora.langs.textmate
 
 import io.github.rosemoe.sora.lang.styling.Span
@@ -35,25 +36,22 @@ import java.util.Arrays
 class TextMateSymbolPairMatch(private val language: TextMateLanguage) :
     SymbolPairMatch(DefaultSymbolPairs()) {
 
-    private var enabled = true
+    var isEnabled: Boolean = true
+        set(value) {
+            field = value
+            if (!value) {
+                removeAllPairs()
+            } else {
+                updatePair()
+            }
+        }
 
     init {
         updatePair()
     }
 
-    fun setEnabled(enabled: Boolean) {
-        this.enabled = enabled
-        if (!enabled) {
-            removeAllPairs()
-        } else {
-            updatePair()
-        }
-    }
-
-    fun isEnabled(): Boolean = enabled
-
     fun updatePair() {
-        if (!enabled) {
+        if (!isEnabled) {
             return
         }
 

@@ -21,6 +21,7 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
+/* Modified by Raj Dave (aka LazyRaj) */
 package io.github.rosemoe.sora.langs.textmate
 
 import android.os.Bundle
@@ -80,8 +81,10 @@ open class TextMateLanguage protected constructor(
          * @param languageScopeName  Root language scope name
          * @param collectIdentifiers Collect identifiers for auto-completion
          */
-        @JvmStatic
-        fun create(languageScopeName: String, collectIdentifiers: Boolean): TextMateLanguage =
+        fun create(
+            languageScopeName: String,
+            collectIdentifiers: Boolean = false
+        ): TextMateLanguage =
             create(languageScopeName, GrammarRegistry.getInstance(), collectIdentifiers)
 
         /**
@@ -91,11 +94,10 @@ open class TextMateLanguage protected constructor(
          * @param grammarRegistry    Grammar registry to lookup language grammars
          * @param collectIdentifiers Collect identifiers for auto-completion
          */
-        @JvmStatic
         fun create(
             languageScopeName: String,
             grammarRegistry: GrammarRegistry,
-            collectIdentifiers: Boolean
+            collectIdentifiers: Boolean = false
         ): TextMateLanguage =
             create(languageScopeName, grammarRegistry, ThemeRegistry.getInstance(), collectIdentifiers)
 
@@ -107,7 +109,6 @@ open class TextMateLanguage protected constructor(
          * @param themeRegistry      Theme registry for theme management
          * @param collectIdentifiers Collect identifiers for auto-completion
          */
-        @JvmStatic
         fun create(
             languageScopeName: String,
             grammarRegistry: GrammarRegistry,
@@ -126,8 +127,10 @@ open class TextMateLanguage protected constructor(
          * @param grammarDefinition  Root language grammar definition
          * @param collectIdentifiers Collect identifiers for auto-completion
          */
-        @JvmStatic
-        fun create(grammarDefinition: GrammarDefinition, collectIdentifiers: Boolean): TextMateLanguage =
+        fun create(
+            grammarDefinition: GrammarDefinition,
+            collectIdentifiers: Boolean = false
+        ): TextMateLanguage =
             create(grammarDefinition, GrammarRegistry.getInstance(), collectIdentifiers)
 
         /**
@@ -137,11 +140,10 @@ open class TextMateLanguage protected constructor(
          * @param grammarRegistry    Grammar registry to lookup language grammars
          * @param collectIdentifiers Collect identifiers for auto-completion
          */
-        @JvmStatic
         fun create(
             grammarDefinition: GrammarDefinition,
             grammarRegistry: GrammarRegistry,
-            collectIdentifiers: Boolean
+            collectIdentifiers: Boolean = false
         ): TextMateLanguage =
             create(grammarDefinition, grammarRegistry, ThemeRegistry.getInstance(), collectIdentifiers)
 
@@ -153,7 +155,6 @@ open class TextMateLanguage protected constructor(
          * @param themeRegistry      Theme registry for theme management
          * @param collectIdentifiers Collect identifiers for auto-completion
          */
-        @JvmStatic
         fun create(
             grammarDefinition: GrammarDefinition,
             grammarRegistry: GrammarRegistry,
@@ -242,7 +243,8 @@ open class TextMateLanguage protected constructor(
         autoComplete.requireAutoComplete(content, position, prefix, publisher, idt)
     }
 
-    fun getAutoCompleter(): IdentifierAutoComplete = autoComplete
+    val autoCompleter: IdentifierAutoComplete
+        get() = autoComplete
 
     /**
      * Set keywords for auto-completion

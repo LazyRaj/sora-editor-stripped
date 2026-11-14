@@ -21,14 +21,15 @@
  *     Please contact Rosemoe by email 2073412493@qq.com if you need
  *     additional information or have any questions
  */
+/* Modified by Raj Dave (aka LazyRaj) */
 package io.github.rosemoe.sora.langs.textmate
 
 import org.eclipse.tm4e.core.grammar.IStateStack
 import org.eclipse.tm4e.core.internal.oniguruma.OnigResult
 
 data class MyState(
-    @JvmField var tokenizeState: IStateStack?,
-    @JvmField var foldingCache: OnigResult?,
-    @JvmField var indent: Int,
-    @JvmField var identifiers: List<String>?
+    var tokenizeState: IStateStack?,
+    var foldingCache: OnigResult?,
+    var indent: Int,
+    var identifiers: List<String>?
 )
