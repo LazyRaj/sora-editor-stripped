@@ -6,9 +6,9 @@ maintained as a submodule for my personal project.
     `language-textmate`.
 - **Purpose:** Dedicated to experimental features, custom optimizations, and breaking API changes
     tailored for my personal project.
-- WILL NEVER MERGE TO UPSTREAM.
+- **Policy:** Will never merge to the upstream. This fork will run as a parallel to the upstream.
 
-Implements Many features and Bugs Fixes from issues and PRs in the [Upstream](https://github.com/Rosemoe/sora-editor) 
+Implements Some features and Bugs Fixes from issues and PRs in the [Upstream](https://github.com/Rosemoe/sora-editor) 
 
 This Fork: 
 1. Kotlin First.
