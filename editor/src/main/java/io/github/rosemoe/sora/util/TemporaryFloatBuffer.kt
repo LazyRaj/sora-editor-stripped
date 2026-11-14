@@ -26,15 +26,12 @@ package io.github.rosemoe.sora.util
 
 object TemporaryFloatBuffer {
 
-    @JvmField
     val sCache: FloatArrayCache = FloatArrayCache()
 
-    @JvmStatic
     fun obtain(len: Int): FloatArray {
         return sCache.obtain(len)
     }
 
-    @JvmStatic
     fun recycle(temp: FloatArray) {
         sCache.recycle(temp)
     }
@@ -64,3 +61,13 @@ object TemporaryFloatBuffer {
         }
     }
 }
+
+inline fun <R> TemporaryFloatBuffer.use(len: Int, block: (FloatArray) -> R): R {
+    val buf = obtain(len)
+    return try {
+        block(buf)
+    } finally {
+        recycle(buf)
+    }
+}
+

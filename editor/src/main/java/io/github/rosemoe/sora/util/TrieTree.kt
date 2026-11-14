@@ -34,7 +34,6 @@ import kotlin.math.max
  */
 class TrieTree<T> {
 
-    @JvmField
     val root: Node<T> = Node()
     private var maxLen: Int = 0
 
@@ -79,10 +78,7 @@ class TrieTree<T> {
     }
 
     class Node<T> {
-        @JvmField
         val map: HashCharMap<Node<T>> = HashCharMap()
-
-        @JvmField
         var token: T? = null
     }
 
@@ -150,13 +146,8 @@ class TrieTree<T> {
     }
 
     class LinkedPair<V> {
-        @JvmField
         var next: LinkedPair<V>? = null
-
-        @JvmField
         var first: Char = '\u0000'
-
-        @JvmField
         var second: V? = null
     }
 }

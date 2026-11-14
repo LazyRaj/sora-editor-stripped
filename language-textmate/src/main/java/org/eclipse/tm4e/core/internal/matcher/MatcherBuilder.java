@@ -33,7 +33,7 @@ import io.github.rosemoe.sora.util.Logger;
  */
 final class MatcherBuilder<T> {
 
-	private static final Logger LOGGER = Logger.instance(MatcherBuilder.class.getName());
+	private static final Logger LOGGER = Logger.Companion.instance(MatcherBuilder.class.getName());
 
 	final List<MatcherWithPriority<T>> results = new ArrayList<>();
 	private final Tokenizer tokenizer;

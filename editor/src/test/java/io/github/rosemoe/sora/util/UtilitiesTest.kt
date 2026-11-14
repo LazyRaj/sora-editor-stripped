@@ -47,6 +47,11 @@ class UtilitiesTest {
 
         assertEquals(first, IntPair.getFirst(packed))
         assertEquals(second, IntPair.getSecond(packed))
+        assertEquals(first, packed.first)
+        assertEquals(second, packed.second)
+        val (f, s) = packed
+        assertEquals(first, f)
+        assertEquals(second, s)
     }
 
     @Test
@@ -57,12 +62,15 @@ class UtilitiesTest {
 
         assertEquals(first, IntPair.getFirst(packed))
         assertEquals(second, IntPair.getSecondAsFloat(packed), 0.00001f)
+        assertEquals(second, packed.secondFloat, 0.00001f)
     }
 
     @Test
     fun testFloatsWithinDelta() {
         assertTrue(Floats.withinDelta(1.0f, 1.05f, 0.1f))
         assertFalse(Floats.withinDelta(1.0f, 1.15f, 0.1f))
+        assertTrue(1.0f.isCloseTo(1.05f, 0.1f))
+        assertFalse(1.0f.isCloseTo(1.15f, 0.1f))
     }
 
     @Test
@@ -98,46 +106,75 @@ class UtilitiesTest {
         val floatBuf = TemporaryFloatBuffer.obtain(50)
         assertTrue(floatBuf.size >= 50)
         TemporaryFloatBuffer.recycle(floatBuf)
+
+        val charRes = TemporaryCharBuffer.use(32) { buf ->
+            buf[0] = 'K'
+            buf[0]
+        }
+        assertEquals('K', charRes)
+
+        val floatRes = TemporaryFloatBuffer.use(32) { buf ->
+            buf[0] = 1.23f
+            buf[0]
+        }
+        assertEquals(1.23f, floatRes, 0.001f)
     }
 
     @Test
     fun testClipDataToString() {
         assertEquals("", ClipDataUtils.clipDataToString(null))
+        assertEquals("", (null as ClipData?).toPlainText())
 
         val clip = ClipData.newPlainText("label", "Hello world")
         assertEquals("Hello world", ClipDataUtils.clipDataToString(clip))
+        assertEquals("Hello world", clip.toPlainText())
 
         val uriClip = ClipData.newRawUri("uri", Uri.parse("https://example.com"))
         assertEquals("https://example.com", ClipDataUtils.clipDataToString(uriClip))
+        assertEquals("https://example.com", uriClip.toPlainText())
     }
 
     @Test
     fun testLongArrayList() {
         val list = LongArrayList()
-        assertEquals(0, list.size())
+        assertEquals(0, list.size)
+        assertTrue(list.isEmpty)
+        assertFalse(list.isNotEmpty)
         list.add(10L)
         list.add(20L)
         list.add(30L)
-        assertEquals(3, list.size())
+        assertEquals(3, list.size)
+        assertTrue(list.isNotEmpty)
+        assertTrue(20L in list)
+        assertFalse(99L in list)
         assertEquals(20L, list[1])
         list[1] = 25L
         assertEquals(25L, list[1])
         assertEquals(1, list.lowerBound(25L))
         assertEquals(2, list.lowerBound(26L))
         list.clear()
-        assertEquals(0, list.size())
+        assertEquals(0, list.size)
+        assertTrue(list.isEmpty)
     }
 
     @Test
     fun testMyCharacter() {
         assertTrue(MyCharacter.isJavaIdentifierStart('a'))
+        assertTrue('a'.isJavaIdentifierStart)
         assertTrue(MyCharacter.isJavaIdentifierStart('_'))
+        assertTrue('_'.isJavaIdentifierStart)
         assertFalse(MyCharacter.isJavaIdentifierStart('1'))
+        assertFalse('1'.isJavaIdentifierStart)
         assertTrue(MyCharacter.isJavaIdentifierPart('1'))
+        assertTrue('1'.isJavaIdentifierPart)
         assertTrue(MyCharacter.isAlpha('Z'))
+        assertTrue('Z'.isAlpha)
         assertFalse(MyCharacter.isAlpha('9'))
+        assertFalse('9'.isAlpha)
         assertTrue(MyCharacter.couldBeEmoji(0x1F600))
+        assertTrue(0x1F600.couldBeEmoji)
         assertFalse(MyCharacter.couldBeEmoji(0x0041))
+        assertFalse(0x0041.couldBeEmoji)
     }
 
     @Test
@@ -169,11 +206,11 @@ class UtilitiesTest {
         val id1 = heap.push(10)
         val id2 = heap.push(30)
         val id3 = heap.push(20)
-        assertEquals(30, heap.top())
+        assertEquals(30, heap.top)
         heap.update(id1, 40)
-        assertEquals(40, heap.top())
+        assertEquals(40, heap.top)
         heap.remove(id1)
-        assertEquals(30, heap.top())
+        assertEquals(30, heap.top)
     }
 
     @Test
@@ -182,16 +219,16 @@ class UtilitiesTest {
         for (i in 0 until 50) {
             list.add(i)
         }
-        assertEquals(50, list.size())
-        assertEquals(49, list.getMax())
+        assertEquals(50, list.size)
+        assertEquals(49, list.max)
         assertEquals(25, list[25])
         list[25] = 100
-        assertEquals(100, list.getMax())
+        assertEquals(100, list.max)
         list.remove(25)
-        assertEquals(49, list.size())
-        assertEquals(49, list.getMax())
+        assertEquals(49, list.size)
+        assertEquals(49, list.max)
         list.removeRange(10, 20)
-        assertEquals(39, list.size())
+        assertEquals(39, list.size)
     }
 
     @Test
@@ -209,5 +246,12 @@ class UtilitiesTest {
         val sb2 = pool.obtain()
         assertTrue(sb1 === sb2)
         assertEquals(1, count)
+        pool.recycle(sb2)
+
+        val used = pool.use { sb ->
+            sb.append("test")
+            sb.toString()
+        }
+        assertEquals("test", used)
     }
 }

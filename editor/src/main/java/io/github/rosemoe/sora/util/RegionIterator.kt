@@ -40,11 +40,11 @@ open class RegionIterator(
     private val pointers = IntArray(providers.size)
     private val pointerStates = BooleanArray(providers.size)
 
-    @JvmField
-    protected var startIndex: Int = 0
+    var startIndex: Int = 0
+        protected set
 
-    @JvmField
-    protected var endIndex: Int = 0
+    var endIndex: Int = 0
+        protected set
 
     /**
      * Move to next region
@@ -111,21 +111,6 @@ open class RegionIterator(
         return min(value, max)
     }
 
-    /**
-     * Get start index of the region
-     * Note that this is inclusive.
-     */
-    fun getStartIndex(): Int {
-        return startIndex
-    }
-
-    /**
-     * Get end index of the region.
-     * Note that this is exclusive.
-     */
-    fun getEndIndex(): Int {
-        return min(endIndex, max)
-    }
 
     /**
      * RegionProvider provides dividing points for [RegionIterator]. Note that the returned

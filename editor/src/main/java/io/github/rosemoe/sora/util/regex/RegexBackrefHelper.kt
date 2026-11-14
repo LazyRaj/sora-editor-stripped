@@ -28,7 +28,6 @@ import java.util.regex.Matcher
 
 object RegexBackrefHelper {
 
-    @JvmStatic
     fun computeReplacement(
         matcher: Matcher,
         grammar: RegexBackrefGrammar,
@@ -39,7 +38,6 @@ object RegexBackrefHelper {
         return computeReplacement(matcher, tokens)
     }
 
-    @JvmStatic
     fun computeReplacement(
         matcher: Matcher,
         tokens: List<RegexBackrefToken>
@@ -56,3 +54,13 @@ object RegexBackrefHelper {
         return sb.toString()
     }
 }
+
+fun Matcher.computeReplacement(
+    grammar: RegexBackrefGrammar,
+    replacementPattern: String
+): String = RegexBackrefHelper.computeReplacement(this, grammar, replacementPattern)
+
+fun Matcher.computeReplacement(
+    tokens: List<RegexBackrefToken>
+): String = RegexBackrefHelper.computeReplacement(this, tokens)
+

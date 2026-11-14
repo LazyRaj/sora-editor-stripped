@@ -26,7 +26,7 @@ package io.github.rosemoe.sora.util
 
 import java.util.concurrent.atomic.AtomicInteger
 
-class SegmentList<T> @JvmOverloads constructor(
+class SegmentList<T>(
     val segmentCapacity: Int = DEFAULT_SEGMENT_CAPACITY
 ) : AbstractMutableList<T>() {
 
@@ -260,7 +260,7 @@ class SegmentList<T> @JvmOverloads constructor(
         fun accept(obj: T)
     }
 
-    private class Segment<T> @JvmOverloads constructor(
+    private class Segment<T>(
         initialCapacity: Int = 10
     ) : ArrayList<T>(initialCapacity), ShareableData<Segment<T>> {
 

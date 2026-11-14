@@ -37,7 +37,7 @@ import io.github.rosemoe.sora.util.Logger;
 
 public final class TMParserPList implements TMParser {
 
-    private static final Logger LOGGER = Logger.instance(TMParserPList.class.getName());
+    private static final Logger LOGGER = Logger.Companion.instance(TMParserPList.class.getName());
 
 	private static final String PLIST_ARRAY = "array";
 	private static final String PLIST_DICT = "dict";

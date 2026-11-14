@@ -29,10 +29,16 @@ package io.github.rosemoe.sora.util
  *
  * @author Rosemoe
  */
-class LongArrayList @JvmOverloads constructor(initialCapacity: Int = 64) {
+class LongArrayList(initialCapacity: Int = 64) {
 
     private var data: LongArray = LongArray(initialCapacity.coerceAtLeast(1))
     private var length = 0
+
+    val size: Int get() = length
+
+    val isEmpty: Boolean get() = length == 0
+
+    val isNotEmpty: Boolean get() = length > 0
 
     /**
      * Add a value at end
@@ -50,6 +56,13 @@ class LongArrayList @JvmOverloads constructor(initialCapacity: Int = 64) {
      * Get length of the list
      */
     fun size(): Int = length
+
+    operator fun contains(value: Long): Boolean {
+        for (i in 0 until length) {
+            if (data[i] == value) return true
+        }
+        return false
+    }
 
     /**
      * Set element at given index to [value]

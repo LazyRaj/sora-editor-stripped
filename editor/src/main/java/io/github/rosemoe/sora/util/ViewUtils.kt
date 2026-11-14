@@ -35,8 +35,10 @@ object ViewUtils {
 
     const val HOVER_TAP_SLOP: Int = 20
 
-    @JvmStatic
     fun getVerticalScrollFactor(context: Context): Float {
         return ViewConfiguration.get(context).scaledVerticalScrollFactor
     }
 }
+
+inline val Context.verticalScrollFactor: Float get() = ViewUtils.getVerticalScrollFactor(this)
+

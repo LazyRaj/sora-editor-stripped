@@ -48,7 +48,7 @@ import io.github.rosemoe.sora.util.Logger;
  */
 public final class Registry {
 
-    private static final Logger LOGGER = Logger.instance(Registry.class.getName());
+    private static final Logger LOGGER = Logger.Companion.instance(Registry.class.getName());
 
     private final IRegistryOptions _options;
     private final SyncRegistry _syncRegistry;

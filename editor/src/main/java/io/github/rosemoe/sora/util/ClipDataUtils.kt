@@ -29,7 +29,6 @@ import android.content.Intent
 
 object ClipDataUtils {
 
-    @JvmStatic
     fun clipDataToString(clipData: ClipData?): String {
         if (clipData == null || clipData.itemCount == 0) {
             return ""
@@ -58,3 +57,6 @@ object ClipDataUtils {
         return sb.toString()
     }
 }
+
+fun ClipData?.toPlainText(): String = ClipDataUtils.clipDataToString(this)
+

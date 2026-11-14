@@ -289,7 +289,7 @@ open class LineBreakLayout(
     override val layoutWidth: Int
         get() {
             val wm = widthMaintainer ?: return 0
-            return if (wm.size() == 0) Int.MAX_VALUE / 10 else wm.getMax()
+            return if (wm.size() == 0) Int.MAX_VALUE / 10 else wm.max
         }
 
     override val layoutHeight: Int

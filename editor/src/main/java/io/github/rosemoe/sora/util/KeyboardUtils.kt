@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2024  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -33,6 +34,7 @@ import android.inputmethodservice.InputMethodService
  * Utility functions for keyboard.
  *
  * @author Akash Yadav
+ * Modified by Raj Dave (aka LazyRaj)
  */
 object KeyboardUtils {
 
@@ -53,3 +55,5 @@ object KeyboardUtils {
                 || config.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO)
     }
 }
+
+inline val Context?.isHardKeyboardConnected: Boolean get() = KeyboardUtils.isHardKeyboardConnected(this)

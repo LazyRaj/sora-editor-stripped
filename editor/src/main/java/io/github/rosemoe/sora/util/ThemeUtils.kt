@@ -29,10 +29,12 @@ import android.view.ContextThemeWrapper
 
 object ThemeUtils {
 
-    @JvmStatic
     fun getColorPrimary(context: ContextThemeWrapper): Int {
         val typedValue = TypedValue()
         context.theme.resolveAttribute(android.R.attr.colorPrimary, typedValue, true)
         return typedValue.data
     }
 }
+
+inline val ContextThemeWrapper.colorPrimary: Int get() = ThemeUtils.getColorPrimary(this)
+

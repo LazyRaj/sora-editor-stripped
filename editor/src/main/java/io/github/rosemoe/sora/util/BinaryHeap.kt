@@ -43,7 +43,6 @@ class BinaryHeap {
     /**
      * Lock for multi-thread reusing
      */
-    @JvmField
     val lock: Lock = ReentrantLock()
 
     /**
@@ -101,6 +100,8 @@ class BinaryHeap {
      *
      * @return Max value
      */
+    val top: Int get() = top()
+
     fun top(): Int {
         if (nodeCount == 0) {
             return 0

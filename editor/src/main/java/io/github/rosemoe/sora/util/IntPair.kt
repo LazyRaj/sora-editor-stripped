@@ -41,7 +41,6 @@ object IntPair {
      * @param second Second of pair
      * @return Packed value
      */
-    @JvmStatic
     fun pack(first: Int, second: Int): Long {
         return (first.toLong() and 0xFFFFFFFFL shl 32) or (second.toLong() and 0xFFFFFFFFL)
     }
@@ -52,7 +51,6 @@ object IntPair {
      * @param packedValue Packed value
      * @return Second of pair
      */
-    @JvmStatic
     fun getSecond(packedValue: Long): Int {
         return packedValue.toInt()
     }
@@ -63,7 +61,6 @@ object IntPair {
      * @param packedValue Packed value
      * @return First of pair
      */
-    @JvmStatic
     fun getFirst(packedValue: Long): Int {
         return (packedValue ushr 32).toInt()
     }
@@ -75,7 +72,6 @@ object IntPair {
      * @param second Second of pair (float)
      * @return Packed value
      */
-    @JvmStatic
     fun packIntFloat(first: Int, second: Float): Long {
         return pack(first, second.toRawBits())
     }
@@ -87,8 +83,18 @@ object IntPair {
      * @return Second of pair
      * @see packIntFloat
      */
-    @JvmStatic
     fun getSecondAsFloat(packedValue: Long): Float {
         return Float.fromBits(getSecond(packedValue))
     }
 }
+
+inline val Long.first: Int get() = (this ushr 32).toInt()
+
+inline val Long.second: Int get() = this.toInt()
+
+inline val Long.secondFloat: Float get() = Float.fromBits(toInt())
+
+inline operator fun Long.component1(): Int = first
+
+inline operator fun Long.component2(): Int = second
+

@@ -33,7 +33,6 @@ class Logger private constructor(val name: String) {
         private val map = WeakHashMap<String, Logger>()
 
         @Synchronized
-        @JvmStatic
         fun instance(name: String): Logger {
             var logger = map[name]
             if (logger == null) {

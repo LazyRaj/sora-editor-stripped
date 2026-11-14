@@ -193,7 +193,7 @@ public final class TextUtils {
 
         var line = d.getLine(position.line);
 
-        var startIndex = IntPair.getFirst(io.github.rosemoe.sora.text.TextUtils.findLeadingAndTrailingWhitespacePos(
+        var startIndex = IntPair.INSTANCE.getFirst(io.github.rosemoe.sora.text.TextUtils.findLeadingAndTrailingWhitespacePos(
                 line
         ));
 

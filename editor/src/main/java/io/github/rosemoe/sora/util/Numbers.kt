@@ -32,8 +32,7 @@ import kotlin.math.min
  */
 object Numbers {
 
-    @JvmField
-    val DigitTens = charArrayOf(
+    private val DigitTens = charArrayOf(
         '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
         '1', '1', '1', '1', '1', '1', '1', '1', '1', '1',
         '2', '2', '2', '2', '2', '2', '2', '2', '2', '2',
@@ -46,8 +45,7 @@ object Numbers {
         '9', '9', '9', '9', '9', '9', '9', '9', '9', '9'
     )
 
-    @JvmField
-    val DigitOnes = charArrayOf(
+    private val DigitOnes = charArrayOf(
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
@@ -60,7 +58,6 @@ object Numbers {
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
     )
 
-    @JvmStatic
     fun stringSize(x: Int): Int {
         var num = x
         var d = 1
@@ -76,7 +73,6 @@ object Numbers {
         return 10 + d
     }
 
-    @JvmStatic
     fun getChars(i: Int, index: Int, buf: CharArray) {
         var num = i
         var q: Int
@@ -106,18 +102,15 @@ object Numbers {
         }
     }
 
-    @JvmStatic
     fun clearBit(flags: Int, flag: Int): Int {
         return if ((flags and flag) != 0) flags xor flag else flags
     }
 
-    @JvmStatic
     fun clearBits(flags: Int, bitsToClear: Int): Int {
         val mask = bitsToClear.inv()
         return flags and mask
     }
 
-    @JvmStatic
     fun coerceIn(value: Int, minVal: Int, maxVal: Int): Int {
         return max(minVal, min(maxVal, value))
     }

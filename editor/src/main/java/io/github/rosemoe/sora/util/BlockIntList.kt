@@ -30,7 +30,7 @@ import java.util.concurrent.locks.ReentrantLock
 import kotlin.math.max
 import kotlin.math.min
 
-class BlockIntList @JvmOverloads constructor(
+class BlockIntList(
     private val blockSize: Int = 1000
 ) {
 
@@ -39,7 +39,6 @@ class BlockIntList @JvmOverloads constructor(
         private const val CACHE_SWITCH = 30
     }
 
-    @JvmField
     val lock: Lock = ReentrantLock()
 
     private val recycled = ArrayList<Block>()
@@ -60,13 +59,14 @@ class BlockIntList @JvmOverloads constructor(
         caches = ArrayList(CACHE_COUNT + 2)
     }
 
-    fun getMax(): Int {
-        if (modCount != updateTime) {
-            updateTime = modCount
+    val max: Int
+        get() {
+            if (modCount != updateTime) {
+                updateTime = modCount
+            }
+            computeMax()
+            return currentMax
         }
-        computeMax()
-        return currentMax
-    }
 
     private fun computeMax() {
         currentMax = 0

@@ -48,7 +48,7 @@ import io.github.rosemoe.sora.util.Logger;
  */
 final class LineTokenizer {
 
-    private static final Logger LOGGER = Logger.instance(LineTokenizer.class.getName());
+    private static final Logger LOGGER = Logger.Companion.instance(LineTokenizer.class.getName());
 
 	private record LocalStackElement(AttributedScopeStack scopes, int endPos) {
 	}

@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2024  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -33,13 +34,13 @@ import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
  * Utility methods for use in editor renderer.
  *
  * @author Akash Yadav
+ * Modified by Raj Dave (aka LazyRaj)
  */
 object RendererUtils {
 
     /**
      * Get the background color for the given span.
      */
-    @JvmStatic
     fun getBackgroundColor(span: Span, colorScheme: EditorColorScheme): Int {
         val resolver = span.getSpanExt<SpanColorResolver>(SpanExtAttrs.EXT_COLOR_RESOLVER)
             ?: return colorScheme.getColor(span.backgroundColorId)
@@ -53,7 +54,6 @@ object RendererUtils {
     /**
      * Get the foreground color for the given span.
      */
-    @JvmStatic
     fun getForegroundColor(span: Span, colorScheme: EditorColorScheme): Int {
         val resolver = span.getSpanExt<SpanColorResolver>(SpanExtAttrs.EXT_COLOR_RESOLVER)
             ?: return colorScheme.getColor(span.foregroundColorId)

@@ -41,7 +41,7 @@ import io.github.rosemoe.sora.util.Logger;
  */
 public final class RuleFactory {
 
-    private static final Logger LOGGER = Logger.instance(RuleFactory.class.getName());
+    private static final Logger LOGGER = Logger.Companion.instance(RuleFactory.class.getName());
 
     private static CaptureRule createCaptureRule(final IRuleFactoryHelper helper, @Nullable final String name,
                                                  @Nullable final String contentName, final RuleId retokenizeCapturedWithRuleId) {

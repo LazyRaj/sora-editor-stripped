@@ -24,7 +24,7 @@
  */
 package io.github.rosemoe.sora.util
 
-class MutableInt(@JvmField var value: Int) {
+class MutableInt(var value: Int) {
 
     fun decreaseAndGet(): Int {
         return --value

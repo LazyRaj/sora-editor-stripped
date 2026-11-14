@@ -48,7 +48,7 @@ import io.github.rosemoe.sora.util.Logger;
  */
 public class LanguageConfiguration {
 
-    private static final Logger log = Logger.instance(LanguageConfiguration.class.getName());
+    private static final Logger log = Logger.Companion.instance(LanguageConfiguration.class.getName());
 
     private static String removeTrailingCommas(String jsonString) {
         /* matches:

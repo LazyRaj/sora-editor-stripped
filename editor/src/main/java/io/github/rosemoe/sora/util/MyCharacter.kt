@@ -54,43 +54,52 @@ object MyCharacter {
         values[bitIndex / 32] = values[bitIndex / 32] or (1 shl (bitIndex % 32))
     }
 
-    @JvmStatic
     fun isJavaIdentifierPart(key: Char): Boolean {
         return get(bitsIsPart, key.code)
     }
 
-    @JvmStatic
     fun isJavaIdentifierStart(key: Char): Boolean {
         return get(bitsIsStart, key.code)
     }
 
-    @JvmStatic
     fun couldBeEmoji(cp: Int): Boolean {
         return cp in 0x1F000..0x1FAFF
     }
 
-    @JvmStatic
     fun isFitzpatrick(cp: Int): Boolean {
         return cp in 0x1F3FB..0x1F3FF
     }
 
-    @JvmStatic
     fun isZWJ(cp: Int): Boolean {
         return cp == 0x200D
     }
 
-    @JvmStatic
     fun isZWNJ(cp: Int): Boolean {
         return cp == 0x200C
     }
 
-    @JvmStatic
     fun isVariationSelector(cp: Int): Boolean {
         return cp == 0xFE0E || cp == 0xFE0F
     }
 
-    @JvmStatic
     fun isAlpha(c: Char): Boolean {
         return (c in 'a'..'z') || (c in 'A'..'Z')
     }
 }
+
+inline val Char.isJavaIdentifierPart: Boolean get() = MyCharacter.isJavaIdentifierPart(this)
+
+inline val Char.isJavaIdentifierStart: Boolean get() = MyCharacter.isJavaIdentifierStart(this)
+
+inline val Char.isAlpha: Boolean get() = MyCharacter.isAlpha(this)
+
+inline val Int.couldBeEmoji: Boolean get() = MyCharacter.couldBeEmoji(this)
+
+inline val Int.isFitzpatrick: Boolean get() = MyCharacter.isFitzpatrick(this)
+
+inline val Int.isZWJ: Boolean get() = MyCharacter.isZWJ(this)
+
+inline val Int.isZWNJ: Boolean get() = MyCharacter.isZWNJ(this)
+
+inline val Int.isVariationSelector: Boolean get() = MyCharacter.isVariationSelector(this)
+

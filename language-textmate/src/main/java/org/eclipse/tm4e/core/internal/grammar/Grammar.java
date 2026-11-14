@@ -59,7 +59,7 @@ import io.github.rosemoe.sora.util.Logger;
  */
 public final class Grammar implements IGrammar, IRuleFactoryHelper {
 
-    private static final Logger LOGGER = Logger.instance(Grammar.class.getName());
+    private static final Logger LOGGER = Logger.Companion.instance(Grammar.class.getName());
 
 	private final String rootScopeName;
 

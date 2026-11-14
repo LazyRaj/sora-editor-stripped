@@ -23,7 +23,7 @@ import io.github.rosemoe.sora.util.Logger;
  */
 public final class RegExpUtils {
 
-    private static final Logger log = Logger.instance(RegExpUtils.class.getName());
+    private static final Logger log = Logger.Companion.instance(RegExpUtils.class.getName());
 
     /**
      * Escapes regular expression characters in a given string

@@ -25,11 +25,10 @@
 package io.github.rosemoe.sora.util.regex
 
 class RegexBackrefGrammar(
-    @JvmField val backrefStartChar: Char,
-    @JvmField val escapeChar: Char
+    val backrefStartChar: Char,
+    val escapeChar: Char
 ) {
     companion object {
-        @JvmField
         val DEFAULT = RegexBackrefGrammar('$', '\\')
     }
 }

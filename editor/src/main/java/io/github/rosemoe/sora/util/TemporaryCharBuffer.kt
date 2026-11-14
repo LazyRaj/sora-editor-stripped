@@ -29,7 +29,6 @@ object TemporaryCharBuffer {
     @Volatile
     private var sTemp: CharArray? = null
 
-    @JvmStatic
     fun obtain(len: Int): CharArray {
         val buf: CharArray?
         synchronized(this) {
@@ -43,7 +42,6 @@ object TemporaryCharBuffer {
         }
     }
 
-    @JvmStatic
     fun recycle(temp: CharArray) {
         if (temp.size > 1000) return
         synchronized(this) {
@@ -51,3 +49,13 @@ object TemporaryCharBuffer {
         }
     }
 }
+
+inline fun <R> TemporaryCharBuffer.use(len: Int, block: (CharArray) -> R): R {
+    val buf = obtain(len)
+    return try {
+        block(buf)
+    } finally {
+        recycle(buf)
+    }
+}
+

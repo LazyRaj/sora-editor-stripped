@@ -2,6 +2,7 @@
  *    sora-editor - the awesome code editor for Android
  *    https://github.com/Rosemoe/sora-editor
  *    Copyright (C) 2020-2024  Rosemoe
+ *    Modified by Raj Dave (aka LazyRaj)
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -33,13 +34,13 @@ import io.github.rosemoe.sora.text.TextRange
  * Utility class for working with characters and indexes.
  *
  * @author Akash Yadav
+ * Modified by Raj Dave (aka LazyRaj)
  */
 object Chars {
 
     /**
      * Find the previous word and get its start position.
      */
-    @JvmStatic
     fun prevWordStart(position: CharPosition, text: Content): CharPosition {
         return findWord(position, text, true).start
     }
@@ -47,7 +48,6 @@ object Chars {
     /**
      * Find the next word and get its end position.
      */
-    @JvmStatic
     fun nextWordEnd(position: CharPosition, text: Content): CharPosition {
         return findWord(position, text).end
     }
@@ -57,8 +57,6 @@ object Chars {
      *
      * @param reverse Whether to search for word in reverse or not.
      */
-    @JvmStatic
-    @JvmOverloads
     fun findWord(position: CharPosition, text: Content, reverse: Boolean = false): TextRange {
         if (reverse) {
             position.column -= 1
@@ -91,7 +89,6 @@ object Chars {
      * @param useIcu Whether to use the ICU library to get word edges.
      * @return The word range.
      */
-    @JvmStatic
     fun getWordRange(text: Content, line: Int, column: Int, useIcu: Boolean): TextRange {
         // Find word edges
         var startLine = line
@@ -131,8 +128,6 @@ object Chars {
      * @param offset The offset to start from.
      * @param reverse Whether to skip whitespaces towards index 0 or `text.length`.
      */
-    @JvmStatic
-    @JvmOverloads
     fun skipWs(text: CharSequence, offset: Int, reverse: Boolean = false): Int {
         var i = offset
         while (true) {

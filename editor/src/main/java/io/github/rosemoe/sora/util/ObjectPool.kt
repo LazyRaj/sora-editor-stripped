@@ -24,7 +24,7 @@
  */
 package io.github.rosemoe.sora.util
 
-abstract class ObjectPool<T : Any> @JvmOverloads constructor(size: Int = 16) {
+abstract class ObjectPool<T : Any>(size: Int = 16) {
 
     private val pool: Array<Any?> = arrayOfNulls(size)
 
@@ -63,3 +63,13 @@ abstract class ObjectPool<T : Any> @JvmOverloads constructor(size: Int = 16) {
 
     protected abstract fun allocateNew(): T
 }
+
+inline fun <T : Any, R> ObjectPool<T>.use(block: (T) -> R): R {
+    val obj = obtain()
+    return try {
+        block(obj)
+    } finally {
+        recycle(obj)
+    }
+}
+
