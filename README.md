@@ -14,7 +14,7 @@ This Fork:
 1. Kotlin First.
 2. Android API 30 or Up.
 3. Uses New RenderNode and Newer Android APIs
-4. Compose First Implementation of Popups however the CodeEditor is not Converted to Compose first because Compose lacks some IME handling. so it has wrapper for compose. 
+4. Compose First Implementation of Auto completions, Selection and other popups, however the CodeEditor is not Converted to Compose first because Compose lacks some IME handling. so it has wrapper for compose. 
 5. Has Inline Completions. (aka GhostText)
 6. Some Bugs and Performance Fixes.
 7. Hand Written Code (AI Written Docs and KDoc)
