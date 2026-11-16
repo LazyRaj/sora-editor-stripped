@@ -356,7 +356,7 @@ open class CodeEditor(
             require(!(size <= 0))
             field = size
         }
-    private var lineSpacingMultiplier = 1f
+    private var lineSpacingMultiplierField = 1f
     private var lineSpacingAdd = 0f
     private var lineNumberMarginLeft = 0f
     private var verticalExtraSpaceFactor = 0.5f
@@ -3246,8 +3246,12 @@ open class CodeEditor(
          * @see .getTextLetterSpacing
          */
         set(textLetterSpacing) {
-            renderer.setLetterSpacing(textLetterSpacing)
-            requestLayoutIfNeeded()
+            val old = renderer.paint.letterSpacing
+            if (old != textLetterSpacing) {
+                renderer.setLetterSpacing(textLetterSpacing)
+                requestLayoutIfNeeded()
+                dispatchEvent(EditorPropertyChangeEvent(this, "textLetterSpacing", textLetterSpacing))
+            }
         }
 
     /**
@@ -3336,7 +3340,7 @@ open class CodeEditor(
      * by
      */
     fun setLineSpacing(add: Float, mult: Float) {
-        lineSpacingAdd = add
+        lineSpacingExtra = add
         lineSpacingMultiplier = mult
     }
 
@@ -3346,7 +3350,7 @@ open class CodeEditor(
          * 
          * @return the extra space that is added to the height of each lines of this TextView.
          * @see .setLineSpacing
-         * @see .getLineSpacingMultiplier
+         * @see .lineSpacingMultiplier
          */
         get() = lineSpacingAdd
         /**
@@ -3354,26 +3358,25 @@ open class CodeEditor(
          * *            This will be applied after the multiplier
          */
         set(lineSpacingExtra) {
-            lineSpacingAdd = lineSpacingExtra
-            invalidate()
+            if (lineSpacingAdd != lineSpacingExtra) {
+                lineSpacingAdd = lineSpacingExtra
+                invalidate()
+                dispatchEvent(EditorPropertyChangeEvent(this, "lineSpacingExtra", lineSpacingExtra))
+            }
         }
 
     /**
-     * @return the value by which each line's height is multiplied to get its actual height.
-     * @see .setLineSpacingMultiplier
+     * The multiplier by which each line's height other than the last line will be multiplied. Default 1.0f.
      */
-    fun getLineSpacingMultiplier(): Float {
-        return lineSpacingMultiplier
-    }
-
-    /**
-     * @param lineSpacingMultiplier The value by which each line height other than the last line will be multiplied
-     * *             by. Default 1.0f
-     */
-    fun setLineSpacingMultiplier(lineSpacingMultiplier: Float) {
-        this.lineSpacingMultiplier = lineSpacingMultiplier
-        invalidate()
-    }
+    var lineSpacingMultiplier: Float
+        get() = lineSpacingMultiplierField
+        set(value) {
+            if (lineSpacingMultiplierField != value) {
+                lineSpacingMultiplierField = value
+                invalidate()
+                dispatchEvent(EditorPropertyChangeEvent(this, "lineSpacingMultiplier", value))
+            }
+        }
 
     val lineSpacingPixels: Int
         /**

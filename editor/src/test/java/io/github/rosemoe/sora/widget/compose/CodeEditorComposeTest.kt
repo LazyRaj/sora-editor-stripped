@@ -102,6 +102,31 @@ class CodeEditorComposeTest {
     }
 
     @Test
+    fun testStateAdoptsSpacingConfiguredOnEditorDuringCreation() {
+        val editor = CodeEditor(context).apply {
+            lineSpacingExtra = 8f
+            lineSpacingMultiplier = 1.5f
+            textLetterSpacing = 0.2f
+        }
+        val state = CodeEditorState(initialText = "Hello")
+        // Before attach, state had defaults (0f, 1f, 0f)
+        assertThat(state.lineSpacingExtra).isEqualTo(0f)
+        assertThat(state.lineSpacingMultiplier).isEqualTo(1f)
+        assertThat(state.textLetterSpacing).isEqualTo(0f)
+
+        // Attach editor -> state adopts the custom spacing configured on editor without overwriting them
+        state.attachEditor(editor)
+        assertThat(editor.lineSpacingExtra).isWithin(0.01f).of(8f)
+        assertThat(editor.lineSpacingMultiplier).isWithin(0.01f).of(1.5f)
+        assertThat(editor.textLetterSpacing).isWithin(0.01f).of(0.2f)
+        assertThat(state.lineSpacingExtra).isWithin(0.01f).of(8f)
+        assertThat(state.lineSpacingMultiplier).isWithin(0.01f).of(1.5f)
+        assertThat(state.textLetterSpacing).isWithin(0.01f).of(0.2f)
+
+        state.detachEditor(editor)
+    }
+
+    @Test
     fun testImperativeActionsOnState() {
         val editor = CodeEditor(context)
         val state = CodeEditorState(initialText = "Initial")
@@ -247,6 +272,15 @@ class CodeEditorComposeTest {
         editor.isScalable = false
         assertThat(state.isScalable).isFalse()
 
+        editor.lineSpacingExtra = 6f
+        assertThat(state.lineSpacingExtra).isWithin(0.01f).of(6f)
+
+        editor.lineSpacingMultiplier = 1.4f
+        assertThat(state.lineSpacingMultiplier).isWithin(0.01f).of(1.4f)
+
+        editor.textLetterSpacing = 0.15f
+        assertThat(state.textLetterSpacing).isWithin(0.01f).of(0.15f)
+
         // 2. Recomposition simulation: updateEditor must NOT revert direct editor changes!
         state.updateEditor(editor)
         assertThat(editor.isWordwrap).isTrue()
@@ -259,6 +293,9 @@ class CodeEditorComposeTest {
         assertThat(editor.isDividerEnabled).isFalse()
         assertThat(editor.cursorBlinkPeriod).isEqualTo(0)
         assertThat(editor.isScalable).isFalse()
+        assertThat(editor.lineSpacingExtra).isWithin(0.01f).of(6f)
+        assertThat(editor.lineSpacingMultiplier).isWithin(0.01f).of(1.4f)
+        assertThat(editor.textLetterSpacing).isWithin(0.01f).of(0.15f)
 
         // 3. Mutation on state -> must reflect on editor
         state.isWordwrap = false
@@ -269,6 +306,15 @@ class CodeEditorComposeTest {
 
         state.textSizeSp = 18f
         assertThat(editor.textSize).isWithin(0.1f).of(18f)
+
+        state.lineSpacingExtra = 4f
+        assertThat(editor.lineSpacingExtra).isWithin(0.01f).of(4f)
+
+        state.lineSpacingMultiplier = 1.2f
+        assertThat(editor.lineSpacingMultiplier).isWithin(0.01f).of(1.2f)
+
+        state.textLetterSpacing = 0.05f
+        assertThat(editor.textLetterSpacing).isWithin(0.01f).of(0.05f)
 
         state.isScalable = true
         assertThat(editor.isScalable).isTrue()
@@ -296,6 +342,9 @@ class CodeEditorComposeTest {
             highlightCurrentLine = false
             dividerEnabled = false
             isScalable = false
+            lineSpacingExtra = 5f
+            lineSpacingMultiplier = 1.3f
+            textLetterSpacing = 0.08f
         }
 
         val saverScope = SaverScope { true }
@@ -306,6 +355,9 @@ class CodeEditorComposeTest {
         assertThat(restored.selection).isEqualTo(TextRange(5, 10))
         assertThat(restored.isWordwrap).isTrue()
         assertThat(restored.textSizeSp).isEqualTo(20f)
+        assertThat(restored.lineSpacingExtra).isWithin(0.01f).of(5f)
+        assertThat(restored.lineSpacingMultiplier).isWithin(0.01f).of(1.3f)
+        assertThat(restored.textLetterSpacing).isWithin(0.01f).of(0.08f)
         assertThat(restored.tabWidth).isEqualTo(2)
         assertThat(restored.isEditable).isFalse()
         assertThat(restored.lineNumbersEnabled).isFalse()

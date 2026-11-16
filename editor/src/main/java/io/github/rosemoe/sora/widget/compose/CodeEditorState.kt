@@ -213,6 +213,57 @@ class CodeEditorState(
             }
         }
 
+    private var _lineSpacingExtra by mutableFloatStateOf(0f)
+
+    /** Extra line spacing in pixels added to each line other than the last line. */
+    var lineSpacingExtra: Float
+        get() {
+            val snap = _lineSpacingExtra
+            return _editor?.lineSpacingExtra ?: snap
+        }
+        set(value) {
+            if (_lineSpacingExtra != value) {
+                _lineSpacingExtra = value
+                _editor?.let { ed ->
+                    if (ed.lineSpacingExtra != value) ed.lineSpacingExtra = value
+                }
+            }
+        }
+
+    private var _lineSpacingMultiplier by mutableFloatStateOf(1f)
+
+    /** Multiplier by which each line height other than the last line is multiplied. Default 1.0f. */
+    var lineSpacingMultiplier: Float
+        get() {
+            val snap = _lineSpacingMultiplier
+            return _editor?.lineSpacingMultiplier ?: snap
+        }
+        set(value) {
+            if (_lineSpacingMultiplier != value) {
+                _lineSpacingMultiplier = value
+                _editor?.let { ed ->
+                    if (ed.lineSpacingMultiplier != value) ed.lineSpacingMultiplier = value
+                }
+            }
+        }
+
+    private var _textLetterSpacing by mutableFloatStateOf(0f)
+
+    /** Letter spacing of editor text paint in font em units. */
+    var textLetterSpacing: Float
+        get() {
+            val snap = _textLetterSpacing
+            return _editor?.textLetterSpacing ?: snap
+        }
+        set(value) {
+            if (_textLetterSpacing != value) {
+                _textLetterSpacing = value
+                _editor?.let { ed ->
+                    if (ed.textLetterSpacing != value) ed.textLetterSpacing = value
+                }
+            }
+        }
+
     private var _isScalable by mutableStateOf(true)
 
     /** Whether pinch-to-zoom text scaling is enabled. */
@@ -446,6 +497,7 @@ class CodeEditorState(
     // -----------------------------------------------------------------------------------------
 
     private var _scrollbarThumbColor by mutableIntStateOf(0)
+
     /** Normal fill color for scrollbar indicator. 0 falls back to color scheme. */
     var scrollbarThumbColor: Int
         get() = _editor?.props?.scrollbarThumbColor ?: _scrollbarThumbColor
@@ -458,6 +510,7 @@ class CodeEditorState(
         }
 
     private var _scrollbarThumbHoldColor by mutableIntStateOf(0)
+
     /** Pressed / holding fill color for scrollbar indicator. 0 falls back to color scheme. */
     var scrollbarThumbHoldColor: Int
         get() = _editor?.props?.scrollbarThumbHoldColor ?: _scrollbarThumbHoldColor
@@ -470,6 +523,7 @@ class CodeEditorState(
         }
 
     private var _scrollbarBorderEnabled by mutableStateOf(false)
+
     /** Whether border rendering is enabled for scrollbar indicator. */
     var scrollbarBorderEnabled: Boolean
         get() = _editor?.props?.scrollbarBorderEnabled ?: _scrollbarBorderEnabled
@@ -482,6 +536,7 @@ class CodeEditorState(
         }
 
     private var _scrollbarBorderColor by mutableIntStateOf(0)
+
     /** Border color for scrollbar indicator. */
     var scrollbarBorderColor: Int
         get() = _editor?.props?.scrollbarBorderColor ?: _scrollbarBorderColor
@@ -494,6 +549,7 @@ class CodeEditorState(
         }
 
     private var _scrollbarBorderRadiusDip by mutableFloatStateOf(0f)
+
     /** Corner/border radius for scrollbar indicator in DIP. */
     var scrollbarBorderRadiusDip: Float
         get() = _editor?.props?.scrollbarBorderRadiusDip ?: _scrollbarBorderRadiusDip
@@ -510,6 +566,7 @@ class CodeEditorState(
     // -----------------------------------------------------------------------------------------
 
     private var _completionCornerRadiusDip by mutableFloatStateOf(8f)
+
     /** Corner radius of auto-completion box in DIP. */
     var completionCornerRadiusDip: Float
         get() = _editor?.props?.completionCornerRadiusDip ?: _completionCornerRadiusDip
@@ -517,11 +574,14 @@ class CodeEditorState(
             _completionCornerRadiusDip = value
             _editor?.let { ed ->
                 ed.props.completionCornerRadiusDip = value
-                (ed.getComponent(EditorAutoCompletion::class.java).layout as? DefaultCompletionLayout)?.onApplyColorScheme(ed.colorScheme)
+                (ed.getComponent(EditorAutoCompletion::class.java).layout as? DefaultCompletionLayout)?.onApplyColorScheme(
+                    ed.colorScheme
+                )
             }
         }
 
     private var _completionBorderWidthDip by mutableFloatStateOf(1f)
+
     /** Border stroke width of auto-completion box in DIP. */
     var completionBorderWidthDip: Float
         get() = _editor?.props?.completionBorderWidthDip ?: _completionBorderWidthDip
@@ -529,11 +589,14 @@ class CodeEditorState(
             _completionBorderWidthDip = value
             _editor?.let { ed ->
                 ed.props.completionBorderWidthDip = value
-                (ed.getComponent(EditorAutoCompletion::class.java).layout as? DefaultCompletionLayout)?.onApplyColorScheme(ed.colorScheme)
+                (ed.getComponent(EditorAutoCompletion::class.java).layout as? DefaultCompletionLayout)?.onApplyColorScheme(
+                    ed.colorScheme
+                )
             }
         }
 
     private var _completionBorderColor by mutableIntStateOf(0)
+
     /** Border stroke color of auto-completion box. */
     var completionBorderColor: Int
         get() = _editor?.props?.completionBorderColor ?: _completionBorderColor
@@ -541,11 +604,14 @@ class CodeEditorState(
             _completionBorderColor = value
             _editor?.let { ed ->
                 ed.props.completionBorderColor = value
-                (ed.getComponent(EditorAutoCompletion::class.java).layout as? DefaultCompletionLayout)?.onApplyColorScheme(ed.colorScheme)
+                (ed.getComponent(EditorAutoCompletion::class.java).layout as? DefaultCompletionLayout)?.onApplyColorScheme(
+                    ed.colorScheme
+                )
             }
         }
 
     private var _completionBackgroundColor by mutableIntStateOf(0)
+
     /** Background color of auto-completion box. */
     var completionBackgroundColor: Int
         get() = _editor?.props?.completionBackgroundColor ?: _completionBackgroundColor
@@ -553,11 +619,14 @@ class CodeEditorState(
             _completionBackgroundColor = value
             _editor?.let { ed ->
                 ed.props.completionBackgroundColor = value
-                (ed.getComponent(EditorAutoCompletion::class.java).layout as? DefaultCompletionLayout)?.onApplyColorScheme(ed.colorScheme)
+                (ed.getComponent(EditorAutoCompletion::class.java).layout as? DefaultCompletionLayout)?.onApplyColorScheme(
+                    ed.colorScheme
+                )
             }
         }
 
     private var _reverseListWhenAbove by mutableStateOf(true)
+
     /** Whether completion list items are reversed when displayed above the cursor line. */
     var reverseListWhenAbove: Boolean
         get() = _editor?.props?.reverseListWhenAbove ?: _reverseListWhenAbove
@@ -716,7 +785,7 @@ class CodeEditorState(
         isAttached = true
 
         // Push initial state into editor
-        if (_text.isNotEmpty()) {
+        if (_text.isNotEmpty() && editor.text.isEmpty()) {
             editor.setText(_text)
         } else if (editor.text.isNotEmpty()) {
             _text = editor.text.toString()
@@ -726,6 +795,23 @@ class CodeEditorState(
         editor.isLineNumberEnabled = lineNumbersEnabled
         editor.isLineNumberPinned = pinLineNumbers
         editor.textSize = textSizeSp
+        if (_lineSpacingExtra != 0f) {
+            editor.lineSpacingExtra = _lineSpacingExtra
+        } else if (editor.lineSpacingExtra != 0f) {
+            _lineSpacingExtra = editor.lineSpacingExtra
+        }
+
+        if (_lineSpacingMultiplier != 1f) {
+            editor.lineSpacingMultiplier = _lineSpacingMultiplier
+        } else if (editor.lineSpacingMultiplier != 1f) {
+            _lineSpacingMultiplier = editor.lineSpacingMultiplier
+        }
+
+        if (_textLetterSpacing != 0f) {
+            editor.textLetterSpacing = _textLetterSpacing
+        } else if (editor.textLetterSpacing != 0f) {
+            _textLetterSpacing = editor.textLetterSpacing
+        }
         editor.isScalable = isScalable
         editor.tabWidth = tabWidth
         editor.isUndoEnabled = isUndoEnabled
@@ -846,7 +932,14 @@ class CodeEditorState(
 
                     "magnifierEnabled" -> (event.value as? Boolean)?.let { _magnifierEnabled = it }
                     "isScalable" -> (event.value as? Boolean)?.let { _isScalable = it }
-                    "ghostText" -> { _ghostText = event.value as? String }
+                    "lineSpacingExtra" -> (event.value as? Float)?.let { _lineSpacingExtra = it }
+                    "lineSpacingMultiplier" -> (event.value as? Float)?.let {
+                        _lineSpacingMultiplier = it
+                    }
+                    "textLetterSpacing" -> (event.value as? Float)?.let { _textLetterSpacing = it }
+                    "ghostText" -> {
+                        _ghostText = event.value as? String
+                    }
                 }
             }
         )
@@ -883,6 +976,15 @@ class CodeEditorState(
             lineNumbersEnabled
         if (editor.isLineNumberPinned != pinLineNumbers) editor.isLineNumberPinned = pinLineNumbers
         if (kotlin.math.abs(editor.textSize - textSizeSp) > 0.05f) editor.textSize = textSizeSp
+        if (kotlin.math.abs(editor.lineSpacingExtra - lineSpacingExtra) > 0.05f) {
+            editor.lineSpacingExtra = lineSpacingExtra
+        }
+        if (kotlin.math.abs(editor.lineSpacingMultiplier - lineSpacingMultiplier) > 0.05f) {
+            editor.lineSpacingMultiplier = lineSpacingMultiplier
+        }
+        if (kotlin.math.abs(editor.textLetterSpacing - textLetterSpacing) > 0.005f) {
+            editor.textLetterSpacing = textLetterSpacing
+        }
         if (editor.isScalable != isScalable) editor.isScalable = isScalable
         if (editor.tabWidth != tabWidth) editor.tabWidth = tabWidth
         if (editor.isUndoEnabled != isUndoEnabled) editor.isUndoEnabled = isUndoEnabled
@@ -927,6 +1029,9 @@ class CodeEditorState(
                 _selection = TextRange(ed.cursor.left, ed.cursor.right)
                 _scrollX = ed.offsetX
                 _scrollY = ed.offsetY
+                _lineSpacingExtra = ed.lineSpacingExtra
+                _lineSpacingMultiplier = ed.lineSpacingMultiplier
+                _textLetterSpacing = ed.textLetterSpacing
                 _scrollbarThumbColor = ed.props.scrollbarThumbColor
                 _scrollbarThumbHoldColor = ed.props.scrollbarThumbHoldColor
                 _scrollbarBorderEnabled = ed.props.scrollbarBorderEnabled
@@ -996,7 +1101,10 @@ class CodeEditorState(
                     state.completionBorderWidthDip,
                     state.completionBorderColor,
                     state.completionBackgroundColor,
-                    state.reverseListWhenAbove
+                    state.reverseListWhenAbove,
+                    state.editor?.lineSpacingExtra ?: state.lineSpacingExtra,
+                    state.editor?.lineSpacingMultiplier ?: state.lineSpacingMultiplier,
+                    state.editor?.textLetterSpacing ?: state.textLetterSpacing
                 )
             },
             restore = { savedList ->
@@ -1027,6 +1135,9 @@ class CodeEditorState(
                     if (savedList.size > 23) completionBorderColor = savedList[23] as Int
                     if (savedList.size > 24) completionBackgroundColor = savedList[24] as Int
                     if (savedList.size > 25) reverseListWhenAbove = savedList[25] as Boolean
+                    if (savedList.size > 26) lineSpacingExtra = savedList[26] as Float
+                    if (savedList.size > 27) lineSpacingMultiplier = savedList[27] as Float
+                    if (savedList.size > 28) textLetterSpacing = savedList[28] as Float
                 }
             }
         )
@@ -1047,6 +1158,9 @@ fun rememberCodeEditorState(
     isWordwrap: Boolean = false,
     lineNumbersEnabled: Boolean = true,
     textSizeSp: Float = 14f,
+    lineSpacingExtra: Float = 0f,
+    lineSpacingMultiplier: Float = 1f,
+    textLetterSpacing: Float = 0f,
     tabWidth: Int = 4
 ): CodeEditorState {
     return rememberSaveable(saver = CodeEditorState.Saver) {
@@ -1060,6 +1174,9 @@ fun rememberCodeEditorState(
             this.isWordwrap = isWordwrap
             this.lineNumbersEnabled = lineNumbersEnabled
             this.textSizeSp = textSizeSp
+            this.lineSpacingExtra = lineSpacingExtra
+            this.lineSpacingMultiplier = lineSpacingMultiplier
+            this.textLetterSpacing = textLetterSpacing
             this.tabWidth = tabWidth
         }
     }
