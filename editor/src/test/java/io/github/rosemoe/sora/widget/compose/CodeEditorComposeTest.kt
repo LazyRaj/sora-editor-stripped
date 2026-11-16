@@ -35,6 +35,7 @@ import io.github.rosemoe.sora.lang.completion.CompletionItem
 import io.github.rosemoe.sora.lang.completion.SimpleCompletionItem
 import io.github.rosemoe.sora.lang.diagnostic.DiagnosticDetail
 import io.github.rosemoe.sora.lang.diagnostic.DiagnosticRegion
+import io.github.rosemoe.sora.text.Content
 import io.github.rosemoe.sora.widget.CodeEditor
 import io.github.rosemoe.sora.widget.component.EditorAutoCompletion
 import io.github.rosemoe.sora.widget.component.EditorTextActionWindow
@@ -661,5 +662,50 @@ class CodeEditorComposeTest {
         assertThat(composeLayout.itemsState).hasSize(2)
         assertThat(composeLayout.itemsState[0].label).isEqualTo("itemA")
         assertThat(composeLayout.itemsState[1].label).isEqualTo("itemB")
+    }
+
+    @Test
+    fun testCodeEditorStateWithContentDirectly() {
+        val originalContent = Content("fun main() {\n    println(1)\n}")
+        val state = CodeEditorState(initialContent = originalContent)
+
+        assertThat(state.content).isSameInstanceAs(originalContent)
+        assertThat(state.textLength).isEqualTo(originalContent.length)
+        assertThat(state.lineCount).isEqualTo(1) // Not yet attached to editor
+
+        val editor = CodeEditor(context)
+        state.attachEditor(editor)
+
+        // Verify editor reuses the exact same Content instance without copying
+        assertThat(editor.text).isSameInstanceAs(originalContent)
+        assertThat(state.content).isSameInstanceAs(originalContent)
+        assertThat(state.lineCount).isEqualTo(3)
+
+        // Insert text via state
+        editor.setSelection(0, 0)
+        state.insertText("// Header\n")
+
+        assertThat(state.lineCount).isEqualTo(4)
+        assertThat(state.content).isSameInstanceAs(editor.text)
+        assertThat(state.text.startsWith("// Header\nfun main()")).isTrue()
+
+        state.detachEditor(editor)
+        assertThat(state.content.lineCount).isEqualTo(4)
+    }
+
+    @Test
+    fun testSaverOmitsExcessiveTextToPreventTransactionTooLargeException() {
+        val saverScope = SaverScope { true }
+        // Create a large buffer exceeding 100,000 chars
+        val largeChunk = "0123456789".repeat(12_000) // 120,000 characters
+        val content = Content(largeChunk)
+        val state = CodeEditorState(initialContent = content)
+
+        val saved = with(CodeEditorState.Saver) { saverScope.save(state) } as List<*>
+        // Text entry at index 0 should be empty string to protect Android Binder buffer
+        assertThat(saved[0]).isEqualTo("")
+
+        val restored = CodeEditorState.Saver.restore(saved) as CodeEditorState
+        assertThat(restored.textLength).isEqualTo(0)
     }
 }

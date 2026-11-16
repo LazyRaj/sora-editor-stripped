@@ -48,6 +48,7 @@ import io.github.rosemoe.sora.event.SubscriptionReceipt
 import io.github.rosemoe.sora.event.TextSizeChangeEvent
 import io.github.rosemoe.sora.lang.Language
 import io.github.rosemoe.sora.text.CharPosition
+import io.github.rosemoe.sora.text.Content
 import io.github.rosemoe.sora.widget.CodeEditor
 import io.github.rosemoe.sora.widget.component.DefaultCompletionLayout
 import io.github.rosemoe.sora.widget.component.EditorAutoCompletion
@@ -58,18 +59,33 @@ import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
  * State holder for [CodeEditorCompose] managing observable editor state, two-way bindings,
  * and imperative editor controls.
  *
- * @param initialText Initial text displayed in the editor.
+ * @param initialContent Initial [Content] buffer displayed in the editor.
  * @param initialSelection Initial selection or cursor location.
  * @param initialLanguage Initial language syntax/highlighting provider.
  * @param initialColorScheme Initial color scheme theme.
  */
 @Stable
 class CodeEditorState(
-    initialText: String = "",
+    initialContent: Content = Content(),
     initialSelection: TextRange = TextRange.Zero,
     private val initialLanguage: Language? = null,
     private val initialColorScheme: EditorColorScheme = EditorColorScheme()
 ) {
+
+    /**
+     * Convenience secondary constructor accepting a [CharSequence] (e.g. [String]).
+     */
+    constructor(
+        initialText: CharSequence,
+        initialSelection: TextRange = TextRange.Zero,
+        initialLanguage: Language? = null,
+        initialColorScheme: EditorColorScheme = EditorColorScheme()
+    ) : this(
+        initialContent = if (initialText is Content) initialText else Content(initialText),
+        initialSelection = initialSelection,
+        initialLanguage = initialLanguage,
+        initialColorScheme = initialColorScheme
+    )
 
     private var _editor: CodeEditor? = null
 
@@ -85,23 +101,24 @@ class CodeEditorState(
     // Observable Two-Way State Properties
     // -----------------------------------------------------------------------------------------
 
-    private var _text by mutableStateOf(initialText)
+    private var _content: Content = initialContent
+    private var textRevision by mutableIntStateOf(0)
 
     /**
-     * The current text content of the editor.
-     * Reading this creates a Compose snapshot read dependency. Mutating it updates the underlying
-     * editor buffer while avoiding circular re-entrancy.
+     * The underlying piece-tree buffer of the editor.
+     * Direct reference to the [Content] object.
      */
-    var text: String
-        get() = _text
+    var content: Content
+        get() = _editor?.text ?: _content
         set(value) {
-            if (_text != value) {
-                _text = value
+            if (_content !== value) {
+                _content = value
+                textRevision++
                 if (!isUpdatingFromEditor) {
                     _editor?.let { ed ->
                         isUpdatingFromState = true
                         try {
-                            ed.setText(value)
+                            ed.setText(value, true, null)
                         } finally {
                             isUpdatingFromState = false
                         }
@@ -109,6 +126,32 @@ class CodeEditorState(
                 }
             }
         }
+
+    /**
+     * The current text content of the editor as a [String].
+     * Reading this creates a Compose snapshot read dependency. Mutating it updates the underlying
+     * editor buffer while avoiding circular re-entrancy.
+     * Note: For very large files (e.g. 50MB+), avoid querying this frequently as it flattens
+     * the piece-tree into a contiguous String. Prefer [content] for direct streaming/IO.
+     */
+    var text: String
+        get() {
+            @Suppress("UNUSED_VARIABLE")
+            val rev = textRevision
+            return content.toString()
+        }
+        set(value) {
+            val cur = content
+            if (cur.length != value.length || cur.toString() != value) {
+                content = Content(value)
+            }
+        }
+
+    /**
+     * Total character count of the current content buffer.
+     */
+    val textLength: Int
+        get() = content.length
 
     private var _selection by mutableStateOf(initialSelection)
 
@@ -671,7 +714,8 @@ class CodeEditorState(
             ed.undo()
             canUndo = ed.canUndo()
             canRedo = ed.canRedo()
-            _text = ed.text.toString()
+            _content = ed.text
+            textRevision++
         }
     }
 
@@ -681,7 +725,8 @@ class CodeEditorState(
             ed.redo()
             canUndo = ed.canUndo()
             canRedo = ed.canRedo()
-            _text = ed.text.toString()
+            _content = ed.text
+            textRevision++
         }
     }
 
@@ -785,12 +830,14 @@ class CodeEditorState(
         isAttached = true
 
         // Push initial state into editor
-        if (_text.isNotEmpty()) {
-            if (editor.text.toString() != _text) {
-                editor.setText(_text)
+        if (_content !== editor.text) {
+            if (_content.length > 0) {
+                editor.setText(_content, true, null)
+            } else if (editor.text.length > 0) {
+                _content = editor.text
+            } else {
+                editor.setText(_content, true, null)
             }
-        } else if (editor.text.isNotEmpty()) {
-            _text = editor.text.toString()
         }
         editor.isEditable = isEditable
         editor.isWordwrap = isWordwrap
@@ -881,13 +928,11 @@ class CodeEditorState(
                 if (isUpdatingFromState) return@subscribeEvent
                 isUpdatingFromEditor = true
                 try {
-                    val currentText = editor.text.toString()
-                    if (_text != currentText) {
-                        _text = currentText
-                    }
+                    _content = editor.text
                     lineCount = editor.lineCount
                     canUndo = editor.canUndo()
                     canRedo = editor.canRedo()
+                    textRevision++
                 } finally {
                     isUpdatingFromEditor = false
                 }
@@ -1013,10 +1058,10 @@ class CodeEditorState(
             }
         }
 
-        if (!isUpdatingFromEditor && editor.text.toString() != _text) {
+        if (!isUpdatingFromEditor && editor.text !== _content) {
             isUpdatingFromState = true
             try {
-                editor.setText(_text)
+                editor.setText(_content, true, null)
             } finally {
                 isUpdatingFromState = false
             }
@@ -1027,7 +1072,7 @@ class CodeEditorState(
         val currentEditor = _editor
         if (editor == null || currentEditor === editor) {
             currentEditor?.let { ed ->
-                _text = ed.text.toString()
+                _content = ed.text
                 _selection = TextRange(ed.cursor.left, ed.cursor.right)
                 _scrollX = ed.offsetX
                 _scrollY = ed.offsetY
@@ -1073,12 +1118,26 @@ class CodeEditorState(
 
     companion object {
         /**
+         * Threshold above which text is omitted from the saved state bundle to prevent
+         * [android.os.TransactionTooLargeException] (IPC binder limit is 1MB across the entire process).
+         */
+        const val MAX_SAVEABLE_TEXT_LENGTH = 100_000
+
+        /**
          * Standard [Saver] implementation enabling state persistence across configuration changes.
+         * For large buffers exceeding [MAX_SAVEABLE_TEXT_LENGTH], text serialization is skipped to
+         * prevent [android.os.TransactionTooLargeException].
          */
         val Saver: Saver<CodeEditorState, Any> = listSaver(
             save = { state ->
+                val currentContent = state.content
+                val textToSave = if (currentContent.length <= MAX_SAVEABLE_TEXT_LENGTH) {
+                    currentContent.toString()
+                } else {
+                    ""
+                }
                 listOf(
-                    state.editor?.text?.toString() ?: state.text,
+                    textToSave,
                     state.selection.start,
                     state.selection.end,
                     state.editor?.isEditable ?: state.isEditable,
@@ -1110,8 +1169,9 @@ class CodeEditorState(
                 )
             },
             restore = { savedList ->
+                val restoredText = savedList[0] as String
                 CodeEditorState(
-                    initialText = savedList[0] as String,
+                    initialContent = Content(restoredText),
                     initialSelection = TextRange(savedList[1] as Int, savedList[2] as Int)
                 ).apply {
                     isEditable = savedList[3] as Boolean
@@ -1152,7 +1212,7 @@ class CodeEditorState(
  */
 @Composable
 fun rememberCodeEditorState(
-    initialText: String = "",
+    initialContent: Content = Content(),
     initialSelection: TextRange = TextRange.Zero,
     initialLanguage: Language? = null,
     initialColorScheme: EditorColorScheme = EditorColorScheme(),
@@ -1167,7 +1227,7 @@ fun rememberCodeEditorState(
 ): CodeEditorState {
     return rememberSaveable(saver = CodeEditorState.Saver) {
         CodeEditorState(
-            initialText = initialText,
+            initialContent = initialContent,
             initialSelection = initialSelection,
             initialLanguage = initialLanguage,
             initialColorScheme = initialColorScheme
@@ -1183,3 +1243,35 @@ fun rememberCodeEditorState(
         }
     }
 }
+
+/**
+ * Convenience overload of [rememberCodeEditorState] accepting a [CharSequence].
+ */
+@Composable
+fun rememberCodeEditorState(
+    initialText: CharSequence,
+    initialSelection: TextRange = TextRange.Zero,
+    initialLanguage: Language? = null,
+    initialColorScheme: EditorColorScheme = EditorColorScheme(),
+    isEditable: Boolean = true,
+    isWordwrap: Boolean = false,
+    lineNumbersEnabled: Boolean = true,
+    textSizeSp: Float = 14f,
+    lineSpacingExtra: Float = 0f,
+    lineSpacingMultiplier: Float = 1f,
+    textLetterSpacing: Float = 0f,
+    tabWidth: Int = 4
+): CodeEditorState = rememberCodeEditorState(
+    initialContent = if (initialText is Content) initialText else Content(initialText),
+    initialSelection = initialSelection,
+    initialLanguage = initialLanguage,
+    initialColorScheme = initialColorScheme,
+    isEditable = isEditable,
+    isWordwrap = isWordwrap,
+    lineNumbersEnabled = lineNumbersEnabled,
+    textSizeSp = textSizeSp,
+    lineSpacingExtra = lineSpacingExtra,
+    lineSpacingMultiplier = lineSpacingMultiplier,
+    textLetterSpacing = textLetterSpacing,
+    tabWidth = tabWidth
+)
