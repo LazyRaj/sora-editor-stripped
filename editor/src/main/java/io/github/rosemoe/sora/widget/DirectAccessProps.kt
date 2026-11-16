@@ -151,6 +151,18 @@ open class DirectAccessProps : Serializable {
     var symbolPairAutoCompletion: Boolean = true
 
     /**
+     * Control whether auto-deletes matching symbol pairs on backspace.
+     *
+     * For example, deleting '{' when the cursor is inside empty '{}' or spaces will also delete '}'.
+     */
+    var symbolPairAutoDelete: Boolean = true
+
+    /**
+     * Strategy handler for auto-deleting symbol pairs.
+     */
+    var symbolPairDeleteHandler: SymbolPairDeleteHandler = DefaultSymbolPairDeleteHandler()
+
+    /**
      * Show auto-completion even when there is composing text set by the IME in editor.
      */
     var autoCompletionOnComposing: Boolean = true

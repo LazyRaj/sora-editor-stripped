@@ -1672,6 +1672,20 @@ open class CodeEditor(
             postInvalidate()
         }
 
+    /** Whether auto-deleting matching symbol pairs on backspace is enabled. */
+    var isSymbolPairAutoDelete: Boolean
+        get() = props.symbolPairAutoDelete
+        set(value) {
+            props.symbolPairAutoDelete = value
+        }
+
+    /** Strategy handler for auto-deleting symbol pairs. */
+    var symbolPairDeleteHandler: SymbolPairDeleteHandler
+        get() = props.symbolPairDeleteHandler
+        set(value) {
+            props.symbolPairDeleteHandler = value
+        }
+
     @get:Px
     var textSizePx: Float
         /**
@@ -2262,6 +2276,24 @@ open class CodeEditor(
         } else {
             val col = cur.leftColumn
             val line = cur.leftLine
+            if (props.symbolPairAutoDelete && languageSymbolPairs != null) {
+                val deleteResult = props.symbolPairDeleteHandler.shouldDeletePair(
+                    this,
+                    this.text,
+                    line,
+                    col,
+                    languageSymbolPairs!!
+                )
+                if (deleteResult != null) {
+                    text.delete(
+                        deleteResult.startLine,
+                        deleteResult.startColumn,
+                        deleteResult.endLine,
+                        deleteResult.endColumn
+                    )
+                    return
+                }
+            }
             if (props.deleteEmptyLineFast || (props.deleteMultiSpaces != 1 && col > 0 && text.charAt(
                     line,
                     col - 1

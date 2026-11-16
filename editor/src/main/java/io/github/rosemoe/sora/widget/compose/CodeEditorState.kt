@@ -444,6 +444,23 @@ class CodeEditorState(
             }
         }
 
+    private var _symbolPairAutoDelete by mutableStateOf(true)
+
+    /** Whether auto-deleting matching symbol pairs on backspace is enabled. */
+    var symbolPairAutoDelete: Boolean
+        get() {
+            val snap = _symbolPairAutoDelete
+            return _editor?.isSymbolPairAutoDelete ?: snap
+        }
+        set(value) {
+            if (_symbolPairAutoDelete != value) {
+                _symbolPairAutoDelete = value
+                _editor?.let { ed ->
+                    if (ed.isSymbolPairAutoDelete != value) ed.isSymbolPairAutoDelete = value
+                }
+            }
+        }
+
     private var _language: Language? by mutableStateOf(initialLanguage)
 
     /** The syntax language engine providing parsing, styling, and completion. */
@@ -876,6 +893,7 @@ class CodeEditorState(
         editor.props.reverseListWhenAbove = _reverseListWhenAbove
         editor.getComponent(EditorAutoCompletion::class.java).setEnabled(_autoCompletionEnabled)
         editor.getComponent(Magnifier::class.java).setEnabled(_magnifierEnabled)
+        editor.isSymbolPairAutoDelete = _symbolPairAutoDelete
         if (language != null) {
             editor.setEditorLanguage(language)
         } else {
@@ -1050,6 +1068,10 @@ class CodeEditorState(
         val magnifier = editor.getComponent(Magnifier::class.java)
         if (magnifier.isEnabled() != magnifierEnabled) magnifier.setEnabled(magnifierEnabled)
 
+        if (editor.isSymbolPairAutoDelete != symbolPairAutoDelete) {
+            editor.isSymbolPairAutoDelete = symbolPairAutoDelete
+        }
+
         if (editor.ghostText != _ghostText) {
             if (_ghostText != null) {
                 editor.ghostText = _ghostText
@@ -1100,6 +1122,7 @@ class CodeEditorState(
                 _completionBorderColor = ed.props.completionBorderColor
                 _completionBackgroundColor = ed.props.completionBackgroundColor
                 _reverseListWhenAbove = ed.props.reverseListWhenAbove
+                _symbolPairAutoDelete = ed.isSymbolPairAutoDelete
             }
             for (u in unsubscribes) {
                 try {
@@ -1176,7 +1199,8 @@ class CodeEditorState(
                     state.reverseListWhenAbove,
                     state.editor?.lineSpacingExtra ?: state.lineSpacingExtra,
                     state.editor?.lineSpacingMultiplier ?: state.lineSpacingMultiplier,
-                    state.editor?.textLetterSpacing ?: state.textLetterSpacing
+                    state.editor?.textLetterSpacing ?: state.textLetterSpacing,
+                    state.editor?.isSymbolPairAutoDelete ?: state.symbolPairAutoDelete
                 )
             },
             restore = { savedList ->
@@ -1211,6 +1235,7 @@ class CodeEditorState(
                     if (savedList.size > 26) lineSpacingExtra = savedList[26] as Float
                     if (savedList.size > 27) lineSpacingMultiplier = savedList[27] as Float
                     if (savedList.size > 28) textLetterSpacing = savedList[28] as Float
+                    if (savedList.size > 29) symbolPairAutoDelete = savedList[29] as Boolean
                 }
             }
         )

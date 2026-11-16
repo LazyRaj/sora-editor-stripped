@@ -480,6 +480,117 @@ class CodeEditorComposeTest {
     }
 
     @Test
+    fun testSymbolPairAutoDeleteDirectAdjacent() {
+        val editor = CodeEditor(context)
+        editor.props.overrideSymbolPairs.setParent(io.github.rosemoe.sora.widget.SymbolPairMatch.DefaultSymbolPairs())
+        val state = CodeEditorState()
+        state.attachEditor(editor)
+
+        // Type '{' -> auto-completes to '{}' with cursor inside
+        editor.commitText("{")
+        assertThat(editor.text.toString()).isEqualTo("{}")
+        assertThat(editor.cursor.leftColumn).isEqualTo(1)
+
+        // Backspace inside '{}' -> deletes both '{' and '}'
+        editor.deleteText()
+        assertThat(editor.text.toString()).isEqualTo("")
+        assertThat(editor.cursor.leftColumn).isEqualTo(0)
+
+        // Same for parentheses
+        editor.commitText("(")
+        assertThat(editor.text.toString()).isEqualTo("()")
+        editor.deleteText()
+        assertThat(editor.text.toString()).isEqualTo("")
+
+        // Same for square brackets
+        editor.commitText("[")
+        assertThat(editor.text.toString()).isEqualTo("[]")
+        editor.deleteText()
+        assertThat(editor.text.toString()).isEqualTo("")
+
+        state.detachEditor(editor)
+    }
+
+    @Test
+    fun testSymbolPairAutoDeleteWithEnclosedWhitespace() {
+        val editor = CodeEditor(context)
+        val state = CodeEditorState()
+        state.attachEditor(editor)
+
+        // Set text "{   }" and place cursor right after '{'
+        editor.setText("{   }")
+        editor.setSelection(0, 1) // cursor at "{|   }"
+
+        // Backspace right after '{' deletes '{', inner whitespace, and '}'
+        editor.deleteText()
+        assertThat(editor.text.toString()).isEqualTo("")
+
+        // Test symmetric space deletion: "{ | }" with 1 space each side
+        editor.setText("{  }")
+        editor.setSelection(0, 2) // cursor at "{ | }" (column 2, between spaces)
+        editor.deleteText() // deletes 1 space on each side -> "{}"
+        assertThat(editor.text.toString()).isEqualTo("{}")
+        assertThat(editor.cursor.leftColumn).isEqualTo(1)
+
+        // Next backspace at "{|}" deletes the remaining brackets
+        editor.deleteText()
+        assertThat(editor.text.toString()).isEqualTo("")
+
+        state.detachEditor(editor)
+    }
+
+    @Test
+    fun testSymbolPairAutoDeletePreservesContentWithNonWhitespace() {
+        val editor = CodeEditor(context)
+        val state = CodeEditorState()
+        state.attachEditor(editor)
+
+        // Text with non-whitespace content: "{ val x = 1 }"
+        editor.setText("{ val x = 1 }")
+        editor.setSelection(0, 1) // cursor at "{| val x = 1 }"
+
+        // Backspace only removes '{', does NOT delete '}'
+        editor.deleteText()
+        assertThat(editor.text.toString()).isEqualTo(" val x = 1 }")
+
+        state.detachEditor(editor)
+    }
+
+    @Test
+    fun testMultiCharacterSymbolPairAutoDelete() {
+        val editor = CodeEditor(context)
+        editor.props.overrideSymbolPairs.putPair("\"\"\"", io.github.rosemoe.sora.widget.SymbolPairMatch.SymbolPair("\"\"\"", "\"\"\""))
+        val state = CodeEditorState()
+        state.attachEditor(editor)
+
+        editor.setText("\"\"\"\"\"\"")
+        editor.setSelection(0, 3) // cursor between """ and """
+
+        editor.deleteText()
+        assertThat(editor.text.toString()).isEqualTo("")
+
+        state.detachEditor(editor)
+    }
+
+    @Test
+    fun testCustomSymbolPairDeleteHandler() {
+        val editor = CodeEditor(context)
+        // Install a custom handler that disables pair deletion
+        editor.symbolPairDeleteHandler = io.github.rosemoe.sora.widget.SymbolPairDeleteHandler { _, _, _, _, _ -> null }
+        val state = CodeEditorState()
+        state.attachEditor(editor)
+
+        editor.setText("{}")
+        editor.setSelection(0, 1)
+
+        // With handler returning null, normal backspace occurs (only deletes '{')
+        editor.deleteText()
+        assertThat(editor.text.toString()).isEqualTo("}")
+
+        state.detachEditor(editor)
+    }
+
+    @Test
     fun testPopupDecorViewLifeCycleOwnerAttachment() {
         val editor = CodeEditor(context)
         val state = CodeEditorState()

@@ -201,6 +201,34 @@ open class SymbolPairMatch(parent: SymbolPairMatch? = null) {
     }
 
     /**
+     * Returns all registered symbol pairs, including inherited pairs from parent.
+     */
+    open fun getAllPairs(): List<SymbolPair> {
+        val result = mutableListOf<SymbolPair>()
+        val seen = mutableSetOf<Pair<String, String>>()
+        for (pair in singleCharPairMaps.values) {
+            if (pair != null && seen.add(Pair(pair.open, pair.close))) {
+                result.add(pair)
+            }
+        }
+        for (list in multipleCharByEndPairMaps.values) {
+            for (pair in list) {
+                if (seen.add(Pair(pair.open, pair.close))) {
+                    result.add(pair)
+                }
+            }
+        }
+        parent?.let { p ->
+            for (pair in p.getAllPairs()) {
+                if (seen.add(Pair(pair.open, pair.close))) {
+                    result.add(pair)
+                }
+            }
+        }
+        return result
+    }
+
+    /**
      * Defines a replacement of input
      */
     open class SymbolPair(
