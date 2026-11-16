@@ -826,9 +826,6 @@ class CodeEditorState(
         if (_editor === editor) return
         detachEditor()
 
-        _editor = editor
-        isAttached = true
-
         // Push initial state into editor
         if (_content !== editor.text) {
             if (_content.length > 0) {
@@ -839,11 +836,11 @@ class CodeEditorState(
                 editor.setText(_content, true, null)
             }
         }
-        editor.isEditable = isEditable
-        editor.isWordwrap = isWordwrap
-        editor.isLineNumberEnabled = lineNumbersEnabled
-        editor.isLineNumberPinned = pinLineNumbers
-        editor.textSize = textSizeSp
+        editor.isEditable = _isEditable
+        editor.isWordwrap = _isWordwrap
+        editor.isLineNumberEnabled = _lineNumbersEnabled
+        editor.isLineNumberPinned = _pinLineNumbers
+        editor.textSize = _textSizeSp
         if (_lineSpacingExtra != 0f) {
             editor.lineSpacingExtra = _lineSpacingExtra
         } else if (editor.lineSpacingExtra != 0f) {
@@ -861,12 +858,12 @@ class CodeEditorState(
         } else if (editor.textLetterSpacing != 0f) {
             _textLetterSpacing = editor.textLetterSpacing
         }
-        editor.isScalable = isScalable
-        editor.tabWidth = tabWidth
-        editor.isUndoEnabled = isUndoEnabled
-        editor.cursorBlinkPeriod = if (cursorBlinkEnabled) 500 else 0
-        editor.isHighlightCurrentLine = highlightCurrentLine
-        editor.isDividerEnabled = dividerEnabled
+        editor.isScalable = _isScalable
+        editor.tabWidth = _tabWidth
+        editor.isUndoEnabled = _isUndoEnabled
+        editor.cursorBlinkPeriod = if (_cursorBlinkEnabled) 500 else 0
+        editor.isHighlightCurrentLine = _highlightCurrentLine
+        editor.isDividerEnabled = _dividerEnabled
         editor.props.scrollbarThumbColor = _scrollbarThumbColor
         editor.props.scrollbarThumbHoldColor = _scrollbarThumbHoldColor
         editor.props.scrollbarBorderEnabled = _scrollbarBorderEnabled
@@ -877,8 +874,8 @@ class CodeEditorState(
         editor.props.completionBorderColor = _completionBorderColor
         editor.props.completionBackgroundColor = _completionBackgroundColor
         editor.props.reverseListWhenAbove = _reverseListWhenAbove
-        editor.getComponent(EditorAutoCompletion::class.java).setEnabled(autoCompletionEnabled)
-        editor.getComponent(Magnifier::class.java).setEnabled(magnifierEnabled)
+        editor.getComponent(EditorAutoCompletion::class.java).setEnabled(_autoCompletionEnabled)
+        editor.getComponent(Magnifier::class.java).setEnabled(_magnifierEnabled)
         if (language != null) {
             editor.setEditorLanguage(language)
         } else {
@@ -889,6 +886,9 @@ class CodeEditorState(
         } else {
             _colorScheme = editor.colorScheme
         }
+
+        _editor = editor
+        isAttached = true
 
         if (_selection != TextRange.Zero) {
             applySelectionToEditor(editor, _selection)
@@ -1022,7 +1022,7 @@ class CodeEditorState(
         if (editor.isLineNumberEnabled != lineNumbersEnabled) editor.isLineNumberEnabled =
             lineNumbersEnabled
         if (editor.isLineNumberPinned != pinLineNumbers) editor.isLineNumberPinned = pinLineNumbers
-        if (kotlin.math.abs(editor.textSize - textSizeSp) > 0.05f) editor.textSize = textSizeSp
+        if (kotlin.math.abs(editor.textSize - _textSizeSp) > 0.05f) editor.textSize = _textSizeSp
         if (kotlin.math.abs(editor.lineSpacingExtra - lineSpacingExtra) > 0.05f) {
             editor.lineSpacingExtra = lineSpacingExtra
         }
@@ -1076,9 +1076,20 @@ class CodeEditorState(
                 _selection = TextRange(ed.cursor.left, ed.cursor.right)
                 _scrollX = ed.offsetX
                 _scrollY = ed.offsetY
+                _textSizeSp = ed.textSize
                 _lineSpacingExtra = ed.lineSpacingExtra
                 _lineSpacingMultiplier = ed.lineSpacingMultiplier
                 _textLetterSpacing = ed.textLetterSpacing
+                _tabWidth = ed.tabWidth
+                _isWordwrap = ed.isWordwrap
+                _isEditable = ed.isEditable
+                _lineNumbersEnabled = ed.isLineNumberEnabled
+                _pinLineNumbers = ed.isLineNumberPinned
+                _isScalable = ed.isScalable
+                _isUndoEnabled = ed.isUndoEnabled
+                _cursorBlinkEnabled = ed.cursorBlinkPeriod > 0
+                _highlightCurrentLine = ed.isHighlightCurrentLine
+                _dividerEnabled = ed.isDividerEnabled
                 _scrollbarThumbColor = ed.props.scrollbarThumbColor
                 _scrollbarThumbHoldColor = ed.props.scrollbarThumbHoldColor
                 _scrollbarBorderEnabled = ed.props.scrollbarBorderEnabled

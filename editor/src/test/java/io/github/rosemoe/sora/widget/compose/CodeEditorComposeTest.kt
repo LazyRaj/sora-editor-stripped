@@ -434,6 +434,52 @@ class CodeEditorComposeTest {
     }
 
     @Test
+    fun testPreConfiguredTextSizePreservedOnAttach() {
+        val state = CodeEditorState().apply {
+            textSizeSp = 24f
+        }
+        assertThat(state.textSizeSp).isEqualTo(24f)
+
+        val editor = CodeEditor(context)
+        state.attachEditor(editor)
+
+        assertThat(editor.textSize).isWithin(0.1f).of(24f)
+        assertThat(state.textSizeSp).isWithin(0.1f).of(24f)
+
+        state.detachEditor(editor)
+    }
+
+    @Test
+    fun testPinchGestureTextScalePreservedAcrossDetachAndReattach() {
+        val state = CodeEditorState().apply {
+            textSizeSp = 16f
+        }
+        val editor1 = CodeEditor(context)
+        state.attachEditor(editor1)
+        assertThat(editor1.textSize).isWithin(0.1f).of(16f)
+
+        // Simulate pinch zoom on editor 1
+        val newPx = 60f
+        editor1.setTextSizePxDirect(newPx)
+        val zoomedSp = editor1.textSize
+        assertThat(state.textSizeSp).isWithin(0.01f).of(zoomedSp)
+
+        // Simulate tab switch: detach editor1
+        state.detachEditor(editor1)
+        assertThat(state.textSizeSp).isWithin(0.01f).of(zoomedSp)
+
+        // Simulate tab switch back: attach new editor2
+        val editor2 = CodeEditor(context)
+        state.attachEditor(editor2)
+
+        // New editor must adopt the preserved pinch zoomed text size
+        assertThat(editor2.textSize).isWithin(0.1f).of(zoomedSp)
+        assertThat(state.textSizeSp).isWithin(0.1f).of(zoomedSp)
+
+        state.detachEditor(editor2)
+    }
+
+    @Test
     fun testPopupDecorViewLifeCycleOwnerAttachment() {
         val editor = CodeEditor(context)
         val state = CodeEditorState()
