@@ -785,8 +785,10 @@ class CodeEditorState(
         isAttached = true
 
         // Push initial state into editor
-        if (_text.isNotEmpty() && editor.text.isEmpty()) {
-            editor.setText(_text)
+        if (_text.isNotEmpty()) {
+            if (editor.text.toString() != _text) {
+                editor.setText(_text)
+            }
         } else if (editor.text.isNotEmpty()) {
             _text = editor.text.toString()
         }
