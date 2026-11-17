@@ -27,6 +27,7 @@
 package io.github.rosemoe.sora.widget.compose
 
 import android.content.Context
+import android.view.ViewGroup
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,7 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import io.github.rosemoe.sora.lang.completion.CompletionItem
 import io.github.rosemoe.sora.widget.CodeEditor
-import io.github.rosemoe.sora.widget.component.DefaultCompletionItemAdapter
 import io.github.rosemoe.sora.widget.component.DefaultDiagnosticTooltipLayout
 import io.github.rosemoe.sora.widget.component.EditorAutoCompletion
 import io.github.rosemoe.sora.widget.component.EditorTextActionWindow
@@ -228,7 +228,8 @@ fun CodeEditorCompose(
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = { context ->
-                val editor = editorFactory?.invoke(context) ?: CodeEditor(context)
+                val editor = editorFactory?.invoke(context) ?: state.editor ?: CodeEditor(context)
+                (editor.parent as? ViewGroup)?.removeView(editor)
 
                 if (autoCompletion != null) {
                     editor.getComponent(EditorAutoCompletion::class.java).setLayout(
@@ -331,8 +332,9 @@ fun CodeEditorCompose(
                 onEditorUpdated?.invoke(editor)
             },
             onRelease = { editor ->
-                state.detachEditor(editor)
-                editor.release()
+                editor.hideEditorWindows()
+                (editor.parent as? ViewGroup)?.removeView(editor)
+                state.notifyDetachedFromView(editor)
             }
         )
 

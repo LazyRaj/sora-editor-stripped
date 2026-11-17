@@ -840,7 +840,12 @@ class CodeEditorState(
     // -----------------------------------------------------------------------------------------
 
     fun attachEditor(editor: CodeEditor) {
-        if (_editor === editor) return
+        if (_editor === editor) {
+            isAttached = true
+            updateEditor(editor)
+            editor.postInvalidate()
+            return
+        }
         detachEditor()
 
         // Push initial state into editor
@@ -1001,6 +1006,7 @@ class CodeEditorState(
                     "lineSpacingMultiplier" -> (event.value as? Float)?.let {
                         _lineSpacingMultiplier = it
                     }
+
                     "textLetterSpacing" -> (event.value as? Float)?.let { _textLetterSpacing = it }
                     "ghostText" -> {
                         _ghostText = event.value as? String
@@ -1056,8 +1062,12 @@ class CodeEditorState(
         if (editor.isHighlightCurrentLine != highlightCurrentLine) editor.isHighlightCurrentLine =
             highlightCurrentLine
         if (editor.isDividerEnabled != dividerEnabled) editor.isDividerEnabled = dividerEnabled
-        if (editor.colorScheme !== colorScheme) editor.colorScheme = colorScheme
-        if (editor.editorLanguage !== language) editor.setEditorLanguage(language)
+        if (_colorScheme !== initialColorScheme && editor.colorScheme !== _colorScheme) {
+            editor.colorScheme = _colorScheme
+        }
+        if (_language != null && editor.editorLanguage !== _language) {
+            editor.setEditorLanguage(_language)
+        }
 
         val desiredBlink = if (cursorBlinkEnabled) 500 else 0
         if (editor.cursorBlinkPeriod != desiredBlink) editor.cursorBlinkPeriod = desiredBlink
@@ -1090,39 +1100,84 @@ class CodeEditorState(
         }
     }
 
+    private fun syncStateFromEditor(ed: CodeEditor) {
+        _content = ed.text
+        _selection = TextRange(ed.cursor.left, ed.cursor.right)
+        _scrollX = ed.offsetX
+        _scrollY = ed.offsetY
+        _textSizeSp = ed.textSize
+        _lineSpacingExtra = ed.lineSpacingExtra
+        _lineSpacingMultiplier = ed.lineSpacingMultiplier
+        _textLetterSpacing = ed.textLetterSpacing
+        _tabWidth = ed.tabWidth
+        _isWordwrap = ed.isWordwrap
+        _isEditable = ed.isEditable
+        _lineNumbersEnabled = ed.isLineNumberEnabled
+        _pinLineNumbers = ed.isLineNumberPinned
+        _isScalable = ed.isScalable
+        _isUndoEnabled = ed.isUndoEnabled
+        _cursorBlinkEnabled = ed.cursorBlinkPeriod > 0
+        _highlightCurrentLine = ed.isHighlightCurrentLine
+        _dividerEnabled = ed.isDividerEnabled
+        _scrollbarThumbColor = ed.props.scrollbarThumbColor
+        _scrollbarThumbHoldColor = ed.props.scrollbarThumbHoldColor
+        _scrollbarBorderEnabled = ed.props.scrollbarBorderEnabled
+        _scrollbarBorderColor = ed.props.scrollbarBorderColor
+        _scrollbarBorderRadiusDip = ed.props.scrollbarBorderRadiusDip
+        _completionCornerRadiusDip = ed.props.completionCornerRadiusDip
+        _completionBorderWidthDip = ed.props.completionBorderWidthDip
+        _completionBorderColor = ed.props.completionBorderColor
+        _completionBackgroundColor = ed.props.completionBackgroundColor
+        _reverseListWhenAbove = ed.props.reverseListWhenAbove
+        _symbolPairAutoDelete = ed.isSymbolPairAutoDelete
+    }
+
+    /**
+     * Called when the Compose view hosting this editor is detached from composition
+     * (such as during a tab switch).
+     *
+     * Preserves the underlying [CodeEditor] instance, its syntax analysis state, and token cache
+     * in memory while updating observable state properties and hiding floating windows.
+     */
+    fun notifyDetachedFromView(editor: CodeEditor? = null) {
+        val currentEditor = _editor
+        if (editor == null || currentEditor === editor) {
+            currentEditor?.let { ed ->
+                syncStateFromEditor(ed)
+                ed.hideEditorWindows()
+            }
+            isAttached = false
+        }
+    }
+
+    /**
+     * Releases this state and the underlying [CodeEditor] instance permanently.
+     * This must be called when the file or editor tab is closed to free native and memory resources.
+     */
+    fun release() {
+        val ed = _editor
+        _editor = null
+        isAttached = false
+        for (u in unsubscribes) {
+            try {
+                u.unsubscribe()
+            } catch (_: Throwable) {
+            }
+        }
+        unsubscribes.clear()
+        ed?.let {
+            it.setEditorLanguage(null)
+            if (!it.isReleased) {
+                it.release()
+            }
+        }
+    }
+
     fun detachEditor(editor: CodeEditor? = null) {
         val currentEditor = _editor
         if (editor == null || currentEditor === editor) {
             currentEditor?.let { ed ->
-                _content = ed.text
-                _selection = TextRange(ed.cursor.left, ed.cursor.right)
-                _scrollX = ed.offsetX
-                _scrollY = ed.offsetY
-                _textSizeSp = ed.textSize
-                _lineSpacingExtra = ed.lineSpacingExtra
-                _lineSpacingMultiplier = ed.lineSpacingMultiplier
-                _textLetterSpacing = ed.textLetterSpacing
-                _tabWidth = ed.tabWidth
-                _isWordwrap = ed.isWordwrap
-                _isEditable = ed.isEditable
-                _lineNumbersEnabled = ed.isLineNumberEnabled
-                _pinLineNumbers = ed.isLineNumberPinned
-                _isScalable = ed.isScalable
-                _isUndoEnabled = ed.isUndoEnabled
-                _cursorBlinkEnabled = ed.cursorBlinkPeriod > 0
-                _highlightCurrentLine = ed.isHighlightCurrentLine
-                _dividerEnabled = ed.isDividerEnabled
-                _scrollbarThumbColor = ed.props.scrollbarThumbColor
-                _scrollbarThumbHoldColor = ed.props.scrollbarThumbHoldColor
-                _scrollbarBorderEnabled = ed.props.scrollbarBorderEnabled
-                _scrollbarBorderColor = ed.props.scrollbarBorderColor
-                _scrollbarBorderRadiusDip = ed.props.scrollbarBorderRadiusDip
-                _completionCornerRadiusDip = ed.props.completionCornerRadiusDip
-                _completionBorderWidthDip = ed.props.completionBorderWidthDip
-                _completionBorderColor = ed.props.completionBorderColor
-                _completionBackgroundColor = ed.props.completionBackgroundColor
-                _reverseListWhenAbove = ed.props.reverseListWhenAbove
-                _symbolPairAutoDelete = ed.isSymbolPairAutoDelete
+                syncStateFromEditor(ed)
             }
             for (u in unsubscribes) {
                 try {
