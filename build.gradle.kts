@@ -45,7 +45,11 @@ object Versions {
 
 fun Project.configureAndroidAndKotlin() {
     extensions.findByType<CommonExtension>()?.apply {
-        compileSdk { version = release(Versions.compileSdkVersion) }
+        compileSdk {
+            version = release(Versions.compileSdkVersion) {
+                minorApiLevel = 2
+            }
+        }
         buildToolsVersion = Versions.buildToolsVersion
 
         defaultConfig.apply {
